@@ -14,6 +14,7 @@ import 'features/tables/models/mesa_model.dart';
 import 'features/reports/views/reports_view.dart';
 import 'features/digital_menu/views/digital_menu_view.dart';
 import 'features/orders/views/orders_list_view.dart';
+import 'features/tables/views/qr_grid_view.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -36,9 +37,11 @@ final _routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/dashboard',
     redirect: (context, state) {
-      final isLoggedIn = authState.value != null;
+      // Usamos valueOrNull para evitar excepciones si el estado es de error
+      final user = authState.valueOrNull;
+      final isLoggedIn = user != null;
       final isLoggingIn = state.uri.path == '/login';
-      final isPublic = state.uri.path.startsWith('/menu');
+      final isPublic = state.uri.path.startsWith('/menu') || state.uri.path == '/print-qr';
       
       if (!isLoggedIn && !isLoggingIn && !isPublic) return '/login';
       if (isLoggedIn && isLoggingIn) return '/dashboard';
@@ -70,6 +73,10 @@ final _routerProvider = Provider<GoRouter>((ref) {
               final mesa = state.extra as Mesa;
               return BillingView(mesa: mesa);
             },
+          ),
+          GoRoute(
+            path: '/print-qr',
+            builder: (context, state) => const QrGridView(),
           ),
         ],
       ),

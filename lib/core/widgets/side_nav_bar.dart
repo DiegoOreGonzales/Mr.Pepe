@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../theme/app_theme.dart';
+import 'brasa_logo.dart';
 
 class SideNavBar extends StatelessWidget {
   final String activeRoute;
@@ -8,75 +9,59 @@ class SideNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Container(
-        width: 100,
-        height: MediaQuery.of(context).size.height,
-        color: Colors.white,
-        padding: const EdgeInsets.symmetric(vertical: 24),
-        child: Column(
-          children: [
-            // Brand Logo
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                gradient: AppTheme.emberGradient,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(Icons.restaurant, color: Colors.white, size: 32),
-            ),
-            const SizedBox(height: 8),
-            const Text('EB', style: TextStyle(fontWeight: FontWeight.w900, color: AppTheme.primaryColor)),
-            const SizedBox(height: 32),
-            
-            _buildNavItem(context, Icons.dashboard, 'Home', '/dashboard'),
-            const SizedBox(height: 12),
-            _buildNavItem(context, Icons.restaurant_menu, 'Mesas', '/mesas'),
-            const SizedBox(height: 12),
-            _buildNavItem(context, Icons.kitchen, 'Cocina', '/kitchen'),
-            const SizedBox(height: 12),
-            _buildNavItem(context, Icons.receipt_long, 'Pedidos', '/orders'),
-            const SizedBox(height: 12),
-            _buildNavItem(context, Icons.bar_chart, 'Reportes', '/reports'),
-            const Spacer(),
-            _buildNavItem(context, Icons.logout, 'Salir', '/login', isLogout: true),
-          ],
-        ),
+    return Container(
+      width: 90,
+      height: MediaQuery.of(context).size.height,
+      color: Colors.white,
+      padding: const EdgeInsets.symmetric(vertical: 0),
+      child: Column(
+        children: [
+          const SizedBox(height: 60), // Increased margin since logo is gone
+          _buildNavItem(context, Icons.grid_view_rounded, 'Home', '/dashboard'),
+          const SizedBox(height: 8),
+          _buildNavItem(context, Icons.restaurant_menu_rounded, 'Mesas', '/mesas'),
+          const SizedBox(height: 8),
+          _buildNavItem(context, Icons.kitchen_rounded, 'Cocina', '/kitchen'),
+          const SizedBox(height: 8),
+          _buildNavItem(context, Icons.receipt_long_rounded, 'Pedidos', '/orders'),
+          const SizedBox(height: 8),
+          _buildNavItem(context, Icons.analytics_outlined, 'Reportes', '/reports'),
+          const Spacer(),
+          _buildNavItem(context, Icons.logout_rounded, 'Salir', '/login', isLogout: true),
+          const SizedBox(height: 20),
+        ],
       ),
     );
   }
 
   Widget _buildNavItem(BuildContext context, IconData icon, String label, String route, {bool isLogout = false}) {
-    final bool isActive = activeRoute.startsWith(route);
+    final bool isActive = activeRoute == route;
 
     return InkWell(
-      onTap: () {
-        if (isLogout) {
-          // Lógica de logout
-          return;
-        }
-        context.go(route);
-      },
+      onTap: () => isLogout ? null : context.go(route),
       child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 12),
+        width: 64,
+        height: 64,
+        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
         decoration: BoxDecoration(
-          border: isActive ? const Border(right: BorderSide(color: AppTheme.primaryColor, width: 4)) : null,
-          color: isActive ? AppTheme.primaryColor.withOpacity(0.05) : null,
+          color: isActive ? AppTheme.primaryColor : Colors.transparent,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: isActive ? [BoxShadow(color: AppTheme.primaryColor.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 4))] : null,
         ),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
               icon,
-              color: isActive ? AppTheme.primaryColor : Colors.grey,
-              size: 28,
+              color: isActive ? Colors.white : Colors.grey.shade400,
+              size: 24,
             ),
             const SizedBox(height: 4),
             Text(
               label,
               style: TextStyle(
-                color: isActive ? AppTheme.primaryColor : Colors.grey,
-                fontSize: 10,
+                color: isActive ? Colors.white : Colors.grey.shade500,
+                fontSize: 9,
                 fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
               ),
             ),

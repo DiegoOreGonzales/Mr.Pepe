@@ -8,6 +8,8 @@ import '../../tables/providers/table_provider.dart';
 import '../../kitchen/models/order_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+final categoryFilterProvider = StateProvider<Categoria>((ref) => Categoria.parrillas);
+
 class TomaPedidoView extends ConsumerWidget {
   final Mesa mesa;
 
@@ -15,7 +17,8 @@ class TomaPedidoView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final productos = ref.watch(productProvider);
+    final selectedCategory = ref.watch(categoryFilterProvider);
+    final productos = ref.watch(productProvider).where((p) => p.categoria == selectedCategory).toList();
     final cart = ref.watch(cartProvider);
     final total = ref.read(cartProvider.notifier).total;
 
@@ -36,10 +39,10 @@ class TomaPedidoView extends ConsumerWidget {
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 20),
               children: [
-                _buildCategoryToken('Parrillas', isSelected: true),
-                _buildCategoryToken('Piqueos'),
-                _buildCategoryToken('Bebidas'),
-                _buildCategoryToken('Postres'),
+                _buildCategoryToken(ref, 'Parrillas', Categoria.parrillas),
+                _buildCategoryToken(ref, 'Piqueos', Categoria.piqueos),
+                _buildCategoryToken(ref, 'Bebidas', Categoria.bebidas),
+                _buildCategoryToken(ref, 'Postres', Categoria.postres),
               ],
             ),
           ),
@@ -60,7 +63,7 @@ class TomaPedidoView extends ConsumerWidget {
             stream: FirebaseFirestore.instance
                 .collection('orders')
                 .where('mesaNumero', isEqualTo: mesa.numero)
-                .where('status', isNotEqualTo: 'entregado')
+                .where('status', isNotEqualTo: OrderStatus.pagado.name)
                 .snapshots()
                 .map((snapshot) => snapshot.docs.map((doc) => OrderModel.fromFirestore(doc)).toList()),
             builder: (context, snapshot) {
@@ -105,119 +108,180 @@ class TomaPedidoView extends ConsumerWidget {
           const SizedBox(height: 100), // Espacio para el carrito flotante
         ],
       ),
-      // Floating Cart
+      // Floating Cart with Summary
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: cart.isEmpty
           ? null
-          : Container(
-              margin: const EdgeInsets.symmetric(horizontal: 20),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppTheme.onBackgroundColor.withOpacity(0.95),
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: const [BoxShadow(blurRadius: 10, color: Colors.black26)],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
+          : Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Mini Resumen de Borrador (Lo que se va a enviar)
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: const [BoxShadow(blurRadius: 10, color: Colors.black12)],
+                    border: Border.all(color: AppTheme.primaryColor.withOpacity(0.2)),
+                  ),
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        '${cart.length} items · S/ ${total.toStringAsFixed(2)}',
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+                      const Text('POR ENVIAR A COCINA (REVISA):',
+                          style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppTheme.primaryColor)),
+                      const SizedBox(height: 8),
+                      ...cart.map((item) => Padding(
+                            padding: const EdgeInsets.only(bottom: 4),
+                            child: Row(
+                              children: [
+                                Text('${item.cantidad}x ', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                                Expanded(child: Text(item.producto.nombre, style: const TextStyle(fontSize: 12))),
+                                IconButton(
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(),
+                                  onPressed: () => ref.read(cartProvider.notifier).remove(item.producto.id),
+                                  icon: const Icon(Icons.close, size: 14, color: Colors.red),
+                                ),
+                              ],
+                            ),
+                          )),
+                    ],
+                  ),
+                ),
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppTheme.onBackgroundColor.withOpacity(0.95),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: const [BoxShadow(blurRadius: 10, color: Colors.black26)],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'S/ ${total.toStringAsFixed(2)}',
+                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+                          ),
+                          const Text(
+                            'TOTAL NUEVO',
+                            style: TextStyle(color: Colors.white54, fontSize: 10, fontWeight: FontWeight.bold),
+                          ),
+                        ],
                       ),
-                      const Text(
-                        'RESUMEN PARCIAL',
-                        style: TextStyle(color: Colors.white54, fontSize: 10, fontWeight: FontWeight.bold),
+                      ElevatedButton(
+                        onPressed: () async {
+                          if (cart.isEmpty) return;
+                          
+                          // 1. Enviar la orden a Firestore
+                          await ref.read(orderServiceProvider).submitOrder(
+                            mesaNumero: mesa.numero,
+                            items: cart,
+                            total: total,
+                          );
+
+                          // 2. Limpiar Carrito
+                          ref.read(cartProvider.notifier).clear();
+
+                          // 3. Marcar la mesa como ocupada
+                          await ref.read(tableProvider.notifier).updateTableStatus(
+                            mesa.id, 
+                            MesaStatus.ocupada,
+                            encargado: 'Mesero Admin',
+                          );
+
+                          // 4. Volver y mostrar mensaje
+                          if (context.mounted) {
+                            Navigator.pop(context);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('¡Pedido enviado a cocina!')),
+                            );
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.primaryColor,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                        ),
+                        child: const Text('CONFIRMAR PEDIDO'),
                       ),
                     ],
                   ),
-                  ElevatedButton(
-                    onPressed: () async {
-                      if (cart.isEmpty) return;
-                      
-                      // 1. Enviar la orden a Firestore
-                      await ref.read(orderServiceProvider).submitOrder(
-                        mesaNumero: mesa.numero,
-                        items: cart,
-                        total: total,
-                      );
-
-                      // 2. Marcar la mesa como ocupada
-                      await ref.read(tableProvider.notifier).updateTableStatus(
-                        mesa.id, 
-                        MesaStatus.ocupada,
-                        encargado: 'Mesero Admin',
-                      );
-
-                      // 3. Volver y mostrar mensaje
-                      if (context.mounted) {
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('¡Pedido enviado a cocina!')),
-                        );
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.primaryColor,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                    ),
-                    child: const Text('CONFIRMAR PEDIDO'),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
     );
   }
 
-  Widget _buildCategoryToken(String label, {bool isSelected = false}) {
-    return Container(
-      margin: const EdgeInsets.only(right: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: isSelected ? AppTheme.primaryColor : Colors.white,
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: isSelected ? AppTheme.primaryColor : Colors.grey.shade200),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: isSelected ? Colors.white : Colors.grey.shade600,
-          fontWeight: FontWeight.bold,
+  Widget _buildCategoryToken(WidgetRef ref, String label, Categoria category) {
+    final selectedCategory = ref.watch(categoryFilterProvider);
+    final bool isSelected = selectedCategory == category;
+    
+    return InkWell(
+      onTap: () => ref.read(categoryFilterProvider.notifier).state = category,
+      borderRadius: BorderRadius.circular(30),
+      child: Container(
+        margin: const EdgeInsets.only(right: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: isSelected ? AppTheme.primaryColor : Colors.white,
+          borderRadius: BorderRadius.circular(30),
+          border: Border.all(color: isSelected ? AppTheme.primaryColor : Colors.grey.shade200),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? Colors.white : Colors.grey.shade600,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
     );
   }
 
   Widget _buildProductCard(Producto producto, WidgetRef ref) {
+    final cart = ref.watch(cartProvider);
+    final cartItem = cart.where((item) => item.producto.id == producto.id).firstOrNull;
+    final int quantity = cartItem?.cantidad ?? 0;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: const Border(left: BorderSide(color: AppTheme.primaryColor, width: 4)),
+        border: Border(left: BorderSide(color: quantity > 0 ? AppTheme.primaryColor : Colors.grey.shade300, width: 4)),
         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
       ),
       child: Row(
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Image.network(
-              producto.imagen,
-              width: 80,
-              height: 80,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => Container(
-                width: 80,
-                height: 80,
-                color: Colors.grey.shade100,
-                child: const Icon(Icons.fastfood, color: AppTheme.primaryColor),
+          Stack(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.network(
+                  producto.imagen,
+                  width: 80,
+                  height: 80,
+                  fit: BoxFit.cover,
+                ),
               ),
-            ),
+              if (quantity > 0)
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(color: AppTheme.primaryColor, shape: BoxShape.circle),
+                    child: Text('$quantity', style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                  ),
+                ),
+            ],
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -232,9 +296,18 @@ class TomaPedidoView extends ConsumerWidget {
               ],
             ),
           ),
-          IconButton(
-            onPressed: () => ref.read(cartProvider.notifier).add(producto),
-            icon: const Icon(Icons.add_circle, color: AppTheme.primaryContainer, size: 32),
+          Column(
+            children: [
+              IconButton(
+                onPressed: () => ref.read(cartProvider.notifier).add(producto),
+                icon: const Icon(Icons.add_circle, color: AppTheme.primaryColor, size: 32),
+              ),
+              if (quantity > 0)
+                IconButton(
+                  onPressed: () => ref.read(cartProvider.notifier).remove(producto.id),
+                  icon: const Icon(Icons.remove_circle_outline, color: Colors.grey, size: 24),
+                ),
+            ],
           ),
         ],
       ),

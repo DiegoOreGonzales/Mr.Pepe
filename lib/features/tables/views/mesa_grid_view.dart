@@ -6,6 +6,9 @@ import '../providers/table_provider.dart';
 import 'mesa_card.dart';
 import '../../orders/views/toma_pedido_view.dart';
 import '../models/mesa_model.dart';
+import '../../orders/providers/order_provider.dart';
+
+final tableFilterProvider = StateProvider<String>((ref) => 'TODAS');
 
 class MesaGridView extends ConsumerWidget {
   const MesaGridView({super.key});
@@ -73,7 +76,7 @@ class MesaGridView extends ConsumerWidget {
                         ],
                       ),
                       ElevatedButton.icon(
-                        onPressed: () {},
+                        onPressed: () => context.push('/print-qr'),
                         icon: const Icon(Icons.qr_code, size: 20),
                         label: const Text('IMPRIMIR QR'),
                         style: ElevatedButton.styleFrom(
@@ -86,15 +89,15 @@ class MesaGridView extends ConsumerWidget {
                     ],
                   ),
                   const SizedBox(height: 24),
-                  // Filtros (Mockup)
+                  // Filtros Interactivos
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
                       children: [
-                        _buildFilterButton('TODAS', isSelected: true),
-                        _buildFilterButton('LIBRES'),
-                        _buildFilterButton('OCUPADAS'),
-                        _buildFilterButton('RESERVADAS'),
+                        _buildFilterButton(ref, 'TODAS'),
+                        _buildFilterButton(ref, 'LIBRES'),
+                        _buildFilterButton(ref, 'OCUPADAS'),
+                        _buildFilterButton(ref, 'RESERVADAS'),
                       ],
                     ),
                   ),
@@ -114,7 +117,17 @@ class MesaGridView extends ConsumerWidget {
               ),
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
-                  final mesa = tables[index];
+                  final filter = ref.watch(tableFilterProvider);
+                  final filteredTables = tables.where((t) {
+                    if (filter == 'TODAS') return true;
+                    if (filter == 'LIBRES') return t.status == MesaStatus.libre;
+                    if (filter == 'OCUPADAS') return t.status == MesaStatus.ocupada;
+                    if (filter == 'RESERVADAS') return t.status == MesaStatus.reservada;
+                    return true;
+                  }).toList();
+                  
+                  if (index >= filteredTables.length) return null;
+                  final mesa = filteredTables[index];
                   return MesaCard(
                     mesa: mesa,
                     onTap: () {
@@ -127,6 +140,7 @@ class MesaGridView extends ConsumerWidget {
                             actions: [
                               TextButton(
                                 onPressed: () {
+                                  ref.read(cartProvider.notifier).clear();
                                   Navigator.pop(context);
                                   Navigator.push(
                                     context,
@@ -149,6 +163,7 @@ class MesaGridView extends ConsumerWidget {
                           ),
                         );
                       } else {
+                        ref.read(cartProvider.notifier).clear();
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -159,7 +174,14 @@ class MesaGridView extends ConsumerWidget {
                     },
                   );
                 },
-                childCount: tables.length,
+                childCount: tables.where((t) {
+                  final filter = ref.watch(tableFilterProvider);
+                  if (filter == 'TODAS') return true;
+                  if (filter == 'LIBRES') return t.status == MesaStatus.libre;
+                  if (filter == 'OCUPADAS') return t.status == MesaStatus.ocupada;
+                  if (filter == 'RESERVADAS') return t.status == MesaStatus.reservada;
+                  return true;
+                }).length,
               ),
             ),
           ),
@@ -169,24 +191,31 @@ class MesaGridView extends ConsumerWidget {
     );
   }
 
-  Widget _buildFilterButton(String label, {bool isSelected = false}) {
+  Widget _buildFilterButton(WidgetRef ref, String label) {
+    final selectedFilter = ref.watch(tableFilterProvider);
+    final bool isSelected = selectedFilter == label;
+    
     return Padding(
       padding: const EdgeInsets.only(right: 8.0),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? AppTheme.primaryColor : Colors.white,
-          borderRadius: BorderRadius.circular(30),
-          border: Border.all(
-            color: isSelected ? AppTheme.primaryColor : Colors.grey.shade200,
+      child: InkWell(
+        onTap: () => ref.read(tableFilterProvider.notifier).state = label,
+        borderRadius: BorderRadius.circular(30),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: isSelected ? AppTheme.primaryColor : Colors.white,
+            borderRadius: BorderRadius.circular(30),
+            border: Border.all(
+              color: isSelected ? AppTheme.primaryColor : Colors.grey.shade200,
+            ),
           ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isSelected ? Colors.white : Colors.grey.shade600,
-            fontWeight: FontWeight.bold,
-            fontSize: 12,
+          child: Text(
+            label,
+            style: TextStyle(
+              color: isSelected ? Colors.white : Colors.grey.shade600,
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+            ),
           ),
         ),
       ),

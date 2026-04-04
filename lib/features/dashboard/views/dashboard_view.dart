@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../kitchen/models/order_model.dart';
 import '../../tables/providers/table_provider.dart';
 import '../../tables/models/mesa_model.dart';
+import '../../reports/providers/report_provider.dart';
 
 class DashboardView extends ConsumerWidget {
   const DashboardView({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final metrics = ref.watch(reportMetricsProvider);
+    
     return SingleChildScrollView(
       padding: const EdgeInsets.all(32),
       child: Column(
@@ -21,11 +25,26 @@ class DashboardView extends ConsumerWidget {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                _buildMetricCard('Total ventas', 'S/ 2,450', Icons.monetization_on, Colors.green),
+                _buildMetricCard(
+                  'Total ventas', 
+                  metrics.maybeWhen(data: (m) => 'S/ ${m.totalSales.toStringAsFixed(2)}', orElse: () => 'S/ 0.00'), 
+                  Icons.monetization_on, 
+                  Colors.green
+                ),
                 const SizedBox(width: 24),
-                _buildMetricCard('Pedidos hoy', '28', Icons.receipt, Colors.orange),
+                _buildMetricCard(
+                  'Pedidos hoy', 
+                  metrics.maybeWhen(data: (m) => '${m.totalOrders}', orElse: () => '0'), 
+                  Icons.receipt, 
+                  Colors.orange
+                ),
                 const SizedBox(width: 24),
-                _buildMetricCard('Mesas ocupadas', '${ref.watch(tableProvider).where((m) => m.status == MesaStatus.ocupada).length}/40', Icons.table_restaurant, Colors.blue),
+                _buildMetricCard(
+                  'Mesas ocupadas', 
+                  '${ref.watch(tableProvider).where((m) => m.status == MesaStatus.ocupada).length}/40', 
+                  Icons.table_restaurant, 
+                  Colors.blue
+                ),
               ],
             ),
           ),
@@ -55,9 +74,15 @@ class DashboardView extends ConsumerWidget {
                   children: [
                     const Text('Acciones Rápidas', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 24),
-                    _buildQuickAction('VER MESAS', Icons.grid_view, AppTheme.emberGradient),
+                    InkWell(
+                      onTap: () => context.go('/mesas'),
+                      child: _buildQuickAction('VER MESAS', Icons.grid_view, AppTheme.emberGradient),
+                    ),
                     const SizedBox(height: 16),
-                    _buildQuickAction('MODO COCINA', Icons.restaurant, AppTheme.emberGradient),
+                    InkWell(
+                      onTap: () => context.go('/kitchen'),
+                      child: _buildQuickAction('MODO COCINA', Icons.restaurant, AppTheme.emberGradient),
+                    ),
                   ],
                 ),
               ),

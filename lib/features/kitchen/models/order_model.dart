@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../tables/models/mesa_model.dart';
 
-enum OrderStatus { pendiente, preparando, listo, entregado }
+enum OrderStatus { pendiente, preparando, listo, entregado, pagado }
 
 class OrderItem {
   final String productId;
@@ -75,6 +75,7 @@ class OrderModel {
       case 'preparando': return OrderStatus.preparando;
       case 'listo': return OrderStatus.listo;
       case 'entregado': return OrderStatus.entregado;
+      case 'pagado': return OrderStatus.pagado;
       default: return OrderStatus.pendiente;
     }
   }
