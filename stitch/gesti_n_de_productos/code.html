@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>El Brasero - Gestión de Productos</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-container": "#e3efff",
+                        "inverse-on-surface": "#e8f2ff",
+                        "primary-container": "#e67e22",
+                        "surface-tint": "#944a00",
+                        "surface-container-low": "#edf4ff",
+                        "tertiary-container": "#00a3e4",
+                        "surface-bright": "#f7f9ff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-container": "#694000",
+                        "on-secondary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed": "#c7e7ff",
+                        "error-container": "#ffdad6",
+                        "on-error": "#ffffff",
+                        "surface-container-high": "#d9eaff",
+                        "secondary-fixed": "#ffddb9",
+                        "primary": "#944a00",
+                        "surface": "#f7f9ff",
+                        "surface-container-highest": "#d1e4fb",
+                        "on-tertiary-fixed": "#001e2e",
+                        "on-primary-fixed-variant": "#713700",
+                        "inverse-primary": "#ffb783",
+                        "outline-variant": "#dcc1b1",
+                        "secondary-container": "#fea520",
+                        "surface-dim": "#c9dcf3",
+                        "on-primary-fixed": "#301400",
+                        "error": "#ba1a1a",
+                        "outline": "#897365",
+                        "tertiary-fixed-dim": "#86cfff",
+                        "on-surface": "#091d2e",
+                        "secondary": "#865300",
+                        "primary-fixed": "#ffdcc5",
+                        "primary-fixed-dim": "#ffb783",
+                        "secondary-fixed-dim": "#ffb961",
+                        "tertiary": "#00658f",
+                        "on-tertiary-fixed-variant": "#004c6d",
+                        "on-surface-variant": "#564337",
+                        "on-background": "#091d2e",
+                        "surface-variant": "#d1e4fb",
+                        "on-tertiary": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed-variant": "#663e00",
+                        "on-secondary-fixed": "#2b1700",
+                        "background": "#f7f9ff",
+                        "on-tertiary-container": "#00354d",
+                        "inverse-surface": "#203243",
+                        "on-primary-container": "#502600"
+                    },
+                    fontFamily: {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Be Vietnam Pro"],
+                        "label": ["Be Vietnam Pro"]
+                    },
+                    borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .ember-gradient {
+            background: linear-gradient(135deg, #944a00 0%, #E67E22 100%);
+        }
+        .ambient-shadow {
+            box-shadow: 0px 8px 24px rgba(9, 29, 46, 0.06);
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface">
+<!-- Sidebar Navigation (SideNavBar) -->
+<aside class="fixed left-0 top-0 h-full flex flex-col py-6 bg-slate-50 dark:bg-slate-900 h-full w-24 border-r-0 z-50">
+<div class="flex flex-col items-center mb-10">
+<div class="text-xl font-black text-orange-700 dark:text-orange-500 mb-2">EB</div>
+<div class="h-10 w-10 rounded-full overflow-hidden border-2 border-primary">
+<img alt="Carlos Profile Picture" class="w-full h-full object-cover" data-alt="Professional male chef in white uniform with a friendly expression in a modern kitchen background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCSV4HqruXSh_P1pj1LwUS339ZorLv2zizEUgSa9Y0eg78sy0qUB-ngzCsAVfGBJnUUm1pHpiFPDvxXL9gXoha6kCDMK74jDM2E_ZQ62Y1QJviVDG1y27PUpSjRX77_kDA5SwvH6SUfqIxmTSBUZS95r1cka_q_qZ7jd4Fnl7dBuZq0ae6BtMGo_dgKx0dU4U3b0nKLlfuSiODikjtc1RLBG3QRWXbWcnUtdbTchJv3mtvQ_J80PR7TRGD4Io4iZOp2EUGR57N-Havi"/>
+</div>
+</div>
+<nav class="flex flex-col items-center space-y-6 w-full">
+<a class="text-slate-500 dark:text-slate-400 hover:bg-orange-50 dark:hover:bg-orange-950/30 transition-colors p-3 rounded-xl flex flex-col items-center gap-1" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-[10px] font-bold">Dash</span>
+</a>
+<a class="text-orange-600 dark:text-orange-400 font-bold border-r-4 border-orange-600 hover:bg-orange-50 dark:hover:bg-orange-950/30 transition-colors p-3 rounded-l-xl flex flex-col items-center gap-1 active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="restaurant_menu">restaurant_menu</span>
+<span class="text-[10px] font-bold">Mesas</span>
+</a>
+<a class="text-slate-500 dark:text-slate-400 hover:bg-orange-50 dark:hover:bg-orange-950/30 transition-colors p-3 rounded-xl flex flex-col items-center gap-1" href="#">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+<span class="text-[10px] font-bold">Pedidos</span>
+</a>
+<a class="text-slate-500 dark:text-slate-400 hover:bg-orange-50 dark:hover:bg-orange-950/30 transition-colors p-3 rounded-xl flex flex-col items-center gap-1" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="text-[10px] font-bold">Perfil</span>
+</a>
+<div class="mt-auto">
+<a class="text-slate-500 dark:text-slate-400 hover:bg-orange-50 dark:hover:bg-orange-950/30 transition-colors p-3 rounded-xl flex flex-col items-center gap-1" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span class="text-[10px] font-bold">Salir</span>
+</a>
+</div>
+</nav>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-24 min-h-screen">
+<!-- TopNavBar -->
+<header class="flex justify-between items-center w-full px-8 py-4 h-16 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl docked full-width top-0 z-40">
+<h1 class="text-2xl font-extrabold text-orange-600 dark:text-orange-500 font-headline uppercase tracking-tight">El Brasero</h1>
+<div class="flex items-center gap-6">
+<div class="relative flex items-center bg-surface-container-low rounded-full px-4 py-2 w-64">
+<span class="material-symbols-outlined text-outline" data-icon="search">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm font-medium w-full ml-2" placeholder="Buscar productos..." type="text"/>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-outline" data-icon="notifications">notifications</span>
+<div class="flex items-center gap-2">
+<span class="text-sm font-semibold text-on-surface">Hola, Carlos 👋</span>
+</div>
+</div>
+</div>
+</header>
+<!-- Product Management Canvas -->
+<div class="p-8">
+<!-- Header Section -->
+<div class="flex justify-between items-end mb-10">
+<div>
+<h2 class="text-4xl font-extrabold font-headline text-on-surface mb-2">Productos</h2>
+<p class="text-on-surface-variant font-medium">Gestiona tu menú y disponibilidad en tiempo real.</p>
+</div>
+<button class="ember-gradient text-on-primary font-bold px-8 py-3 rounded-full flex items-center gap-2 ambient-shadow active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+                    AGREGAR PRODUCTO
+                </button>
+</div>
+<!-- Filter Tabs -->
+<div class="flex gap-4 mb-8">
+<button class="px-6 py-2 rounded-full bg-primary text-on-primary font-bold text-sm">TODOS</button>
+<button class="px-6 py-2 rounded-full bg-surface-container-highest text-on-surface-variant font-bold text-sm hover:bg-surface-container-high transition-colors">ACTIVOS</button>
+<button class="px-6 py-2 rounded-full bg-surface-container-highest text-on-surface-variant font-bold text-sm hover:bg-surface-container-high transition-colors">INACTIVOS</button>
+</div>
+<!-- Bento Grid of Categories -->
+<div class="grid grid-cols-12 gap-6">
+<!-- Category: Parrillas -->
+<section class="col-span-12 lg:col-span-8 bg-surface-container-lowest rounded-xl p-6 ambient-shadow">
+<div class="flex justify-between items-center mb-6">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary bg-primary-fixed p-2 rounded-lg" data-icon="outdoor_grill">outdoor_grill</span>
+<h3 class="text-xl font-bold font-headline">Parrillas <span class="text-sm font-normal text-outline-variant ml-2">(6 productos)</span></h3>
+</div>
+<span class="material-symbols-outlined cursor-pointer text-outline hover:text-primary" data-icon="expand_less">expand_less</span>
+</div>
+<div class="space-y-4">
+<!-- Product Item -->
+<div class="flex items-center justify-between p-4 bg-surface hover:bg-surface-container-low rounded-xl transition-all border-l-4 border-primary">
+<div class="flex items-center gap-4">
+<div class="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
+<img alt="Pollo a la Brasa" class="w-full h-full object-cover" data-alt="Close-up of a juicy roasted rotisserie chicken with golden crispy skin and side of fries on a dark plate" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC5ZWE2BVK3hwRggQer3MGYpqhCrKHLxR-EtM1bcnc_cx5q8DsviDnsr0sA--BuN_06p5C9GmHSfo0MqqcGOJI08XjUm-WrpuJh63KIlK5R4_Da7jxLiSHA5g2gPtWUq8-v2SHjgQl6f7XPSM9L58XnU42_qnIitMtWVbvK64BOsiwPOr21DS4xnbbwDmEV0WsVVYTVJCpO_gT1cnzsrdf5JlYU2JJTqqt0dCysqPs6mJWdnomxS-sdjqlMHfAilAKtXX10ngMBlq8a"/>
+</div>
+<div>
+<h4 class="font-bold text-on-surface">Pollo a la Brasa 1/4</h4>
+<p class="text-sm text-on-surface-variant">Incluye papas fritas y ensalada clásica.</p>
+</div>
+</div>
+<div class="flex items-center gap-8">
+<div class="text-right">
+<p class="font-bold text-lg text-primary">S/ 25.90</p>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-700">Activo</span>
+</div>
+<div class="flex gap-2">
+<button class="p-2 text-outline hover:text-primary-container transition-colors">
+<span class="material-symbols-outlined" data-icon="edit">edit</span>
+</button>
+<button class="p-2 text-outline hover:text-error transition-colors">
+<span class="material-symbols-outlined" data-icon="delete">delete</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Product Item (Inactive Example) -->
+<div class="flex items-center justify-between p-4 bg-surface-container-low/50 hover:bg-surface-container-low rounded-xl transition-all border-l-4 border-outline-variant opacity-75">
+<div class="flex items-center gap-4">
+<div class="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 grayscale">
+<img alt="Anticuchos" class="w-full h-full object-cover" data-alt="Traditional Peruvian beef heart skewers with roasted potatoes and corn, rustic style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAFD2FoYgROBtF9zNWtjywbou1d1ZKpMAL3VGJylFwfK9HHC2OXR2gizo5oDI95Cav-zjpfpbHQgrjfIMdAo9i76Jj09c0CFKyE7Gp4WOsjhInFRbcajaSMuBTyaBpeTwasEQvo5B62sPUCIrqNyIfuUvEqZW4jwSE3CsMVpWD8PN9l5LAsEJ88APpKaqaoC2DUcz9TfMe93i6iMoLtrMH7ixapb7JXhEVOrBLuQVAtNazVThDv8eBoFCIE85l-LQHOvoqMlCZ0TJtP"/>
+</div>
+<div>
+<h4 class="font-bold text-on-surface">Anticuchos Especiales</h4>
+<p class="text-sm text-on-surface-variant">Corazón de res marinado con ají panca.</p>
+</div>
+</div>
+<div class="flex items-center gap-8">
+<div class="text-right">
+<p class="font-bold text-lg text-outline">S/ 32.00</p>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-slate-200 text-slate-600">Inactivo</span>
+</div>
+<div class="flex gap-2">
+<button class="p-2 text-outline hover:text-primary-container transition-colors">
+<span class="material-symbols-outlined" data-icon="edit">edit</span>
+</button>
+<button class="p-2 text-outline hover:text-error transition-colors">
+<span class="material-symbols-outlined" data-icon="delete">delete</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Category: Bebidas (Compact/Secondary) -->
+<section class="col-span-12 lg:col-span-4 flex flex-col gap-6">
+<div class="bg-surface-container-lowest rounded-xl p-6 ambient-shadow flex-1">
+<div class="flex justify-between items-center mb-6">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-tertiary bg-tertiary-fixed p-2 rounded-lg" data-icon="local_bar">local_bar</span>
+<h3 class="text-xl font-bold font-headline">Bebidas <span class="text-sm font-normal text-outline-variant ml-2">(4 productos)</span></h3>
+</div>
+<span class="material-symbols-outlined cursor-pointer text-outline hover:text-primary" data-icon="expand_more">expand_more</span>
+</div>
+<div class="bg-surface p-4 rounded-xl flex items-center justify-between mb-2">
+<span class="font-medium">Chicha Morada 1L</span>
+<span class="font-bold text-primary">S/ 12.00</span>
+</div>
+<div class="bg-surface p-4 rounded-xl flex items-center justify-between">
+<span class="font-medium">Inca Kola 1.5L</span>
+<span class="font-bold text-primary">S/ 10.50</span>
+</div>
+</div>
+<!-- Small Stat/Promo Card -->
+<div class="ember-gradient rounded-xl p-6 ambient-shadow text-on-primary">
+<h4 class="font-headline font-bold text-lg mb-2">Artículos Destacados</h4>
+<p class="text-sm opacity-90 mb-4">Tienes 3 artículos apareciendo en el carrusel principal.</p>
+<button class="w-full bg-white/20 hover:bg-white/30 py-2 rounded-lg text-sm font-bold transition-colors">Ver Dashboard</button>
+</div>
+</section>
+</div>
+</div>
+</main>
+<!-- Edit/Add Modal Overlay -->
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-on-surface/40 backdrop-blur-md">
+<div class="bg-surface-container-lowest w-full max-w-2xl rounded-2xl ambient-shadow overflow-hidden">
+<!-- Modal Header -->
+<div class="px-8 py-6 ember-gradient text-on-primary flex justify-between items-center">
+<div>
+<h3 class="text-2xl font-bold font-headline">Editar Producto</h3>
+<p class="text-sm opacity-80">Actualiza la información de 'Pollo a la Brasa 1/4'</p>
+</div>
+<button class="text-on-primary/80 hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+</div>
+<!-- Modal Content -->
+<form class="p-8 grid grid-cols-2 gap-6">
+<!-- Name -->
+<div class="col-span-2">
+<label class="block text-sm font-bold text-outline mb-2">Nombre del Producto</label>
+<input class="w-full bg-surface rounded-xl border-none ring-1 ring-outline-variant focus:ring-2 focus:ring-primary p-3 font-semibold" type="text" value="Pollo a la Brasa 1/4"/>
+</div>
+<!-- Price & Category -->
+<div class="col-span-1">
+<label class="block text-sm font-bold text-outline mb-2">Precio (S/)</label>
+<input class="w-full bg-surface rounded-xl border-none ring-1 ring-outline-variant focus:ring-2 focus:ring-primary p-3 font-semibold" type="text" value="25.90"/>
+</div>
+<div class="col-span-1">
+<label class="block text-sm font-bold text-outline mb-2">Categoría</label>
+<select class="w-full bg-surface rounded-xl border-none ring-1 ring-outline-variant focus:ring-2 focus:ring-primary p-3 font-semibold">
+<option selected="">Parrillas</option>
+<option>Bebidas</option>
+<option>Postres</option>
+<option>Guarniciones</option>
+</select>
+</div>
+<!-- Description -->
+<div class="col-span-2">
+<label class="block text-sm font-bold text-outline mb-2">Descripción</label>
+<textarea class="w-full bg-surface rounded-xl border-none ring-1 ring-outline-variant focus:ring-2 focus:ring-primary p-3 font-medium" rows="3">Incluye papas fritas crocantes y ensalada clásica de la casa con aliño secreto.</textarea>
+</div>
+<!-- Image Selector Area -->
+<div class="col-span-1">
+<label class="block text-sm font-bold text-outline mb-2">Imagen</label>
+<div class="relative group h-32 bg-surface rounded-xl overflow-hidden border-2 border-dashed border-outline-variant flex flex-col items-center justify-center cursor-pointer hover:border-primary transition-colors">
+<img alt="Pollo preview" class="absolute inset-0 w-full h-full object-cover opacity-30" data-alt="Golden brown roasted chicken with steam rising, focused food photography on neutral background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB2UyF2rP4kxTmQ1YD3uYBvTnU-z3n8wXd3K2sFtO5evsesAp1f5b94zsikcshob6aMoSzc7v_p4XY_ddmenjPc0vpUV6TKG-xZgcOpphRsZ0ZoQtCR-JGGQA84qmmtateJVM4MYwmws8rLs7GrpJZub7dlCzTZUEsUamXQCyx4wkkKV6n7XjJVUIL8IHTK1tpQpRPAttPSPHl4J-LioL5Wnj3p3SQxR02WE2PnqdlbE8NyNO-BrqpT0QGS5g8MERrn_fn1PAIduOzG"/>
+<span class="material-symbols-outlined text-outline group-hover:text-primary z-10" data-icon="add_a_photo">add_a_photo</span>
+<p class="text-xs font-bold text-outline group-hover:text-primary z-10">Cambiar Foto</p>
+</div>
+</div>
+<!-- Switches Area -->
+<div class="col-span-1 flex flex-col justify-center gap-4">
+<div class="flex items-center justify-between bg-surface p-3 rounded-xl">
+<span class="text-sm font-bold">Activo</span>
+<div class="w-12 h-6 bg-primary rounded-full relative p-1 flex items-center justify-end">
+<div class="w-4 h-4 bg-white rounded-full"></div>
+</div>
+</div>
+<div class="flex items-center justify-between bg-surface p-3 rounded-xl">
+<span class="text-sm font-bold">Destacado</span>
+<div class="w-12 h-6 bg-outline-variant rounded-full relative p-1 flex items-center justify-start">
+<div class="w-4 h-4 bg-white rounded-full"></div>
+</div>
+</div>
+</div>
+<!-- Actions -->
+<div class="col-span-2 flex gap-4 mt-4">
+<button class="flex-1 py-3 bg-surface-container-high text-on-surface font-bold rounded-full hover:bg-surface-container-highest transition-colors" type="button">Cancelar</button>
+<button class="flex-1 py-3 ember-gradient text-on-primary font-bold rounded-full ambient-shadow" type="submit">Guardar Cambios</button>
+</div>
+</form>
+</div>
+</div>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-4 pt-2 md:hidden bg-white dark:bg-slate-900 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] rounded-t-3xl border-t border-slate-100 dark:border-slate-800">
+<a class="flex flex-col items-center justify-center bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300 rounded-2xl px-6 py-2 scale-90" href="#">
+<span class="material-symbols-outlined" data-icon="restaurant">restaurant</span>
+<span class="text-[10px] font-bold">Menú</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 hover:bg-slate-50" href="#">
+<span class="material-symbols-outlined" data-icon="list_alt">list_alt</span>
+<span class="text-[10px] font-bold">Pedidos</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 hover:bg-slate-50" href="#">
+<span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+<span class="text-[10px] font-bold">Carrito</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 hover:bg-slate-50" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="text-[10px] font-bold">Perfil</span>
+</a>
+</nav>
+</body></html>

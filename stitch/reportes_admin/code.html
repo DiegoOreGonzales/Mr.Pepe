@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-container": "#e3efff",
+                        "inverse-on-surface": "#e8f2ff",
+                        "primary-container": "#e67e22",
+                        "surface-tint": "#944a00",
+                        "surface-container-low": "#edf4ff",
+                        "tertiary-container": "#00a3e4",
+                        "surface-bright": "#f7f9ff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-container": "#694000",
+                        "on-secondary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed": "#c7e7ff",
+                        "error-container": "#ffdad6",
+                        "on-error": "#ffffff",
+                        "surface-container-high": "#d9eaff",
+                        "secondary-fixed": "#ffddb9",
+                        "primary": "#944a00",
+                        "surface": "#f7f9ff",
+                        "surface-container-highest": "#d1e4fb",
+                        "on-tertiary-fixed": "#001e2e",
+                        "on-primary-fixed-variant": "#713700",
+                        "inverse-primary": "#ffb783",
+                        "outline-variant": "#dcc1b1",
+                        "secondary-container": "#fea520",
+                        "surface-dim": "#c9dcf3",
+                        "on-primary-fixed": "#301400",
+                        "error": "#ba1a1a",
+                        "outline": "#897365",
+                        "tertiary-fixed-dim": "#86cfff",
+                        "on-surface": "#091d2e",
+                        "secondary": "#865300",
+                        "primary-fixed": "#ffdcc5",
+                        "primary-fixed-dim": "#ffb783",
+                        "secondary-fixed-dim": "#ffb961",
+                        "tertiary": "#00658f",
+                        "on-tertiary-fixed-variant": "#004c6d",
+                        "on-surface-variant": "#564337",
+                        "on-background": "#091d2e",
+                        "surface-variant": "#d1e4fb",
+                        "on-tertiary": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed-variant": "#663e00",
+                        "on-secondary-fixed": "#2b1700",
+                        "background": "#f7f9ff",
+                        "on-tertiary-container": "#00354d",
+                        "inverse-surface": "#203243",
+                        "on-primary-container": "#502600"
+                    },
+                    fontFamily: {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Be Vietnam Pro"],
+                        "label": ["Be Vietnam Pro"]
+                    },
+                    borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Be Vietnam Pro', sans-serif; }
+        h1, h2, h3, .display-font { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .ember-gradient { background: linear-gradient(135deg, #944a00 0%, #e67e22 100%); }
+        .ambient-shadow { box-shadow: 0px 8px 24px rgba(9, 29, 46, 0.06); }
+        .glass-panel { backdrop-filter: blur(20px); background: rgba(255, 255, 255, 0.8); }
+    </style>
+</head>
+<body class="bg-surface text-on-surface antialiased min-h-screen">
+<aside class="fixed left-0 top-0 h-full flex flex-col py-6 bg-slate-50 dark:bg-slate-900 h-full w-24 border-r-0 shadow-sm dark:shadow-none z-50">
+<div class="flex flex-col items-center mb-10">
+<div class="text-xl font-black text-orange-700 dark:text-orange-500 mb-1">E</div>
+<div class="w-10 h-1 rounded-full bg-primary opacity-20"></div>
+</div>
+<nav class="flex-1 flex flex-col items-center gap-6">
+<button class="group flex flex-col items-center gap-1 text-slate-500 dark:text-slate-400 hover:bg-orange-50 dark:hover:bg-orange-950/30 transition-colors p-3 rounded-xl">
+<span class="material-symbols-outlined text-2xl">dashboard</span>
+</button>
+<button class="group flex flex-col items-center gap-1 text-slate-500 dark:text-slate-400 hover:bg-orange-50 dark:hover:bg-orange-950/30 transition-colors p-3 rounded-xl">
+<span class="material-symbols-outlined text-2xl">restaurant_menu</span>
+</button>
+<button class="group flex flex-col items-center gap-1 text-orange-600 dark:text-orange-400 font-bold border-r-4 border-orange-600 scale-95 transition-transform p-3 rounded-l-xl">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">bar_chart</span>
+</button>
+<button class="group flex flex-col items-center gap-1 text-slate-500 dark:text-slate-400 hover:bg-orange-50 dark:hover:bg-orange-950/30 transition-colors p-3 rounded-xl">
+<span class="material-symbols-outlined text-2xl">receipt_long</span>
+</button>
+<button class="group flex flex-col items-center gap-1 text-slate-500 dark:text-slate-400 hover:bg-orange-50 dark:hover:bg-orange-950/30 transition-colors p-3 rounded-xl">
+<span class="material-symbols-outlined text-2xl">person</span>
+</button>
+</nav>
+<div class="mt-auto flex flex-col items-center gap-6">
+<button class="text-slate-500 hover:text-error transition-colors">
+<span class="material-symbols-outlined">logout</span>
+</button>
+</div>
+</aside>
+<main class="ml-24 min-h-screen">
+<header class="flex justify-between items-center w-full px-8 py-4 h-20 bg-white/80 backdrop-blur-xl sticky top-0 z-40">
+<div class="flex flex-col">
+<h1 class="text-2xl font-extrabold text-orange-600 tracking-tight">Reportes</h1>
+<p class="text-xs font-medium text-on-surface-variant opacity-70">Admin Management Panel</p>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex bg-surface-container-low p-1 rounded-full">
+<button class="px-4 py-1.5 text-xs font-bold rounded-full bg-primary text-on-primary shadow-sm">HOY</button>
+<button class="px-4 py-1.5 text-xs font-semibold rounded-full text-on-surface-variant hover:bg-surface-container transition-colors">ESTA SEMANA</button>
+<button class="px-4 py-1.5 text-xs font-semibold rounded-full text-on-surface-variant hover:bg-surface-container transition-colors">ESTE MES</button>
+<button class="px-4 py-1.5 text-xs font-semibold rounded-full text-on-surface-variant hover:bg-surface-container transition-colors">PERSONALIZADO</button>
+</div>
+<button class="flex items-center gap-2 px-4 py-2 rounded-full border border-outline-variant/30 hover:bg-surface-container-lowest transition-all text-sm font-semibold text-on-surface">
+<span class="material-symbols-outlined text-lg">picture_as_pdf</span>
+                    EXPORTAR PDF
+                </button>
+<div class="flex items-center gap-3 border-l pl-6 border-outline-variant/30">
+<div class="text-right">
+<p class="text-sm font-bold text-on-surface">Hola, Carlos 👋</p>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-widest font-bold">Admin/Mesero</p>
+</div>
+<img alt="Carlos Profile" class="w-10 h-10 rounded-full object-cover border-2 border-primary-container" data-alt="close-up portrait of a professional latin male chef in a clean white uniform with a friendly smile, warm indoor kitchen lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBcByLLAmtdopupY9qQzWtQa9YlnRuH2jgJ-G2y0c6RVIXhksnXhWKPWtLcqQFuDyQCkohQpOEJBwYFU5KvqGHwwi55tvR4ZOCUOr8F2x_Zxnw1h91DFhxJyG5uB5TyJYvCsqSCcIqyWb1A62Bp9cbFkNwT7Dz7p2uU_zJ5a4G0M15Kapt90qqpiFotjv7TVlTYzKbS0ZvWUXHJpNBSKcoaiPyVjX1wmR76gVxQNWOSl3h_YAWE5I7b8RF9GMl9RHMJQ1v9iu_a_vQ_"/>
+</div>
+</div>
+</header>
+<div class="p-8 space-y-8">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+<div class="bg-surface-container-lowest p-6 rounded-2xl ambient-shadow flex flex-col justify-between group hover:translate-y-[-4px] transition-transform duration-300">
+<div class="flex justify-between items-start">
+<span class="p-3 rounded-2xl bg-orange-50 text-primary">
+<span class="material-symbols-outlined">payments</span>
+</span>
+<span class="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-lg">+12%</span>
+</div>
+<div class="mt-4">
+<p class="text-xs font-bold text-on-surface-variant opacity-60 uppercase tracking-wider">Total ventas</p>
+<p class="text-3xl font-black text-on-surface mt-1">S/ 2,450</p>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-2xl ambient-shadow flex flex-col justify-between group hover:translate-y-[-4px] transition-transform duration-300">
+<div class="flex justify-between items-start">
+<span class="p-3 rounded-2xl bg-blue-50 text-tertiary">
+<span class="material-symbols-outlined">confirmation_number</span>
+</span>
+<span class="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-lg">+5%</span>
+</div>
+<div class="mt-4">
+<p class="text-xs font-bold text-on-surface-variant opacity-60 uppercase tracking-wider">Ticket promedio</p>
+<p class="text-3xl font-black text-on-surface mt-1">S/ 32.50</p>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-2xl ambient-shadow flex flex-col justify-between group hover:translate-y-[-4px] transition-transform duration-300">
+<div class="flex justify-between items-start">
+<span class="p-3 rounded-2xl bg-purple-50 text-purple-600">
+<span class="material-symbols-outlined">shopping_bag</span>
+</span>
+<span class="text-xs font-bold text-orange-600 bg-orange-50 px-2 py-1 rounded-lg">28 hoy</span>
+</div>
+<div class="mt-4">
+<p class="text-xs font-bold text-on-surface-variant opacity-60 uppercase tracking-wider">Pedidos</p>
+<p class="text-3xl font-black text-on-surface mt-1">28</p>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-2xl ambient-shadow flex flex-col justify-between group hover:translate-y-[-4px] transition-transform duration-300">
+<div class="flex justify-between items-start">
+<span class="p-3 rounded-2xl bg-green-50 text-green-600">
+<span class="material-symbols-outlined">table_restaurant</span>
+</span>
+<span class="text-xs font-bold text-tertiary bg-tertiary-fixed px-2 py-1 rounded-lg">Óptimo</span>
+</div>
+<div class="mt-4">
+<p class="text-xs font-bold text-on-surface-variant opacity-60 uppercase tracking-wider">Mesas rotación</p>
+<p class="text-3xl font-black text-on-surface mt-1">2.3 <span class="text-sm font-medium opacity-50">veces</span></p>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-12 gap-8">
+<div class="col-span-8 bg-surface-container-lowest p-8 rounded-2xl ambient-shadow">
+<div class="flex justify-between items-end mb-10">
+<div>
+<h3 class="text-xl font-extrabold text-on-surface">Flujo de Ventas</h3>
+<p class="text-sm text-on-surface-variant">Rendimiento por hora (S/)</p>
+</div>
+<div class="flex gap-4">
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 rounded-full bg-primary"></div>
+<span class="text-xs font-bold text-on-surface-variant">Ventas</span>
+</div>
+</div>
+</div>
+<div class="relative h-[300px] w-full mt-4 flex items-end justify-between px-2">
+<div class="absolute inset-0 flex flex-col justify-between pointer-events-none">
+<div class="border-b border-surface-container border-dashed w-full h-0"></div>
+<div class="border-b border-surface-container border-dashed w-full h-0"></div>
+<div class="border-b border-surface-container border-dashed w-full h-0"></div>
+<div class="border-b border-surface-container border-dashed w-full h-0"></div>
+</div>
+<div class="relative group w-12 flex flex-col items-center">
+<div class="w-1.5 h-[120px] bg-primary-container/20 rounded-full mb-2 overflow-hidden flex flex-col justify-end">
+<div class="w-full h-3/4 ember-gradient rounded-full"></div>
+</div>
+<span class="text-[10px] font-bold text-on-surface-variant">12 PM</span>
+</div>
+<div class="relative group w-12 flex flex-col items-center">
+<div class="w-1.5 h-[120px] bg-primary-container/20 rounded-full mb-2 overflow-hidden flex flex-col justify-end">
+<div class="w-full h-1/2 ember-gradient rounded-full"></div>
+</div>
+<span class="text-[10px] font-bold text-on-surface-variant">02 PM</span>
+</div>
+<div class="relative group w-12 flex flex-col items-center">
+<div class="w-1.5 h-[120px] bg-primary-container/20 rounded-full mb-2 overflow-hidden flex flex-col justify-end">
+<div class="w-full h-2/5 ember-gradient rounded-full"></div>
+</div>
+<span class="text-[10px] font-bold text-on-surface-variant">04 PM</span>
+</div>
+<div class="relative group w-12 flex flex-col items-center">
+<div class="w-1.5 h-[120px] bg-primary-container/20 rounded-full mb-2 overflow-hidden flex flex-col justify-end">
+<div class="w-full h-4/5 ember-gradient rounded-full"></div>
+</div>
+<span class="text-[10px] font-bold text-on-surface-variant">06 PM</span>
+</div>
+<div class="relative group w-12 flex flex-col items-center">
+<div class="w-1.5 h-[120px] bg-primary-container/20 rounded-full mb-2 overflow-hidden flex flex-col justify-end">
+<div class="w-full h-full ember-gradient rounded-full"></div>
+</div>
+<span class="text-[10px] font-bold text-on-surface-variant">08 PM</span>
+</div>
+<div class="relative group w-12 flex flex-col items-center">
+<div class="w-1.5 h-[120px] bg-primary-container/20 rounded-full mb-2 overflow-hidden flex flex-col justify-end">
+<div class="w-full h-3/4 ember-gradient rounded-full"></div>
+</div>
+<span class="text-[10px] font-bold text-on-surface-variant">10 PM</span>
+</div>
+<svg class="absolute top-0 left-0 w-full h-[250px] overflow-visible pointer-events-none" preserveaspectratio="none">
+<path d="M 0 180 Q 100 150 200 190 T 400 120 T 600 50 T 800 100" fill="none" stroke="url(#emberGrad)" stroke-linecap="round" stroke-width="4"></path>
+<defs>
+<lineargradient id="emberGrad" x1="0%" x2="100%" y1="0%" y2="0%">
+<stop offset="0%" style="stop-color:#944a00;stop-opacity:1"></stop>
+<stop offset="100%" style="stop-color:#e67e22;stop-opacity:1"></stop>
+</lineargradient>
+</defs>
+</svg>
+</div>
+</div>
+<div class="col-span-4 bg-surface-container-lowest p-8 rounded-2xl ambient-shadow">
+<h3 class="text-xl font-extrabold text-on-surface mb-6">Productos más vendidos</h3>
+<div class="space-y-6">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-surface overflow-hidden">
+<img alt="Pollo a la Brasa" class="w-full h-full object-cover" data-alt="Golden crispy whole rotisserie chicken on a rustic wooden platter with steam rising, professional food photography" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_J4yawsw09tlKtz_qmutpklxpdEqj6TCzICeKFkbfscGEMwPf3_wbSSBxkiPNdi-j9opuaUt-xlrAm_dT1jfpG3AMav8SOMW6Ur7dv6LgsvvnJyMR3wx0oq3O1FCn4vfVTkJtQZQvbc9-gCP8PrmpZgJMvItEqHRc0kohRkoklyqzLR8OaEwcEx9DjlYfwzmu-qtr99yn7iPVPUA4VbXqx2XKb-B8Omi7xJuTspr49JdsQg4AkiMfR81DIKVMlqQAlyrgLNO3FrWP"/>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-center mb-1">
+<h4 class="font-bold text-on-surface">Pollo</h4>
+<span class="text-sm font-black text-primary">42</span>
+</div>
+<div class="w-full h-1.5 bg-surface rounded-full overflow-hidden">
+<div class="h-full ember-gradient w-[92%] rounded-full"></div>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-surface overflow-hidden">
+<img alt="Papas Fritas" class="w-full h-full object-cover" data-alt="close up of golden crispy french fries in a metal serving basket, lightly salted with fresh parsley, warm lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAA90PP8lc5AYLiSja72B23qAuKFj-kzv90PzdlGMNYwEroJyX-rqby4MKUDXHBwjDMVtgsVa920ppZYYemVPTAqr0ODsilDr3qxZEXWYkohuzvH05gJntQsJUIqVQS-7ZFNXn0MKhEeT4hVF4vpWn3sswa6m_IvhOa1KpyNuubZItGVn4mFuP0JWlHtwhm2XeVW2rbfl0KbPkx5nHppWpoE4Tfv3Agxynm5Bh5-1ot7t58meJDoOu1tTlS54MOFlWXSpBR6BC7bGup"/>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-center mb-1">
+<h4 class="font-bold text-on-surface">Papas</h4>
+<span class="text-sm font-black text-primary">38</span>
+</div>
+<div class="w-full h-1.5 bg-surface rounded-full overflow-hidden">
+<div class="h-full ember-gradient w-[80%] rounded-full"></div>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-surface overflow-hidden">
+<img alt="Chicha Morada" class="w-full h-full object-cover" data-alt="Traditional Peruvian purple corn drink in a tall glass with ice cubes and a slice of lime, dark rich purple color, appetizing studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBsPtrjuhVURJfWLFxeb7iz0t6fMSkQeECtaE71UwTK0pX9ofkeVmwUp96qzN5LdmNI6vpkg_4-T4wiIt_l2No9fR4YDFXUx_HDBxHWQD9f9DSIGBKeoNQEjz_rZZhwQhYEZBK8LnvIqhAADh-F2_r8jSP2OrY9KKbMIX760Ek8QPM6dHAlMjA3ExI8amjPzErlYHb4oSVceb3vFC7UfU1Zx272JyaFNC102-aFvTfbNDln9prMYdAag7ub0Nu7YNulaZ-RBOApaX5n"/>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-center mb-1">
+<h4 class="font-bold text-on-surface">Chicha</h4>
+<span class="text-sm font-black text-primary">35</span>
+</div>
+<div class="w-full h-1.5 bg-surface rounded-full overflow-hidden">
+<div class="h-full ember-gradient w-[72%] rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+<button class="w-full mt-8 py-3 rounded-xl border border-outline-variant/20 text-xs font-bold text-on-surface-variant hover:bg-surface transition-colors flex items-center justify-center gap-2">
+                        Ver todo el inventario
+                        <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+<section class="bg-surface-container-lowest p-8 rounded-2xl ambient-shadow">
+<div class="flex justify-between items-center mb-8">
+<h3 class="text-xl font-extrabold text-on-surface">Ventas por mesero</h3>
+<div class="flex items-center gap-2 text-xs font-bold text-on-surface-variant bg-surface px-3 py-1.5 rounded-lg">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+                        RANKING DE EFICIENCIA
+                    </div>
+</div>
+<div class="grid grid-cols-3 gap-8">
+<div class="flex items-center gap-4 p-4 rounded-2xl bg-orange-50/50 border-l-4 border-primary">
+<div class="relative">
+<img alt="Maria" class="w-14 h-14 rounded-full object-cover shadow-md" data-alt="portrait of a confident smiling waitress in a restaurant uniform, holding a tablet, warm hospitality lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBf2F4njehI4PEkTMzX3r79INf5Pwf3yirCkcZ4-lXL3cryWlnt7RLFVvCIlQhsKjyYCWNae8v0jqXEakuuTyh1wKB3JUyHW1V7HxRtNTNP-9JryK93V0ztQ4LEhbky5PjuK2K0rIzyAFsIOTQjrIKVYVq0dIpRPAbzAbm__yuViA5Hih3ESlWiba-E6oWk4k4g4pQnaceL2VGI1Rr5qEPRL13ok0uFHVlUeKuqJZwhQExSH52Shg5hCV_Z2NbgVDPHgNdpKO9hbmJB"/>
+<span class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-primary-container text-[10px] font-black text-white flex items-center justify-center border-2 border-white">1</span>
+</div>
+<div>
+<h4 class="font-bold text-on-surface">Maria González</h4>
+<p class="text-xs font-semibold text-on-surface-variant">S/ 840.00 • 12 Pedidos</p>
+<p class="text-[10px] text-green-600 font-bold mt-1">98% Satisfacción</p>
+</div>
+</div>
+<div class="flex items-center gap-4 p-4 rounded-2xl hover:bg-surface transition-colors">
+<div class="relative">
+<img alt="Jorge" class="w-14 h-14 rounded-full object-cover" data-alt="portrait of a young efficient male waiter smiling, clean uniform, restaurant setting background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMAu_GyuXszh9zWqhK0kJCBbUgywWkWLBvf19ZxgyYFU8r8GjrFmMZKaMoOiWL4jJVrGbw-E7vShqbgmx-jcAu6SxmCv8eswNPYxAb4u1O7xAdWaKAwcDrVe8CPP5xntsQJN_sMiB8YI2QkqbvaePhWB9V1SB6QfTYqJcdRSGQEjkXnplOXe707Xy0Hv-FBOfs8GVjpsL9jfghuGZSJxCGOTZHcoeQnsjGH2HD_fynTHKE5ob5yscl6B6h5_TmQ85Kh9AFP6Cgmpsb"/>
+<span class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-slate-400 text-[10px] font-black text-white flex items-center justify-center border-2 border-white">2</span>
+</div>
+<div>
+<h4 class="font-bold text-on-surface">Jorge Luna</h4>
+<p class="text-xs font-semibold text-on-surface-variant">S/ 720.50 • 10 Pedidos</p>
+<p class="text-[10px] text-green-600 font-bold mt-1">94% Satisfacción</p>
+</div>
+</div>
+<div class="flex items-center gap-4 p-4 rounded-2xl hover:bg-surface transition-colors">
+<div class="relative">
+<img alt="Lucia" class="w-14 h-14 rounded-full object-cover" data-alt="portrait of a friendly latin woman in waitstaff uniform, professional and attentive look, blurred dining room background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCdoa9PUMiM1CgYkwjbSVCZ_gQshoXK3QfJ6hqOrqrP-kS50e5pkyzQWCGAhJK14oT02eMtuYDxezMW5Lqpr3HFvJ3J3pBcDdNRg9j0Bbz-Uuc6yu9A3OjaAFDeeIqp1Z9BEut4q_zuuoFARkfJYTQw5uKx8NLjcanW3q9QovxvI3zUDAorlYTiQ3w5GJyLGEU2d2cws5QxNFn4tZzTFjrd4ujYdNF39iKyVvslCUCvwWwzvIBvpSaIIgrzPpVMBgN7uPMzfdpyIR0Z"/>
+<span class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-orange-300 text-[10px] font-black text-white flex items-center justify-center border-2 border-white">3</span>
+</div>
+<div>
+<h4 class="font-bold text-on-surface">Lucía Ferreyra</h4>
+<p class="text-xs font-semibold text-on-surface-variant">S/ 615.00 • 8 Pedidos</p>
+<p class="text-[10px] text-green-600 font-bold mt-1">96% Satisfacción</p>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+<div class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-4 pt-2 md:hidden bg-white dark:bg-slate-900 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] border-t border-slate-100 dark:border-slate-800">
+<button class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500">
+<span class="material-symbols-outlined">restaurant</span>
+<span class="text-[10px] font-bold">Menú</span>
+</button>
+<button class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500">
+<span class="material-symbols-outlined">list_alt</span>
+<span class="text-[10px] font-bold">Pedidos</span>
+</button>
+<button class="flex flex-col items-center justify-center bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300 rounded-2xl px-6 py-2 scale-90 duration-150">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">bar_chart</span>
+<span class="text-[10px] font-bold">Reportes</span>
+</button>
+<button class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px] font-bold">Perfil</span>
+</button>
+</div>
+</body></html>

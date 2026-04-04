@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Cierre de Cuenta - El Brasero</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-container": "#e3efff",
+                        "inverse-on-surface": "#e8f2ff",
+                        "primary-container": "#e67e22",
+                        "surface-tint": "#944a00",
+                        "surface-container-low": "#edf4ff",
+                        "tertiary-container": "#00a3e4",
+                        "surface-bright": "#f7f9ff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-container": "#694000",
+                        "on-secondary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed": "#c7e7ff",
+                        "error-container": "#ffdad6",
+                        "on-error": "#ffffff",
+                        "surface-container-high": "#d9eaff",
+                        "secondary-fixed": "#ffddb9",
+                        "primary": "#944a00",
+                        "surface": "#f7f9ff",
+                        "surface-container-highest": "#d1e4fb",
+                        "on-tertiary-fixed": "#001e2e",
+                        "on-primary-fixed-variant": "#713700",
+                        "inverse-primary": "#ffb783",
+                        "outline-variant": "#dcc1b1",
+                        "secondary-container": "#fea520",
+                        "surface-dim": "#c9dcf3",
+                        "on-primary-fixed": "#301400",
+                        "error": "#ba1a1a",
+                        "outline": "#897365",
+                        "tertiary-fixed-dim": "#86cfff",
+                        "on-surface": "#091d2e",
+                        "secondary": "#865300",
+                        "primary-fixed": "#ffdcc5",
+                        "primary-fixed-dim": "#ffb783",
+                        "secondary-fixed-dim": "#ffb961",
+                        "tertiary": "#00658f",
+                        "on-tertiary-fixed-variant": "#004c6d",
+                        "on-surface-variant": "#564337",
+                        "on-background": "#091d2e",
+                        "surface-variant": "#d1e4fb",
+                        "on-tertiary": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed-variant": "#663e00",
+                        "on-secondary-fixed": "#2b1700",
+                        "background": "#f7f9ff",
+                        "on-tertiary-container": "#00354d",
+                        "inverse-surface": "#203243",
+                        "on-primary-container": "#502600"
+                    },
+                    fontFamily: {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Be Vietnam Pro"],
+                        "label": ["Be Vietnam Pro"]
+                    },
+                    borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .ember-gradient {
+            background: linear-gradient(135deg, #944a00 0%, #E67E22 100%);
+        }
+        .ambient-shadow {
+            box-shadow: 0px 8px 24px rgba(9, 29, 46, 0.06);
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface">
+<!-- Sidebar Navigation Shell -->
+<nav class="fixed left-0 top-0 h-full flex flex-col py-6 bg-slate-50 dark:bg-slate-900 h-full w-24 border-r-0 z-40">
+<div class="flex flex-col items-center mb-8">
+<span class="text-xl font-black text-orange-700 dark:text-orange-500 mb-1">EB</span>
+<span class="text-[10px] font-bold text-slate-400">Admin</span>
+</div>
+<div class="flex flex-col gap-6 items-center flex-1">
+<button class="flex flex-col items-center gap-1 text-slate-500 dark:text-slate-400 hover:bg-orange-50 dark:hover:bg-orange-950/30 transition-colors p-3 rounded-xl group">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-[10px] font-bold">Dashboard</span>
+</button>
+<!-- Mesas is Active for this context -->
+<button class="flex flex-col items-center gap-1 text-orange-600 dark:text-orange-400 font-bold border-r-4 border-orange-600 bg-orange-50 dark:bg-orange-950/20 p-3 rounded-xl scale-95 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">restaurant_menu</span>
+<span class="text-[10px] font-bold">Mesas</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-500 dark:text-slate-400 hover:bg-orange-50 dark:hover:bg-orange-950/30 transition-colors p-3 rounded-xl group">
+<span class="material-symbols-outlined">receipt_long</span>
+<span class="text-[10px] font-bold">Pedidos</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-500 dark:text-slate-400 hover:bg-orange-50 dark:hover:bg-orange-950/30 transition-colors p-3 rounded-xl group">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px] font-bold">Perfil</span>
+</button>
+</div>
+<button class="flex flex-col items-center gap-1 text-slate-500 dark:text-slate-400 hover:bg-orange-50 dark:hover:bg-orange-950/30 transition-colors p-3 rounded-xl group mt-auto">
+<span class="material-symbols-outlined">logout</span>
+<span class="text-[10px] font-bold">Logout</span>
+</button>
+</nav>
+<!-- Top Navigation Bar -->
+<header class="flex justify-between items-center w-full px-8 py-4 h-16 ml-24 fixed top-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl z-30 shadow-sm dark:shadow-none">
+<div class="flex items-center gap-4">
+<h1 class="text-2xl font-extrabold text-orange-600 dark:text-orange-500 font-headline">El Brasero</h1>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden md:flex items-center bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-full border-none">
+<span class="material-symbols-outlined text-slate-400 text-lg mr-2">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-48" placeholder="Buscar pedido..." type="text"/>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-on-surface font-medium text-sm">Hola, Carlos 👋</span>
+<div class="relative">
+<span class="material-symbols-outlined text-slate-500">notifications</span>
+<span class="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full"></span>
+</div>
+<img alt="Carlos" class="w-10 h-10 rounded-full object-cover" data-alt="Close-up portrait of a professional male server in a clean white apron with a friendly warm smile in a modern restaurant setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8_U7TP10ytxCiKNnpdEjmx8orcdcjbGlpyW5UnNhose7yceU4YHEtUSBCBj_p09zTUXvy2PIy3cjA1U6n-ZAVmAcfXlXMZmtzZnysPggLlfRlAdXYyXquwm0MLqzZD7R7cbOve3fXni2KNThUTEfPINOTuUwYoeFGsbFqq47Sj5OdIOhPleus74ivj8UfHXG9h-jc_pWgkw41p5IuRqe30NU-BxIpXNkgBJQWwbvpa_Tak-IwjSEOFkbldope4_hr6IHNuhyulup5"/>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-24 pt-20 pb-8 px-8 min-h-screen">
+<div class="max-w-6xl mx-auto grid grid-cols-12 gap-8">
+<!-- Header Section -->
+<div class="col-span-12 mb-2">
+<nav class="flex items-center gap-2 text-slate-400 text-xs mb-4">
+<span class="material-symbols-outlined text-sm">arrow_back</span>
+<span>VOLVER A MESAS</span>
+</nav>
+<h2 class="text-4xl font-extrabold font-headline text-on-surface flex items-center gap-4">
+                    Cerrar Cuenta - Mesa #12
+                    <span class="bg-secondary-container text-on-secondary-container text-xs px-3 py-1 rounded-full font-bold">OCUPADA</span>
+</h2>
+</div>
+<!-- Summary List (Editorial Card Style) -->
+<div class="col-span-12 lg:col-span-7 space-y-6">
+<div class="bg-surface-container-lowest p-8 rounded-lg ambient-shadow">
+<div class="flex justify-between items-end mb-8">
+<h3 class="text-xl font-bold font-headline">Resumen de Consumo</h3>
+<span class="text-label-md text-slate-400">Atendido por: Carlos M.</span>
+</div>
+<div class="space-y-4">
+<!-- Order Item -->
+<div class="flex items-center justify-between py-4 border-b border-outline-variant/15">
+<div class="flex gap-4 items-center">
+<div class="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
+<img alt="Pollo a la Brasa" class="w-full h-full object-cover" data-alt="Succulent roasted chicken with crispy golden skin served with a side of french fries and herbs" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD51zIrJGDruAwklP8dwU3PjYw51nW8NcLaHbcesgTCwDZ8bUqyR5Yr3VTbtefIx0MvPiFkaKmvIqxQOrvJ-1XzVaH7FAKBUMmjcC0sEYN8DeF_8gl6aKjFwvCMqSd6IAmckR5_Wru-_JMFc0OTQ3e-bWj9xo19y_afuO9-9DNdgKdvkcgWMYA4xREpD1L5OQIjM41dKOJjcZlNbPKEsh_eA1JHiN9pCFtK8PsJEvs-t6QthCmGgx5ZzZhmhW8yGCMZnfEJ3v-K_Yq2"/>
+</div>
+<div>
+<p class="font-bold text-on-surface">1x Pollo a la Brasa - Clásico</p>
+<p class="text-xs text-slate-400">Papas grandes, Ensalada fresca</p>
+</div>
+</div>
+<span class="font-bold text-on-surface">S/ 65.00</span>
+</div>
+<!-- Order Item -->
+<div class="flex items-center justify-between py-4 border-b border-outline-variant/15">
+<div class="flex gap-4 items-center">
+<div class="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
+<img alt="Inca Kola" class="w-full h-full object-cover" data-alt="Chilled bottle of yellow Inca Kola soda with condensation on a modern restaurant table" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD0QT03pljezl4zXLwDjYHselyANhSuxU1aCS8fY20TT7Rk2alB8U8-iuvBlp0hQnYv5gA81NCyJ0roA5dPMlsDuM7LIM9i1AOnKURZFthhXkF1HdaIMT18hLNXPglaspvqX6BxGkg9e4ULpflfEyA-zp3xfWnsfBs2Sn_V8cwfPOJdOeHq9_lYRvKwUOwDfmvAXinjditSrYvi2CiUie2Z3GqI_q9qArbGWRfmcH1f_3b5kJL-yulFhYtpiDCvydYYqgX6UggEJFDm"/>
+</div>
+<div>
+<p class="font-bold text-on-surface">1x Inca Kola 1.5L</p>
+<p class="text-xs text-slate-400">Helada</p>
+</div>
+</div>
+<span class="font-bold text-on-surface">S/ 12.50</span>
+</div>
+<!-- Order Item -->
+<div class="flex items-center justify-between py-4 border-b border-outline-variant/15">
+<div class="flex gap-4 items-center">
+<div class="w-12 h-12 bg-surface-container-low rounded-lg flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined">icecream</span>
+</div>
+<div>
+<p class="font-bold text-on-surface">2x Helado de Vainilla</p>
+<p class="text-xs text-slate-400">Copa artesanal</p>
+</div>
+</div>
+<span class="font-bold text-on-surface">S/ 15.13</span>
+</div>
+</div>
+<div class="mt-8 pt-6 border-t-2 border-primary-container/20">
+<div class="flex justify-between items-center text-slate-500 mb-2">
+<span>Subtotal</span>
+<span>S/ 78.50</span>
+</div>
+<div class="flex justify-between items-center text-slate-500 mb-6">
+<span>IGV (18%)</span>
+<span>S/ 14.13</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-2xl font-bold font-headline">Total a Pagar</span>
+<span class="text-4xl font-black font-headline text-primary">S/ 92.63</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Payment & Invoicing Selection -->
+<div class="col-span-12 lg:col-span-5 space-y-6">
+<!-- Payment Method -->
+<div class="bg-surface-container-lowest p-8 rounded-lg ambient-shadow">
+<h3 class="text-lg font-bold font-headline mb-6">Método de Pago</h3>
+<div class="grid grid-cols-2 gap-4">
+<button class="flex flex-col items-center justify-center py-6 px-4 rounded-2xl bg-orange-50 border-2 border-primary text-primary transition-transform active:scale-95">
+<span class="material-symbols-outlined mb-2 text-3xl">payments</span>
+<span class="font-bold text-sm">Efectivo</span>
+</button>
+<button class="flex flex-col items-center justify-center py-6 px-4 rounded-2xl bg-surface-container-low border-2 border-transparent text-slate-500 hover:bg-slate-50 transition-colors">
+<span class="material-symbols-outlined mb-2 text-3xl">credit_card</span>
+<span class="font-bold text-sm">Tarjeta</span>
+</button>
+<button class="flex flex-col items-center justify-center py-6 px-4 rounded-2xl bg-surface-container-low border-2 border-transparent text-slate-500 hover:bg-slate-50 transition-colors">
+<div class="w-8 h-8 rounded-full bg-[#7a2ff7] mb-2 flex items-center justify-center text-white text-[10px] font-black italic">Y</div>
+<span class="font-bold text-sm">Yape</span>
+</button>
+<button class="flex flex-col items-center justify-center py-6 px-4 rounded-2xl bg-surface-container-low border-2 border-transparent text-slate-500 hover:bg-slate-50 transition-colors">
+<div class="w-8 h-8 rounded-full bg-[#00d0e3] mb-2 flex items-center justify-center text-white text-[10px] font-black italic">P</div>
+<span class="font-bold text-sm">Plin</span>
+</button>
+</div>
+</div>
+<!-- Invoice Type & Details -->
+<div class="bg-surface-container-lowest p-8 rounded-lg ambient-shadow">
+<h3 class="text-lg font-bold font-headline mb-6">Tipo de Comprobante</h3>
+<div class="flex gap-4 p-1 bg-surface-container-low rounded-full mb-8">
+<button class="flex-1 py-3 rounded-full text-sm font-bold text-slate-500">BOLETA</button>
+<button class="flex-1 py-3 rounded-full text-sm font-bold bg-white shadow-sm text-primary">FACTURA</button>
+</div>
+<!-- Factura Fields (Active State) -->
+<div class="space-y-6">
+<div>
+<label class="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">Número de RUC</label>
+<div class="flex gap-2">
+<input class="flex-1 bg-surface border-none rounded-xl px-4 py-3 focus:ring-2 focus:ring-primary/20 text-on-surface font-medium" placeholder="11 dígitos" type="text" value="20601234567"/>
+<button class="bg-tertiary-container text-white px-4 rounded-xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap">Validar RUC</button>
+</div>
+</div>
+<div>
+<label class="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">Razón Social</label>
+<input class="w-full bg-surface-container-low/50 border-none rounded-xl px-4 py-3 text-slate-400 font-medium cursor-not-allowed" readonly="" type="text" value="INVERSIONES BRASERO S.A.C."/>
+</div>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex gap-4 mt-8">
+<button class="flex-1 h-14 rounded-full ember-gradient text-white font-bold text-sm tracking-wide shadow-lg shadow-primary/25 active:scale-95 transition-transform uppercase">
+                        Emitir Comprobante
+                    </button>
+<button class="w-14 h-14 rounded-full bg-surface-container-low flex items-center justify-center text-primary-container hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined">print</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+<!-- Success Modal State (Hidden by default, shown for prompt requirements) -->
+<!-- Remove 'hidden' class to visualize -->
+<div class="fixed inset-0 bg-on-surface/60 backdrop-blur-md z-50 flex items-center justify-center p-6 hidden">
+<div class="bg-white w-full max-w-md rounded-lg p-10 text-center ambient-shadow transform transition-all">
+<div class="w-20 h-20 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
+<span class="material-symbols-outlined text-4xl" style="font-variation-settings: 'wght' 700;">check_circle</span>
+</div>
+<h3 class="text-2xl font-black font-headline text-on-surface mb-2">¡Listo para entregar!</h3>
+<p class="text-slate-500 mb-10">Comprobante emitido correctamente y enviado al correo del cliente.</p>
+<button class="w-full h-14 rounded-full ember-gradient text-white font-bold tracking-widest uppercase mb-4 active:scale-95 transition-transform">
+                Cerrar Mesa
+            </button>
+<button class="w-full py-3 text-slate-400 font-bold text-xs uppercase tracking-widest hover:text-primary transition-colors">
+                Imprimir Duplicado
+            </button>
+</div>
+</div>
+<!-- Mobile Navigation Shell (Bottom) -->
+<footer class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-4 pt-2 md:hidden bg-white dark:bg-slate-900 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] border-t border-slate-100 dark:border-slate-800">
+<div class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500">
+<span class="material-symbols-outlined">restaurant</span>
+<span class="text-[10px] font-bold">Menú</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300 rounded-2xl px-6 py-2">
+<span class="material-symbols-outlined">list_alt</span>
+<span class="text-[10px] font-bold">Pedidos</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500">
+<span class="material-symbols-outlined">shopping_cart</span>
+<span class="text-[10px] font-bold">Carrito</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px] font-bold">Perfil</span>
+</div>
+</footer>
+</body></html>

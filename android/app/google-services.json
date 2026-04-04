@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "151579555777",
+    "project_id": "app-polleria-7e98a",
+    "storage_bucket": "app-polleria-7e98a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:151579555777:android:eb953a44d50bbf7072e140",
+        "android_client_info": {
+          "package_name": "com.polleria.elbrasero.el_brasero"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBm8BK4miU1D2D2eWd-w3tYW0MO6Ri1qYY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

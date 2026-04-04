@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Pollería El Brasero - Menú Digital</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-container": "#e3efff",
+                        "inverse-on-surface": "#e8f2ff",
+                        "primary-container": "#e67e22",
+                        "surface-tint": "#944a00",
+                        "surface-container-low": "#edf4ff",
+                        "tertiary-container": "#00a3e4",
+                        "surface-bright": "#f7f9ff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-container": "#694000",
+                        "on-secondary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed": "#c7e7ff",
+                        "error-container": "#ffdad6",
+                        "on-error": "#ffffff",
+                        "surface-container-high": "#d9eaff",
+                        "secondary-fixed": "#ffddb9",
+                        "primary": "#944a00",
+                        "surface": "#f7f9ff",
+                        "surface-container-highest": "#d1e4fb",
+                        "on-tertiary-fixed": "#001e2e",
+                        "on-primary-fixed-variant": "#713700",
+                        "inverse-primary": "#ffb783",
+                        "outline-variant": "#dcc1b1",
+                        "secondary-container": "#fea520",
+                        "surface-dim": "#c9dcf3",
+                        "on-primary-fixed": "#301400",
+                        "error": "#ba1a1a",
+                        "outline": "#897365",
+                        "tertiary-fixed-dim": "#86cfff",
+                        "on-surface": "#091d2e",
+                        "secondary": "#865300",
+                        "primary-fixed": "#ffdcc5",
+                        "primary-fixed-dim": "#ffb783",
+                        "secondary-fixed-dim": "#ffb961",
+                        "tertiary": "#00658f",
+                        "on-tertiary-fixed-variant": "#004c6d",
+                        "on-surface-variant": "#564337",
+                        "on-background": "#091d2e",
+                        "surface-variant": "#d1e4fb",
+                        "on-tertiary": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed-variant": "#663e00",
+                        "on-secondary-fixed": "#2b1700",
+                        "background": "#f7f9ff",
+                        "on-tertiary-container": "#00354d",
+                        "inverse-surface": "#203243",
+                        "on-primary-container": "#502600"
+                    },
+                    fontFamily: {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Be Vietnam Pro"],
+                        "label": ["Be Vietnam Pro"]
+                    },
+                    borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .ember-gradient {
+            background: linear-gradient(135deg, #944a00 0%, #e67e22 100%);
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body text-on-surface antialiased pb-32">
+<header class="flex justify-between items-center w-full px-8 py-4 h-16 fixed top-0 z-50 glass-panel">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 ember-gradient rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">restaurant</span>
+</div>
+<h1 class="text-2xl font-extrabold text-orange-600 font-headline tracking-tight">El Brasero</h1>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant font-medium">
+<span class="material-symbols-outlined text-primary">table_restaurant</span>
+<span class="text-sm">Mesa 12</span>
+</div>
+</header>
+<main class="mt-20 px-4 space-y-8">
+<section class="relative overflow-hidden rounded-lg">
+<div class="flex overflow-x-auto snap-x snap-mandatory no-scrollbar gap-4 pb-4">
+<div class="min-w-[85%] snap-center relative aspect-[16/9] rounded-lg overflow-hidden shadow-lg">
+<img alt="Promoción Especial" class="absolute inset-0 w-full h-full object-cover" data-alt="succulent grilled chicken on a spit with rising smoke and golden glowing embers in the background, professional food photography" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAn2aXT5Fg7JOvjLN2ZYSWisaeVYZS9I6pzz7WBk21JdT9Ln-e7JwH21gfs5D45M6st9iCaSJ-bSjsFpCgqCevKQaV4SxJ6R60hVH91XTcGgc_MTJMyBqPnquxHOGUfw1DVUmz53Sxtw8dC1LypoCxLlD__5lFy5Kmi3b-uzrLqky7l7WNsAl1RrHBZxpYjg2qxTOjnamqVREDNmYvF9nNymeTXcNmkIc46q7aIaAtBvil3OoLybgV-aH7Ly5nriZs2Izb1QL7APyGD"/>
+<div class="absolute inset-0 bg-gradient-to-t from-on-surface/80 to-transparent flex flex-col justify-end p-6">
+<span class="bg-secondary-container text-on-secondary-container text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full w-fit mb-2">PROMO DEL DÍA</span>
+<h2 class="text-white font-headline text-xl font-bold">Combo Familiar Brasero</h2>
+<p class="text-white/80 text-xs">Pollo entero + Papas XL + Ensalada + Gaseosa 1.5L</p>
+</div>
+</div>
+<div class="min-w-[85%] snap-center relative aspect-[16/9] rounded-lg overflow-hidden shadow-lg">
+<img alt="Parrilla Mix" class="absolute inset-0 w-full h-full object-cover" data-alt="premium mixed grill platter with steak and sausages on a rustic dark wooden table with ambient warm light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCP0-C6uyqZb8X2PEL9wKzOwCSJh9aPrkgR_4OI876jatsKiyXAc4OBZSOAw7DDNqslY-g-cJktWinc8jgDH8REkgDRMFOQUAfj2QlGJFgk75fqcLCsDeakD_lC5FgB65yIbbhfcOrjw0vAW_fbtp3ISgpQL2iiwpMb9m0G2jEpEm7Y-HOG8g8Sm9SWs9gepGF8RV4XUAF61GUpoBmrmgZor6YWmu854hvKt6nKvToUoiFGz7JbULgV2L-R95xkhotqAkN4mKm1sTpt"/>
+<div class="absolute inset-0 bg-gradient-to-t from-on-surface/80 to-transparent flex flex-col justify-end p-6">
+<span class="bg-secondary-container text-on-secondary-container text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full w-fit mb-2">SÁBADOS</span>
+<h2 class="text-white font-headline text-xl font-bold">Parrilla Mix Personal</h2>
+<p class="text-white/80 text-xs">Anticuchos, Chuleta y Chorizo a la brasa</p>
+</div>
+</div>
+</div>
+</section>
+<section class="space-y-4">
+<div class="bg-surface-container-lowest rounded-lg overflow-hidden shadow-sm">
+<button class="w-full px-6 py-5 flex justify-between items-center group">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">outdoor_grill</span>
+</div>
+<h3 class="font-headline font-bold text-lg text-on-surface">Parrillas</h3>
+</div>
+<span class="material-symbols-outlined text-outline transition-transform duration-300 group-focus:rotate-180">expand_more</span>
+</button>
+<div class="px-4 pb-6 grid grid-cols-2 gap-4">
+<div class="bg-white rounded-lg overflow-hidden border border-transparent hover:border-outline-variant/30 transition-all shadow-sm">
+<img class="w-full h-32 object-cover" data-alt="close up of a succulent roasted chicken leg with crispy golden skin on a white plate" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQP0R_yczGvNdnKJ-i5lSmGJM-VZXKpp-o8mxWNPETSXSGxWR6WyOwnTANipLpmKLpanxOQXYwwAYI-5pQd67WxvFZFMC_kSLnZJL8fyA1Oc-FZ-2ZyaZS5IvwjUKP-VMAnacUTyMiOMdYKwaalB95m4nswSzj_B5jZJDgZtCMrmXB3VY1ZEDCjh2z6-cwDj6GwY2Nm2WOPQWvPPBATZWLi9DdDOGfqQojgAmv6CyMcwHVzrZYW68uM1RKovPvg4DMUCp8CoeQrv8G"/>
+<div class="p-3 space-y-1">
+<h4 class="font-bold text-sm leading-tight">1/4 de Pollo a la Brasa</h4>
+<p class="text-[11px] text-on-surface-variant line-clamp-2">Con papas fritas y ensalada clásica.</p>
+<div class="flex justify-between items-center pt-2">
+<span class="text-primary font-bold text-sm">S/ 24.90</span>
+<button class="w-8 h-8 rounded-full bg-orange-50 text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-sm">add</span>
+</button>
+</div>
+</div>
+</div>
+<div class="bg-white rounded-lg overflow-hidden border border-transparent hover:border-outline-variant/30 transition-all shadow-sm">
+<img class="w-full h-32 object-cover" data-alt="grilled skewers of beef heart anticuchos with corn and potatoes in a traditional Peruvian setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-siCpf8jhmIWOBxh8-X7HpodaCoWtVxNrI_4KA_PNgWlqZCgas3tMOn4NzmYkqir8dUcn8EFydEzosUo1L1r4H4uGRa6dXv0cbjhpLzcVMtvmfQFxqN0NIl_tfsyVeuBFyIVAa3emOTMqg0frFv8KiMJ93Bswj74KiQzXrFjeDmLja2KWl1NHg6my82ziQPUwUKw6GUFJN9Xz4qCgplMi5pEjnAXywFdTP0QkB1oGP6A4EmMXSDaONi77ZLZtL8IAjNsBHHoaXydO"/>
+<div class="p-3 space-y-1">
+<h4 class="font-bold text-sm leading-tight">Dúo de Anticuchos</h4>
+<p class="text-[11px] text-on-surface-variant line-clamp-2">Corazón de res con papa y choclo.</p>
+<div class="flex justify-between items-center pt-2">
+<span class="text-primary font-bold text-sm">S/ 32.00</span>
+<button class="w-8 h-8 rounded-full bg-orange-50 text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-sm">add</span>
+</button>
+</div>
+</div>
+</div>
+<div class="bg-white rounded-lg overflow-hidden border border-transparent hover:border-outline-variant/30 transition-all shadow-sm">
+<img class="w-full h-32 object-cover" data-alt="grilled pork chop with grill marks and fresh herbs on a wooden platter" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5i4jNnst1XHhQi31pruJcroXjn7LQYviZpKGZW4hbtMIDonzJsMU_4TKVVwu_gxRRpzxI1TEyb15YFLll9Y3yKgGTWe0_5CJxhMruhnhne269Tgr4sdMGD7CjBh4m-KOSQvBpx8qgUwp1msUGEd3SpYGznnTiUkRcKtRJ34ZWLf-0AQFnevDrzkZELeG5HekERrvnx_CVeNo9kltmk2zCn1sMOCI0U7iO2Khxf41_9LwR7r7Dh5-QZ-z1CsPD_-RlJw6j2RHxnxn6"/>
+<div class="p-3 space-y-1">
+<h4 class="font-bold text-sm leading-tight">Chuleta de Cerdo</h4>
+<p class="text-[11px] text-on-surface-variant line-clamp-2">A la parrilla con guarnición al gusto.</p>
+<div class="flex justify-between items-center pt-2">
+<span class="text-primary font-bold text-sm">S/ 28.50</span>
+<button class="w-8 h-8 rounded-full bg-orange-50 text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-sm">add</span>
+</button>
+</div>
+</div>
+</div>
+<div class="bg-white rounded-lg overflow-hidden border border-transparent hover:border-outline-variant/30 transition-all shadow-sm">
+<img class="w-full h-32 object-cover" data-alt="juicy grilled chorizo sausages on a wooden board with small salsa bowls" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDEo_ilrZDFUd3duQRAddMx19tpa2_iBuSpbon3PFgRSaeQtqOFhFDVRDzUtrqhqzfPXZrv3FPhwKf3xXkcFMwM3UXqkV4b-sL0haFMVefkLK4RhPNE1BDA-rVS6qLbNXgPWm3eHWho7ambpd0hoMh7AWpY61zRY0TkcmhrsNxY20oN5vsZZiTeM4sc9tPQXZ7t0VgtHAxcxAgYjtaQwoVKAdnBPuko-LTBMSrxId_VXsw5KIbvMLlMpz9SoE1oZeIlhlcF9ucEQsYk"/>
+<div class="p-3 space-y-1">
+<h4 class="font-bold text-sm leading-tight">Porción Chorizos</h4>
+<p class="text-[11px] text-on-surface-variant line-clamp-2">2 chorizos finas hierbas a la leña.</p>
+<div class="flex justify-between items-center pt-2">
+<span class="text-primary font-bold text-sm">S/ 18.00</span>
+<button class="w-8 h-8 rounded-full bg-orange-50 text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-sm">add</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-lg overflow-hidden shadow-sm">
+<button class="w-full px-6 py-5 flex justify-between items-center">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined">local_bar</span>
+</div>
+<h3 class="font-headline font-bold text-lg text-on-surface">Bebidas</h3>
+</div>
+<span class="material-symbols-outlined text-outline">expand_more</span>
+</button>
+</div>
+<div class="bg-surface-container-lowest rounded-lg overflow-hidden shadow-sm">
+<button class="w-full px-6 py-5 flex justify-between items-center">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined">tapas</span>
+</div>
+<h3 class="font-headline font-bold text-lg text-on-surface">Piqueos</h3>
+</div>
+<span class="material-symbols-outlined text-outline">expand_more</span>
+</button>
+</div>
+</section>
+</main>
+<button class="fixed bottom-28 right-6 w-14 h-14 ember-gradient rounded-full shadow-lg flex flex-col items-center justify-center text-white z-40">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">person_add</span>
+<span class="text-[8px] font-bold uppercase tracking-tight -mt-1">LLAMAR</span>
+</button>
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-4 pt-2 md:hidden bg-white shadow-[0_-4px_12px_rgba(0,0,0,0.05)] rounded-t-3xl border-t border-slate-100">
+<div class="flex flex-col items-center justify-center text-slate-400">
+<span class="material-symbols-outlined" data-icon="restaurant">restaurant</span>
+<span class="text-[10px] font-bold font-body">Menú</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-400">
+<span class="material-symbols-outlined" data-icon="list_alt">list_alt</span>
+<span class="text-[10px] font-bold font-body">Mis Pedidos</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-400">
+<div class="relative">
+<span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+<span class="absolute -top-2 -right-2 bg-primary text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">2</span>
+</div>
+<span class="text-[10px] font-bold font-body">Carrito</span>
+</div>
+<div class="flex flex-col items-center justify-center text-orange-600 bg-orange-100/50 rounded-2xl px-4 py-2">
+<button class="flex flex-col items-center">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+<span class="text-[10px] font-bold font-body uppercase">Solicitar Cuenta</span>
+</button>
+</div>
+</nav>
+</body></html>

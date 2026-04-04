@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>El Brasero - Resumen de Pedido</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "surface-container": "#e3efff",
+                "inverse-on-surface": "#e8f2ff",
+                "primary-container": "#e67e22",
+                "surface-tint": "#944a00",
+                "surface-container-low": "#edf4ff",
+                "tertiary-container": "#00a3e4",
+                "surface-bright": "#f7f9ff",
+                "surface-container-lowest": "#ffffff",
+                "on-secondary-container": "#694000",
+                "on-secondary": "#ffffff",
+                "on-error-container": "#93000a",
+                "tertiary-fixed": "#c7e7ff",
+                "error-container": "#ffdad6",
+                "on-error": "#ffffff",
+                "surface-container-high": "#d9eaff",
+                "secondary-fixed": "#ffddb9",
+                "primary": "#944a00",
+                "surface": "#f7f9ff",
+                "surface-container-highest": "#d1e4fb",
+                "on-tertiary-fixed": "#001e2e",
+                "on-primary-fixed-variant": "#713700",
+                "inverse-primary": "#ffb783",
+                "outline-variant": "#dcc1b1",
+                "secondary-container": "#fea520",
+                "surface-dim": "#c9dcf3",
+                "on-primary-fixed": "#301400",
+                "error": "#ba1a1a",
+                "outline": "#897365",
+                "tertiary-fixed-dim": "#86cfff",
+                "on-surface": "#091d2e",
+                "secondary": "#865300",
+                "primary-fixed": "#ffdcc5",
+                "primary-fixed-dim": "#ffb783",
+                "secondary-fixed-dim": "#ffb961",
+                "tertiary": "#00658f",
+                "on-tertiary-fixed-variant": "#004c6d",
+                "on-surface-variant": "#564337",
+                "on-background": "#091d2e",
+                "surface-variant": "#d1e4fb",
+                "on-tertiary": "#ffffff",
+                "on-primary": "#ffffff",
+                "on-secondary-fixed-variant": "#663e00",
+                "on-secondary-fixed": "#2b1700",
+                "background": "#f7f9ff",
+                "on-tertiary-container": "#00354d",
+                "inverse-surface": "#203243",
+                "on-primary-container": "#502600"
+              },
+              fontFamily: {
+                "headline": ["Plus Jakarta Sans"],
+                "body": ["Be Vietnam Pro"],
+                "label": ["Be Vietnam Pro"]
+              },
+              borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+            },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .ember-gradient {
+            background: linear-gradient(135deg, #944a00 0%, #E67E22 100%);
+        }
+        .ambient-shadow {
+            box-shadow: 0px 8px 24px rgba(9, 29, 46, 0.06);
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface selection:bg-primary-container/30">
+<!-- Sidebar Navigation (SideNavBar) -->
+<aside class="fixed left-0 top-0 h-full flex flex-col py-6 bg-slate-50 dark:bg-slate-900 h-full w-24 border-r-0 shadow-sm dark:shadow-none z-50">
+<div class="flex flex-col items-center mb-10">
+<span class="text-xl font-black text-orange-700 dark:text-orange-500 font-headline">EB</span>
+</div>
+<nav class="flex-1 flex flex-col items-center space-y-8">
+<button class="flex flex-col items-center space-y-1 text-slate-500 dark:text-slate-400 hover:bg-orange-50 dark:hover:bg-orange-950/30 transition-colors w-full py-2">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-[10px] font-bold">Dashboard</span>
+</button>
+<button class="flex flex-col items-center space-y-1 text-orange-600 dark:text-orange-400 font-bold border-r-4 border-orange-600 hover:bg-orange-50 dark:hover:bg-orange-950/30 transition-colors w-full py-2">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">restaurant_menu</span>
+<span class="text-[10px] font-bold">Mesas</span>
+</button>
+<button class="flex flex-col items-center space-y-1 text-slate-500 dark:text-slate-400 hover:bg-orange-50 dark:hover:bg-orange-950/30 transition-colors w-full py-2">
+<span class="material-symbols-outlined">receipt_long</span>
+<span class="text-[10px] font-bold">Pedidos</span>
+</button>
+<button class="flex flex-col items-center space-y-1 text-slate-500 dark:text-slate-400 hover:bg-orange-50 dark:hover:bg-orange-950/30 transition-colors w-full py-2">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px] font-bold">Perfil</span>
+</button>
+</nav>
+<div class="mt-auto flex flex-col items-center">
+<button class="text-slate-500 dark:text-slate-400 hover:bg-orange-50 transition-colors w-full py-4">
+<span class="material-symbols-outlined">logout</span>
+</button>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-24 min-h-screen flex flex-col">
+<!-- Top Navigation Bar -->
+<header class="flex justify-between items-center w-full px-8 py-4 h-16 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl shadow-sm dark:shadow-none">
+<h1 class="text-2xl font-extrabold text-orange-600 dark:text-orange-500 font-headline">El Brasero</h1>
+<div class="flex items-center space-x-6">
+<div class="relative hidden lg:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="bg-surface-container-low border-none rounded-full py-2 pl-10 pr-4 w-64 focus:ring-2 focus:ring-primary-container text-sm" placeholder="Buscar plato..." type="text"/>
+</div>
+<div class="flex items-center space-x-3">
+<span class="text-sm font-medium text-on-surface-variant">Hola, Carlos 👋</span>
+<img alt="Carlos" class="w-8 h-8 rounded-full object-cover" data-alt="professional portrait of a friendly male restaurant manager in a clean white shirt with soft studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAbJfeZ5DERUq5o5NHy1PQ64z1LrTkzuG1xBS62kXY__EYWf0gd2VBp9aCcsokwtPpyfifvT1wHQanHftXABZSlWlB86C5xSdHlrqT5csLj9On_0dl9Ke51vjb2f6S81jseDxD369HCHznHHsJ1OhS4LbQ8JHtsy47f7NZmK4uFPyvGKBpDiQYeWtIliTHs7XdsN5gimT3s-kBkQWtgVsjdfSP80d-gTNY3ovG3aYsVYSVRAbG8YwCTX3eBVssMnT4sKyKddxD9MyL_"/>
+<span class="material-symbols-outlined text-on-surface-variant">notifications</span>
+</div>
+</div>
+</header>
+<!-- Order Summary Section -->
+<section class="flex-1 p-8 grid grid-cols-12 gap-8">
+<!-- Left Column: Items List & Observations -->
+<div class="col-span-12 lg:col-span-8 flex flex-col space-y-6">
+<div class="flex items-center justify-between">
+<div>
+<h2 class="text-display-md font-headline font-bold text-on-surface tracking-tight">Pedido - Mesa #12</h2>
+<p class="text-label-md text-on-surface-variant mt-1">Servicio en salón • Mesero: Carlos V.</p>
+</div>
+<a class="text-primary font-bold text-sm flex items-center hover:opacity-80 transition-opacity" href="#">
+<span class="material-symbols-outlined mr-1 text-lg">add_circle</span>
+                        SEGUIR AGREGANDO
+                    </a>
+</div>
+<!-- Items Container (No Dividers, tonal shifts used) -->
+<div class="bg-surface-container-low rounded-lg p-6 flex flex-col space-y-4">
+<!-- Item 1 -->
+<div class="bg-surface-container-lowest ambient-shadow p-4 rounded-DEFAULT flex items-center justify-between transition-transform active:scale-[0.98]">
+<div class="flex items-center space-x-4">
+<div class="w-16 h-16 rounded-md bg-surface overflow-hidden">
+<img alt="Pollo a la Brasa" class="w-full h-full object-cover" data-alt="close-up of a juicy Peruvian roasted chicken with crispy golden skin on a white plate" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC4Me0Ma_8hRAGpdHLBVVSF-PIdqX3-P9pi8lVsXUyLirRF1PKl0li_pw1ihw7LyZngM73eo9xxj2wQsGcbQmYp9z3F7Q4mmXRLoZ4UHlydYFVARaHXaBFZ0Zyc9bMxxx2L7sujd1NK-c7a6OFr4LWalPdk2I8gj1XTDZwYt9HK50XtX2fn-yeZ3zn5mfIOMmGR8haPLDxrF3xaq5PGpgs2774Iszf2WHbcJRLzRRmwe3zWT6EiQ60ZmBXDEmCcueO1X2VbdvrVhHRs"/>
+</div>
+<div>
+<h3 class="font-headline font-bold text-on-surface">1/2 Pollo a la Brasa</h3>
+<p class="text-label-md text-on-surface-variant">Con papas y ensalada clásica</p>
+</div>
+</div>
+<div class="flex items-center space-x-8">
+<div class="flex items-center bg-surface-container rounded-full p-1">
+<button class="w-8 h-8 flex items-center justify-center text-primary font-bold">
+<span class="material-symbols-outlined text-sm">remove</span>
+</button>
+<span class="px-4 font-bold text-on-surface">01</span>
+<button class="w-8 h-8 flex items-center justify-center text-primary font-bold">
+<span class="material-symbols-outlined text-sm">add</span>
+</button>
+</div>
+<span class="font-headline font-bold text-on-surface min-w-[80px] text-right">S/ 42.00</span>
+<button class="text-error/40 hover:text-error transition-colors">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="bg-surface-container-lowest ambient-shadow p-4 rounded-DEFAULT flex items-center justify-between transition-transform active:scale-[0.98]">
+<div class="flex items-center space-x-4">
+<div class="w-16 h-16 rounded-md bg-surface overflow-hidden">
+<img alt="Anticuchos" class="w-full h-full object-cover" data-alt="grilled beef heart skewers served with large kernel corn and golden potatoes on a rustic wooden plate" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDUn4wvs_2xvCdFmrfDlMFHkjkZzkE8sYdDAzBSJUI4df9MtIN-yxQXMnFJ2wTfPnC9uuH5VGcZ_Fkt2S4yznb6bmKf4jnC6rqHmJlFCqq7kVBadgLxQcwfmvokDiI1pN3n3NzzEUYfgO142kc-k1gJP1a7EYGf8uNGTqfoSpaxeCuyJntwofOGxGu5JSSgeDPudVkpPRkqlQbrd6K-SyV1pRkny7CHKaEIuUaV4m4OiZYDIbiFJN7TYgQjI3oF1BMpVfG8Yvk_y1PD"/>
+</div>
+<div>
+<h3 class="font-headline font-bold text-on-surface">Anticuchos de Corazón</h3>
+<p class="text-label-md text-on-surface-variant">2 palos + papa dorada + choclo</p>
+</div>
+</div>
+<div class="flex items-center space-x-8">
+<div class="flex items-center bg-surface-container rounded-full p-1">
+<button class="w-8 h-8 flex items-center justify-center text-primary font-bold">
+<span class="material-symbols-outlined text-sm">remove</span>
+</button>
+<span class="px-4 font-bold text-on-surface">01</span>
+<button class="w-8 h-8 flex items-center justify-center text-primary font-bold">
+<span class="material-symbols-outlined text-sm">add</span>
+</button>
+</div>
+<span class="font-headline font-bold text-on-surface min-w-[80px] text-right">S/ 24.50</span>
+<button class="text-error/40 hover:text-error transition-colors">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="bg-surface-container-lowest ambient-shadow p-4 rounded-DEFAULT flex items-center justify-between transition-transform active:scale-[0.98]">
+<div class="flex items-center space-x-4">
+<div class="w-16 h-16 rounded-md bg-surface overflow-hidden">
+<img alt="Chicha Morada" class="w-full h-full object-cover" data-alt="chilled traditional purple corn drink in a tall glass with lemon slices and ice" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3rFSNPITmObKtjy08i-cGBhdUBbstYMdu46Gs_k2AIXORo9Q9qQfTrz0Dg4LkXYf9w4qorWyBEnjGmn34mnw9VccMQf5WIXkraHQTwGQEVnzVm5EbbPym7tCzYp7pB0CL-dV4aEFANIOuSWVLknQI88FpragqD23XOjYF_NDAEysCuYXpKeObns8eREYxfcrOryiMhB2vJyHg1lZnuMZS9H16HIeN717c92U-l44Pb9XFbeZNzyD59dP1PHRvFHp9nR6HbQSe4KrU"/>
+</div>
+<div>
+<h3 class="font-headline font-bold text-on-surface">Jarra Chicha Morada</h3>
+<p class="text-label-md text-on-surface-variant">1 Litro - Preparación de la casa</p>
+</div>
+</div>
+<div class="flex items-center space-x-8">
+<div class="flex items-center bg-surface-container rounded-full p-1">
+<button class="w-8 h-8 flex items-center justify-center text-primary font-bold">
+<span class="material-symbols-outlined text-sm">remove</span>
+</button>
+<span class="px-4 font-bold text-on-surface">01</span>
+<button class="w-8 h-8 flex items-center justify-center text-primary font-bold">
+<span class="material-symbols-outlined text-sm">add</span>
+</button>
+</div>
+<span class="font-headline font-bold text-on-surface min-w-[80px] text-right">S/ 12.00</span>
+<button class="text-error/40 hover:text-error transition-colors">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Observations -->
+<div class="mt-4">
+<label class="block text-title-lg font-bold text-on-surface mb-2 font-headline" for="observations">Observaciones Generales</label>
+<textarea class="w-full bg-surface-container-lowest border-none rounded-DEFAULT p-4 ambient-shadow focus:ring-2 focus:ring-primary-container text-body-md" id="observations" placeholder="Ej. Sin cremas en el pollo, ensalada sin cebolla..." rows="3"></textarea>
+</div>
+</div>
+<!-- Right Column: Checkout Summary -->
+<div class="col-span-12 lg:col-span-4">
+<div class="bg-surface-container-high rounded-lg p-8 sticky top-24">
+<h3 class="text-headline-sm font-headline font-extrabold text-on-surface mb-8">Resumen</h3>
+<div class="space-y-4 mb-10">
+<div class="flex justify-between items-center text-body-md text-on-surface-variant">
+<span>Subtotal</span>
+<span class="font-semibold text-on-surface">S/ 78.50</span>
+</div>
+<div class="flex justify-between items-center text-body-md text-on-surface-variant">
+<span>IGV (18%)</span>
+<span class="font-semibold text-on-surface">S/ 14.13</span>
+</div>
+<div class="pt-4 border-t border-outline-variant/30 flex justify-between items-end">
+<span class="text-title-lg font-bold text-on-surface">Total</span>
+<div class="text-right">
+<span class="text-display-md font-headline font-extrabold text-primary leading-none block">S/ 92.63</span>
+<span class="text-[10px] text-on-surface-variant uppercase tracking-widest font-bold">Soles Netos</span>
+</div>
+</div>
+</div>
+<div class="space-y-4">
+<button class="ember-gradient w-full py-5 rounded-full text-white font-bold text-lg shadow-lg shadow-primary/20 flex items-center justify-center space-x-3 transition-transform active:scale-95">
+<span class="material-symbols-outlined">check_circle</span>
+<span>CONFIRMAR PEDIDO</span>
+</button>
+<div class="bg-white/50 rounded-xl p-4 flex items-start space-x-3 text-xs text-on-surface-variant border border-white/20">
+<span class="material-symbols-outlined text-primary text-sm">info</span>
+<p>Al confirmar, el pedido se enviará directamente a la cocina y barra. Verifica las cantidades antes de proceder.</p>
+</div>
+</div>
+</div>
+<!-- Suggested Add-ons (Editorial Asymmetry) -->
+<div class="mt-8 pl-4">
+<h4 class="text-label-md font-bold text-primary tracking-widest mb-4">¿ALGO MÁS?</h4>
+<div class="flex flex-wrap gap-2">
+<button class="bg-secondary-container/20 text-on-secondary-container px-4 py-2 rounded-full text-xs font-bold hover:bg-secondary-container/40 transition-colors">Extra Papas</button>
+<button class="bg-secondary-container/20 text-on-secondary-container px-4 py-2 rounded-full text-xs font-bold hover:bg-secondary-container/40 transition-colors">Inca Kola 1.5L</button>
+<button class="bg-secondary-container/20 text-on-secondary-container px-4 py-2 rounded-full text-xs font-bold hover:bg-secondary-container/40 transition-colors">Picarones</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Mobile Navigation (BottomNavBar) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-4 pt-2 md:hidden bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] rounded-t-3xl">
+<div class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500">
+<span class="material-symbols-outlined">restaurant</span>
+<span class="text-[10px] font-bold Be Vietnam Pro">Menú</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300 rounded-2xl px-6 py-2 scale-90">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">list_alt</span>
+<span class="text-[10px] font-bold Be Vietnam Pro">Pedidos</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500">
+<span class="material-symbols-outlined">shopping_cart</span>
+<span class="text-[10px] font-bold Be Vietnam Pro">Carrito</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px] font-bold Be Vietnam Pro">Perfil</span>
+</div>
+</nav>
+</body></html>

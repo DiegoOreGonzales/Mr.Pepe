@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>El Brasero - Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&amp;family=Be+Vietnam+Pro:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-container": "#e3efff",
+                        "inverse-on-surface": "#e8f2ff",
+                        "primary-container": "#e67e22",
+                        "surface-tint": "#944a00",
+                        "surface-container-low": "#edf4ff",
+                        "tertiary-container": "#00a3e4",
+                        "surface-bright": "#f7f9ff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-container": "#694000",
+                        "on-secondary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed": "#c7e7ff",
+                        "error-container": "#ffdad6",
+                        "on-error": "#ffffff",
+                        "surface-container-high": "#d9eaff",
+                        "secondary-fixed": "#ffddb9",
+                        "primary": "#944a00",
+                        "surface": "#f7f9ff",
+                        "surface-container-highest": "#d1e4fb",
+                        "on-tertiary-fixed": "#001e2e",
+                        "on-primary-fixed-variant": "#713700",
+                        "inverse-primary": "#ffb783",
+                        "outline-variant": "#dcc1b1",
+                        "secondary-container": "#fea520",
+                        "surface-dim": "#c9dcf3",
+                        "on-primary-fixed": "#301400",
+                        "error": "#ba1a1a",
+                        "outline": "#897365",
+                        "tertiary-fixed-dim": "#86cfff",
+                        "on-surface": "#091d2e",
+                        "secondary": "#865300",
+                        "primary-fixed": "#ffdcc5",
+                        "primary-fixed-dim": "#ffb783",
+                        "secondary-fixed-dim": "#ffb961",
+                        "tertiary": "#00658f",
+                        "on-tertiary-fixed-variant": "#004c6d",
+                        "on-surface-variant": "#564337",
+                        "on-background": "#091d2e",
+                        "surface-variant": "#d1e4fb",
+                        "on-tertiary": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed-variant": "#663e00",
+                        "on-secondary-fixed": "#2b1700",
+                        "background": "#f7f9ff",
+                        "on-tertiary-container": "#00354d",
+                        "inverse-surface": "#203243",
+                        "on-primary-container": "#502600"
+                    },
+                    fontFamily: {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Be Vietnam Pro"],
+                        "label": ["Be Vietnam Pro"]
+                    },
+                    borderRadius: { "DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .ember-gradient {
+            background: linear-gradient(135deg, #944a00 0%, #e67e22 100%);
+        }
+        .ambient-shadow {
+            box-shadow: 0px 8px 24px rgba(9, 29, 46, 0.06);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-100 to-white min-h-screen flex items-center justify-center font-body text-on-surface">
+<!-- Login Container -->
+<main class="w-full max-w-[1280px] h-[800px] flex items-center justify-center p-6">
+<!-- Glassmorphism Card -->
+<div class="bg-surface-container-lowest/80 backdrop-blur-xl w-full max-w-md p-10 rounded-lg ambient-shadow flex flex-col items-center">
+<!-- Logo Section -->
+<div class="mb-8">
+<img alt="Pollería El Brasero Logo" class="w-[100px] h-[100px] rounded-full object-cover shadow-lg border-4 border-white" data-alt="stylized emblem logo for a premium rotisserie restaurant with flame and grill motifs in deep amber and burnt orange" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBTNjZKq_b1w5dp9Grs95S_B6qFJTaDy3_Ofxj7P16XKOtzuRa7gPPkeXhb9VNQPRUQeCVQQz0_qQLtG5Vs48Qi5gm0-38IvYyfx-4nD5rQhBhTEVDpk8SCFtL2-UO-Qll2fr8OqzPB4sT9MISPYicABxAP4DRlvHq-Fur18rYi9AI0v5agOeAfo1atoIvcGNzRLDc67mWy4JK6Le-bCjjElIfE_bHID8z7CGv637tezKBQXe7a_4qQ2Vc6yFidOUXyUOJPsiExMKU-"/>
+</div>
+<!-- Title -->
+<h1 class="font-headline text-[24px] font-extrabold text-on-surface mb-10 tracking-tight">
+                Bienvenido
+            </h1>
+<!-- Login Form -->
+<form class="w-full space-y-6">
+<!-- Email Field -->
+<div class="space-y-2">
+<div class="relative flex items-center group">
+<span class="material-symbols-outlined absolute left-4 text-outline group-focus-within:text-primary transition-colors" data-icon="email">email</span>
+<input class="w-full h-14 pl-12 pr-4 bg-surface-container-low border-none rounded-DEFAULT text-on-surface focus:ring-2 focus:ring-primary-container transition-all placeholder:text-outline/60 font-medium" placeholder="correo@polleria.com" type="email"/>
+</div>
+</div>
+<!-- Password Field -->
+<div class="space-y-2">
+<div class="relative flex items-center group">
+<span class="material-symbols-outlined absolute left-4 text-outline group-focus-within:text-primary transition-colors" data-icon="lock">lock</span>
+<input class="w-full h-14 pl-12 pr-4 bg-surface-container-low border-none rounded-DEFAULT text-on-surface focus:ring-2 focus:ring-primary-container transition-all placeholder:text-outline/60 font-medium" placeholder="contraseña" type="password"/>
+</div>
+</div>
+<!-- Action Button -->
+<button class="w-full h-[56px] ember-gradient text-on-primary font-bold text-sm tracking-widest rounded-full hover:opacity-90 active:scale-95 transition-all shadow-md mt-4" type="submit">
+                    INICIAR SESIÓN
+                </button>
+<!-- Forgot Password Link -->
+<div class="text-center mt-6">
+<a class="text-secondary font-bold text-sm hover:underline decoration-2 underline-offset-4 transition-all" href="#">
+                        ¿Olvidaste tu contraseña?
+                    </a>
+</div>
+</form>
+<!-- Version Info (Bottom of Card) -->
+<div class="mt-12 text-outline/50 font-medium text-xs">
+                Version: 1.0.0
+            </div>
+</div>
+</main>
+<!-- Decorative Culinary Elements (Subtle UI depth) -->
+<div class="fixed top-0 right-0 p-12 -z-10 opacity-10">
+<span class="material-symbols-outlined text-[120px] text-primary" data-icon="restaurant_menu">restaurant_menu</span>
+</div>
+<div class="fixed bottom-0 left-0 p-12 -z-10 opacity-10">
+<span class="material-symbols-outlined text-[120px] text-primary" data-icon="outdoor_grill">outdoor_grill</span>
+</div>
+</body></html>

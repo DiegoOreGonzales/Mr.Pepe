@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Toma de Pedido - El Brasero</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-container": "#e3efff",
+                        "inverse-on-surface": "#e8f2ff",
+                        "primary-container": "#e67e22",
+                        "surface-tint": "#944a00",
+                        "surface-container-low": "#edf4ff",
+                        "tertiary-container": "#00a3e4",
+                        "surface-bright": "#f7f9ff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-container": "#694000",
+                        "on-secondary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed": "#c7e7ff",
+                        "error-container": "#ffdad6",
+                        "on-error": "#ffffff",
+                        "surface-container-high": "#d9eaff",
+                        "secondary-fixed": "#ffddb9",
+                        "primary": "#944a00",
+                        "surface": "#f7f9ff",
+                        "surface-container-highest": "#d1e4fb",
+                        "on-tertiary-fixed": "#001e2e",
+                        "on-primary-fixed-variant": "#713700",
+                        "inverse-primary": "#ffb783",
+                        "outline-variant": "#dcc1b1",
+                        "secondary-container": "#fea520",
+                        "surface-dim": "#c9dcf3",
+                        "on-primary-fixed": "#301400",
+                        "error": "#ba1a1a",
+                        "outline": "#897365",
+                        "tertiary-fixed-dim": "#86cfff",
+                        "on-surface": "#091d2e",
+                        "secondary": "#865300",
+                        "primary-fixed": "#ffdcc5",
+                        "primary-fixed-dim": "#ffb783",
+                        "secondary-fixed-dim": "#ffb961",
+                        "tertiary": "#00658f",
+                        "on-tertiary-fixed-variant": "#004c6d",
+                        "on-surface-variant": "#564337",
+                        "on-background": "#091d2e",
+                        "surface-variant": "#d1e4fb",
+                        "on-tertiary": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed-variant": "#663e00",
+                        "on-secondary-fixed": "#2b1700",
+                        "background": "#f7f9ff",
+                        "on-tertiary-container": "#00354d",
+                        "inverse-surface": "#203243",
+                        "on-primary-container": "#502600"
+                    },
+                    fontFamily: {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Be Vietnam Pro"],
+                        "label": ["Be Vietnam Pro"]
+                    },
+                    borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .ember-gradient {
+            background: linear-gradient(135deg, #944a00 0%, #e67e22 100%);
+        }
+        .ambient-shadow {
+            box-shadow: 0px 8px 24px rgba(9, 29, 46, 0.06);
+        }
+        ::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface overflow-hidden">
+<!-- Sidebar Navigation (Rail) -->
+<aside class="fixed left-0 top-0 h-full flex flex-col py-6 bg-slate-50 dark:bg-slate-900 h-full w-24 border-r-0 shadow-sm dark:shadow-none z-50">
+<div class="flex flex-col items-center mb-8">
+<span class="text-xl font-black text-orange-700 dark:text-orange-500 mb-1">EB</span>
+</div>
+<nav class="flex flex-col items-center space-y-8 flex-1">
+<button class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-orange-50 dark:hover:bg-orange-950/30 transition-colors group">
+<span class="material-symbols-outlined text-2xl" data-icon="dashboard">dashboard</span>
+<span class="text-[10px] mt-1 font-medium">Dashboard</span>
+</button>
+<button class="flex flex-col items-center justify-center text-orange-600 dark:text-orange-400 font-bold border-r-4 border-orange-600 px-4 transition-transform active:scale-95">
+<span class="material-symbols-outlined text-2xl" data-icon="restaurant_menu">restaurant_menu</span>
+<span class="text-[10px] mt-1">Mesas</span>
+</button>
+<button class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-orange-50 dark:hover:bg-orange-950/30 transition-colors">
+<span class="material-symbols-outlined text-2xl" data-icon="receipt_long">receipt_long</span>
+<span class="text-[10px] mt-1">Pedidos</span>
+</button>
+<button class="flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-orange-50 dark:hover:bg-orange-950/30 transition-colors">
+<span class="material-symbols-outlined text-2xl" data-icon="person">person</span>
+<span class="text-[10px] mt-1">Perfil</span>
+</button>
+</nav>
+<button class="mt-auto flex flex-col items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-orange-50 dark:hover:bg-orange-950/30 transition-colors">
+<span class="material-symbols-outlined text-2xl" data-icon="logout">logout</span>
+<span class="text-[10px] mt-1">Logout</span>
+</button>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-24 h-screen flex flex-col relative">
+<!-- Header -->
+<header class="flex justify-between items-center w-full px-8 py-4 h-20 bg-white/80 backdrop-blur-xl z-40">
+<div class="flex items-center gap-6">
+<button class="p-2 rounded-full hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-on-surface" data-icon="arrow_back">arrow_back</span>
+</button>
+<div>
+<h1 class="text-2xl font-bold font-headline text-on-surface tracking-tight">Mesa #12 - 4 personas</h1>
+<div class="flex items-center gap-2 mt-0.5">
+<span class="w-2 h-2 rounded-full bg-error"></span>
+<span class="text-xs font-medium text-on-surface-variant">Ocupado hace 15 min</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden md:flex flex-col items-end">
+<span class="text-sm font-bold text-on-surface">Hola, Carlos 👋</span>
+<span class="text-[10px] text-on-surface-variant uppercase tracking-wider">Admin/Mesero</span>
+</div>
+<img alt="Carlos Profile" class="w-10 h-10 rounded-full object-cover border-2 border-primary-container" data-alt="Close-up portrait of a friendly male restaurant manager wearing a professional dark shirt in a warm lit environment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAY68iGbEeCSuhgg9oPT7tjNigWo4T96m95soLj5bUiMOkk6dL5FhLJxv6hIk_-Ho4Q6MEJwxDo4AbTE_9KPafCsSJ5T7CbHkWr2Zk4U19RBvWnzy9jPvu8jfzj0Cv7cJPLvpxHRenUMbvI8dH_CCyiHgFb2amzXhVfbwKbykWkUheNWCJV2rxildKBdiTjWrD_2gZRZK4DCqnyPpOmPt06LBCXvE66QFQFIotLgu-nPYvGmFU9QUrTuWsJqS9Pwtvj7NlebDSUYj_P"/>
+</div>
+</header>
+<!-- Categories Tabs -->
+<nav class="px-8 py-4 flex gap-4 overflow-x-auto whitespace-nowrap bg-surface-container-low/50">
+<button class="px-6 py-2.5 rounded-full bg-primary-container text-white font-bold text-sm shadow-md transition-transform active:scale-95">Parrillas</button>
+<button class="px-6 py-2.5 rounded-full bg-white text-on-surface-variant font-semibold text-sm hover:bg-orange-50 transition-colors">Piqueos</button>
+<button class="px-6 py-2.5 rounded-full bg-white text-on-surface-variant font-semibold text-sm hover:bg-orange-50 transition-colors">Bebidas</button>
+<button class="px-6 py-2.5 rounded-full bg-white text-on-surface-variant font-semibold text-sm hover:bg-orange-50 transition-colors">Postres</button>
+<button class="px-6 py-2.5 rounded-full bg-white text-on-surface-variant font-semibold text-sm hover:bg-orange-50 transition-colors">Ensaladas</button>
+<button class="px-6 py-2.5 rounded-full bg-white text-on-surface-variant font-semibold text-sm hover:bg-orange-50 transition-colors">Tragos</button>
+</nav>
+<!-- Product Grid -->
+<section class="flex-1 overflow-y-auto px-8 py-6 pb-32">
+<div class="grid grid-cols-2 gap-6">
+<!-- Product Card 1 -->
+<div class="bg-surface-container-lowest p-4 rounded-xl ambient-shadow flex gap-4 items-center group cursor-pointer hover:bg-orange-50/50 transition-colors border-l-4 border-primary">
+<img alt="Pollo a la Brasa" class="w-20 h-20 rounded-lg object-cover" data-alt="Juicy roasted golden brown rotisserie chicken with crisp skin served on a dark rustic platter with fresh herbs" src="https://lh3.googleusercontent.com/aida-public/AB6AXuANcPFuGpP5Z6bpt3OAJ6sLyVaj29ALyk5CiUqVOu0e6sL_ulMLustA7WbQKtEV_lCFh4AaU1DazxWB3hpHdR0TtuHmv8wgDWFA5tdu8dANTfL4eMIXQH1A38jneNWPtW5H88954kJ7Ax7vqBQgPXXjLjvr4U9Ce0ihB5VBJenYlXSvSoTToPAQT1FEj40DKbO_oTEJGT5r2NA8Bb7o-E4Xre5Ugyvg8RiPmtuHKmnTA_2ZN6x2Q-NsSPdZJcoe0z_auvQ-vRDefnrE"/>
+<div class="flex-1">
+<h3 class="text-base font-bold text-on-surface leading-tight">Pollo a la Brasa 1/4</h3>
+<p class="text-xs text-on-surface-variant mt-1">Con papas fritas y ensalada</p>
+<p class="text-sm font-bold text-primary mt-2">S/ 24.50</p>
+</div>
+<button class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container transition-transform active:scale-90">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+<!-- Product Card 2 -->
+<div class="bg-surface-container-lowest p-4 rounded-xl ambient-shadow flex gap-4 items-center group cursor-pointer hover:bg-orange-50/50 transition-colors border-l-4 border-transparent">
+<img alt="Parrilla Mixta" class="w-20 h-20 rounded-lg object-cover" data-alt="Platter of various grilled meats including steak, sausage and chicken with charred grill marks and vibrant sides" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD0LBBeLvvCGpXcP7VhEq9b_mj1ozrShnWyA4uCITnel32V6Y3a83toZjaiPN2nxOp-sqRXYGnepQNu8_P1hagty3wQyMm_bdbvwsDkxMeTkmj13uTMXg6kwV0BysfGJX8TNaOPye6CXF26Uk-fTIdDJM3Mv2XwJ8iYMaPnCuBvEDvLiE7FZ9dCElpVLoV2YGNZrAPQQvw0KOsJPM68sbuZll4ewaQGWEJ8Q2bsuc2bPtuSWn3YzSu5v5Xhi_YwUsSoKU0RlX8tXTUt"/>
+<div class="flex-1">
+<h3 class="text-base font-bold text-on-surface leading-tight">Parrilla Mixta Personal</h3>
+<p class="text-xs text-on-surface-variant mt-1">Anticucho, chuleta y pollo</p>
+<p class="text-sm font-bold text-primary mt-2">S/ 48.00</p>
+</div>
+<button class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container transition-transform active:scale-90">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+<!-- Product Card 3 -->
+<div class="bg-surface-container-lowest p-4 rounded-xl ambient-shadow flex gap-4 items-center group cursor-pointer hover:bg-orange-50/50 transition-colors border-l-4 border-transparent">
+<img alt="Anticuchos" class="w-20 h-20 rounded-lg object-cover" data-alt="Two skewers of marinated grilled beef heart anticuchos served with boiled golden potatoes and corn" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCq-mGXcNWaYiGMX0Tj5FYu5_Bc4LQmk_A-O_P0Dn8uhRuk-TLn4Z-spfxitWq_crE57cfosxqxxxvjLLQ3UXMTiXIuMh7UCAmgT0f3oJOx6lziCHlM2Si8Rr6XCOsoznLu08_0b9mLlSXDDwc0EO-xIj4vGz2b5g2cYGuirXeEcZC6PF_KLvzdFha0CWaV_H8feyGmR68tXS41Bw9KjB7HiR_Wc0b4oKvJtbxyIyQDh3CFpSd6FFl2pjBTjF2PrtGD1QAlwOJ0Yu9W"/>
+<div class="flex-1">
+<h3 class="text-base font-bold text-on-surface leading-tight">Anticuchos (2 palos)</h3>
+<p class="text-xs text-on-surface-variant mt-1">Corazón de res macerado</p>
+<p class="text-sm font-bold text-primary mt-2">S/ 22.50</p>
+</div>
+<button class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container transition-transform active:scale-90">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+<!-- Product Card 4 -->
+<div class="bg-surface-container-lowest p-4 rounded-xl ambient-shadow flex gap-4 items-center group cursor-pointer hover:bg-orange-50/50 transition-colors border-l-4 border-transparent">
+<img alt="Pechuga a la Parrilla" class="w-20 h-20 rounded-lg object-cover" data-alt="Grilled chicken breast with herb seasoning and fresh lemon wedges on a white ceramic plate" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCimQ6kyoW0XLhxfqQrN0SVbC2l85nGpYqSyVo-KxhTitoDSMJRBr_udbXMdf_PcFCRT3BKaDnAl7KFWSxVfFc_LiIGlHuvrc2tyTBrBIJ3ntcl66kIwgR1gGXEtY-S5XYoWRAArEGlPPhrYIFKlPdKbMxvEPaZov220aQSYkKIMrpH15xjLW63P39LKP6JJO75Lvwg8qt5JmWJMjqt6riW68PEYGkKqbhva7MpZXxFxQuhDSap52-ai1wC_rsi9UdeSNIbrU5WgZsA"/>
+<div class="flex-1">
+<h3 class="text-base font-bold text-on-surface leading-tight">Pechuga a la Parrilla</h3>
+<p class="text-xs text-on-surface-variant mt-1">Con guarnición a elegir</p>
+<p class="text-sm font-bold text-primary mt-2">S/ 26.00</p>
+</div>
+<button class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container transition-transform active:scale-90">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Floating Cart Bar -->
+<footer class="fixed bottom-0 left-24 right-0 p-6 z-40 pointer-events-none">
+<div class="max-w-4xl mx-auto w-full bg-inverse-surface/95 backdrop-blur-md rounded-2xl p-4 flex items-center justify-between pointer-events-auto ambient-shadow">
+<div class="flex items-center gap-4 pl-4 border-l-4 border-primary">
+<div class="flex flex-col">
+<span class="text-white text-lg font-bold">3 items · S/ 78.50</span>
+<span class="text-slate-400 text-[10px] uppercase tracking-widest font-bold">Resumen parcial</span>
+</div>
+</div>
+<div class="flex gap-4">
+<button class="px-6 py-3 rounded-full bg-white/10 text-white font-bold text-sm hover:bg-white/20 transition-colors uppercase tracking-tight">Ver Carrito</button>
+<button class="px-8 py-3 rounded-full ember-gradient text-white font-bold text-sm shadow-lg active:scale-95 transition-transform uppercase tracking-tight">Confirmar Pedido</button>
+</div>
+</div>
+</footer>
+<!-- Modal Overlay (Active Selection State) -->
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-on-surface/40 backdrop-blur-sm px-6">
+<div class="bg-surface-container-lowest w-full max-w-lg rounded-xl overflow-hidden ambient-shadow">
+<!-- Modal Header -->
+<div class="relative h-48">
+<img alt="Selected Product" class="w-full h-full object-cover" data-alt="High quality overhead view of golden grilled chicken quarter served with crispy fries and fresh side salad" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9cFtbNXprST1cmxIVGxTFWBumTrfWiOZGa_YC9JGXgGW3AarF9AHWVDYgtOURUTEya1YlKSpDCksa_AJ-ME24v1c2HE5JWD1mnNXpW05UU_QPpjmFpA8OKDp6tyysuR8Q9Jys4wqp8RTxgcBPs6srt0ZHyolwEMDirlC4l2V_-6xjnu49fgjbkVi8BjStyOvAD136zvq3bTCr139RLPCFkHuISEZHuNt_SLNLso8n5GIUAZF1QGG1yWrB9ju8rkg6Y8LgIVbsrGtu"/>
+<button class="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/30 backdrop-blur-md text-white flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+</div>
+<div class="p-6">
+<div class="flex justify-between items-start mb-6">
+<div>
+<h2 class="text-2xl font-bold font-headline text-on-surface">Pollo a la Brasa 1/4</h2>
+<p class="text-sm text-on-surface-variant">Incluye papas artesanales y ensalada clásica.</p>
+</div>
+<span class="text-xl font-bold text-primary">S/ 24.50</span>
+</div>
+<!-- Quantity Selector -->
+<div class="flex items-center justify-between bg-surface-container-low p-4 rounded-xl mb-6">
+<span class="font-bold text-on-surface">Cantidad</span>
+<div class="flex items-center gap-6">
+<button class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-primary shadow-sm active:scale-90">
+<span class="material-symbols-outlined" data-icon="remove">remove</span>
+</button>
+<span class="text-xl font-black text-on-surface w-6 text-center">1</span>
+<button class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-primary shadow-sm active:scale-90">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</div>
+</div>
+<!-- Accompaniment Options -->
+<div class="mb-6">
+<h4 class="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-3">Guarnición (Opcional)</h4>
+<div class="grid grid-cols-2 gap-3">
+<label class="flex items-center p-3 rounded-lg border border-primary bg-orange-50/30 cursor-pointer">
+<input checked="" class="text-primary focus:ring-primary h-4 w-4" name="side" type="radio"/>
+<span class="ml-3 text-sm font-medium">Papas Fritas</span>
+</label>
+<label class="flex items-center p-3 rounded-lg border border-transparent bg-surface-container-low cursor-pointer hover:bg-surface-container transition-colors">
+<input class="text-primary focus:ring-primary h-4 w-4" name="side" type="radio"/>
+<span class="ml-3 text-sm font-medium">Papas Doradas</span>
+</label>
+</div>
+</div>
+<!-- Observations -->
+<div class="mb-8">
+<h4 class="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-3">Observaciones</h4>
+<textarea class="w-full bg-surface-container-low border-none rounded-xl p-4 text-sm focus:ring-2 focus:ring-primary-container h-24 resize-none" placeholder="Ej: El pollo bien cocido, sin ensalada..."></textarea>
+</div>
+<!-- Add Button -->
+<button class="w-full py-4 ember-gradient text-white font-bold rounded-full shadow-lg transition-transform active:scale-95 uppercase tracking-wide">
+                        Agregar al Pedido — S/ 24.50
+                    </button>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation (Hidden on Tablet Landscape/Desktop by design, but here for mobile-ish refs) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-4 pt-2 md:hidden bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
+<div class="flex flex-col items-center justify-center bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300 rounded-2xl px-6 py-2">
+<span class="material-symbols-outlined" data-icon="restaurant">restaurant</span>
+<span class="text-[10px] font-bold font-body">Menú</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500">
+<span class="material-symbols-outlined" data-icon="list_alt">list_alt</span>
+<span class="text-[10px] font-bold font-body">Pedidos</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500">
+<span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+<span class="text-[10px] font-bold font-body">Carrito</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="text-[10px] font-bold font-body">Perfil</span>
+</div>
+</nav>
+</body></html>

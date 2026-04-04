@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;800&amp;family=Be+Vietnam+Pro:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-container": "#e3efff",
+              "inverse-on-surface": "#e8f2ff",
+              "primary-container": "#e67e22",
+              "surface-tint": "#944a00",
+              "surface-container-low": "#edf4ff",
+              "tertiary-container": "#00a3e4",
+              "surface-bright": "#f7f9ff",
+              "surface-container-lowest": "#ffffff",
+              "on-secondary-container": "#694000",
+              "on-secondary": "#ffffff",
+              "on-error-container": "#93000a",
+              "tertiary-fixed": "#c7e7ff",
+              "error-container": "#ffdad6",
+              "on-error": "#ffffff",
+              "surface-container-high": "#d9eaff",
+              "secondary-fixed": "#ffddb9",
+              "primary": "#944a00",
+              "surface": "#f7f9ff",
+              "surface-container-highest": "#d1e4fb",
+              "on-tertiary-fixed": "#001e2e",
+              "on-primary-fixed-variant": "#713700",
+              "inverse-primary": "#ffb783",
+              "outline-variant": "#dcc1b1",
+              "secondary-container": "#fea520",
+              "surface-dim": "#c9dcf3",
+              "on-primary-fixed": "#301400",
+              "error": "#ba1a1a",
+              "outline": "#897365",
+              "tertiary-fixed-dim": "#86cfff",
+              "on-surface": "#091d2e",
+              "secondary": "#865300",
+              "primary-fixed": "#ffdcc5",
+              "primary-fixed-dim": "#ffb783",
+              "secondary-fixed-dim": "#ffb961",
+              "tertiary": "#00658f",
+              "on-tertiary-fixed-variant": "#004c6d",
+              "on-surface-variant": "#564337",
+              "on-background": "#091d2e",
+              "surface-variant": "#d1e4fb",
+              "on-tertiary": "#ffffff",
+              "on-primary": "#ffffff",
+              "on-secondary-fixed-variant": "#663e00",
+              "on-secondary-fixed": "#2b1700",
+              "background": "#f7f9ff",
+              "on-tertiary-container": "#00354d",
+              "inverse-surface": "#203243",
+              "on-primary-container": "#502600"
+            },
+            fontFamily: {
+              "headline": ["Plus Jakarta Sans"],
+              "body": ["Be Vietnam Pro"],
+              "label": ["Be Vietnam Pro"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .ember-gradient {
+            background: linear-gradient(135deg, #944a00 0%, #E67E22 100%);
+        }
+        .bg-mesh {
+            background-color: #f7f9ff;
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(28,100%,93%,1) 0, transparent 50%), 
+                radial-gradient(at 50% 0%, hsla(208,100%,97%,1) 0, transparent 50%), 
+                radial-gradient(at 100% 0%, hsla(33,100%,90%,1) 0, transparent 50%);
+        }
+    </style>
+</head>
+<body class="bg-mesh font-body text-on-surface antialiased overflow-hidden">
+<!-- Translucent Status Bar Mockup -->
+<div class="fixed top-0 left-0 w-full h-8 px-6 flex justify-between items-center z-50 backdrop-blur-md bg-white/20">
+<div class="flex items-center gap-4">
+<span class="text-[10px] font-bold tracking-widest text-on-surface/60">10:45 AM</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-on-surface/60" data-icon="wifi">wifi</span>
+<span class="material-symbols-outlined text-sm text-on-surface/60" data-icon="battery_full">battery_full</span>
+</div>
+</div>
+<!-- Main Splash Container -->
+<main class="relative min-h-screen w-full flex flex-col items-center justify-center">
+<!-- Background Accents (The Hearth Glow) -->
+<div class="absolute inset-0 overflow-hidden pointer-events-none">
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[120px]"></div>
+</div>
+<!-- Identity Cluster -->
+<div class="relative z-10 flex flex-col items-center">
+<!-- Logo Container (Editorial Authority) -->
+<div class="relative w-[120px] h-[120px] mb-8">
+<!-- Outer Glow -->
+<div class="absolute inset-0 ember-gradient opacity-20 blur-2xl rounded-full"></div>
+<!-- Logo Frame -->
+<div class="relative w-full h-full bg-white rounded-3xl shadow-[0px_8px_24px_rgba(9,29,46,0.06)] flex items-center justify-center overflow-hidden">
+<div class="absolute inset-0 bg-slate-50/50"></div>
+<img alt="El Brasero Official Logo" class="w-[80px] h-[80px] object-contain relative z-10" data-alt="Modern minimalist logo for a rotisserie chicken restaurant featuring stylized flame and grill marks in burnt orange and charcoal tones" src="https://lh3.googleusercontent.com/aida-public/AB6AXuANoPUjOyzzt6eZvjr7an_Y7MIntI5GsEb_NawJgmkiwWfMFCTn5qYHDFFxfIKdH3KKk9Mns2ifVQYZo9GP0IwXWhYN2hlyPLhNAX5KwzlS4n3KN_vG8RBUWnbY5Tqh-PyU0VEwf5r1407WTGbrZ5pkGxWkAoc3-xBTxbYlxmlQBOr0k5wPMzPQDnliBNWAmLFNIznbBhVReijo2nk0MXNtBg1cWZv-GCuw6518r0vC3ojG2_UwvdbSNo_je1Vw1jV27zuWcvQz5D4U"/>
+</div>
+</div>
+<!-- Brand Typography -->
+<div class="text-center">
+<h1 class="font-headline font-black text-5xl tracking-tighter text-on-surface mb-2">
+                    El Brasero
+                </h1>
+<p class="font-label text-sm font-medium uppercase tracking-[0.3em] text-primary/70">
+                    Professional Management
+                </p>
+</div>
+</div>
+<!-- Loading Indicator -->
+<div class="mt-24 relative w-48 h-[2px] bg-surface-container-highest rounded-full overflow-hidden">
+<div class="absolute inset-y-0 left-0 w-1/3 ember-gradient rounded-full"></div>
+</div>
+<!-- Versioning (Bottom Anchor) -->
+<footer class="absolute bottom-12 w-full text-center">
+<div class="flex flex-col items-center gap-1">
+<span class="font-label text-[10px] text-on-surface/30 tracking-widest uppercase">Version 1.0.0</span>
+<div class="w-1 h-1 bg-primary/20 rounded-full"></div>
+</div>
+</footer>
+</main>
+<!-- Navigation suppression check: This is a splash screen (task-focused/entry), so BottomNavBar and SideNavBar are suppressed as per UI Designer instructions. -->
+</body></html>
