@@ -26,7 +26,7 @@ void main() async {
 
   runApp(
     const ProviderScope(
-      child: ElBraseroApp(),
+      child: MrPepeApp(),
     ),
   );
 }
@@ -84,8 +84,8 @@ final _routerProvider = Provider<GoRouter>((ref) {
   );
 });
 
-class ElBraseroApp extends ConsumerWidget {
-  const ElBraseroApp({super.key});
+class MrPepeApp extends ConsumerWidget {
+  const MrPepeApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -93,7 +93,7 @@ class ElBraseroApp extends ConsumerWidget {
 
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
-      title: 'El Brasero',
+      title: 'Mr. Pepe',
       theme: AppTheme.lightTheme,
       routerConfig: router,
     );

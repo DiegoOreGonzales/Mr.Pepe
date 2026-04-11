@@ -4,18 +4,21 @@ import '../theme/app_theme.dart';
 class BrasaLogo extends StatefulWidget {
   final double size;
   final bool showText;
-  
+  final bool darkBackground;
+
   const BrasaLogo({
-    super.key, 
+    super.key,
     this.size = 40,
     this.showText = true,
+    this.darkBackground = false,
   });
 
   @override
   State<BrasaLogo> createState() => _BrasaLogoState();
 }
 
-class _BrasaLogoState extends State<BrasaLogo> with SingleTickerProviderStateMixin {
+class _BrasaLogoState extends State<BrasaLogo>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _glowAnimation;
 
@@ -26,8 +29,7 @@ class _BrasaLogoState extends State<BrasaLogo> with SingleTickerProviderStateMix
       vsync: this,
       duration: const Duration(seconds: 2),
     )..repeat(reverse: true);
-
-    _glowAnimation = Tween<double>(begin: 0.2, end: 1.0).animate(
+    _glowAnimation = Tween<double>(begin: 0.3, end: 1.0).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
   }
@@ -50,28 +52,29 @@ class _BrasaLogoState extends State<BrasaLogo> with SingleTickerProviderStateMix
               width: widget.size,
               height: widget.size,
               decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: RadialGradient(
-                  colors: [
-                    AppTheme.primaryColor,
-                    AppTheme.primaryColor.withOpacity(0.4),
-                    Colors.transparent,
-                  ],
-                  stops: [0.3, _glowAnimation.value, 1.0],
-                ),
+                borderRadius: BorderRadius.circular(widget.size * 0.25),
+                color: Colors.white,
                 boxShadow: [
                   BoxShadow(
-                    color: AppTheme.primaryColor.withOpacity(0.4 * _glowAnimation.value),
-                    blurRadius: 15 * _glowAnimation.value,
-                    spreadRadius: 2 * _glowAnimation.value,
+                    color: AppTheme.primaryColor
+                        .withOpacity(0.35 * _glowAnimation.value),
+                    blurRadius: 10 * _glowAnimation.value,
+                    spreadRadius: 1 * _glowAnimation.value,
                   ),
                 ],
               ),
-              child: Center(
-                child: Icon(
-                  Icons.local_fire_department_rounded,
-                  color: Colors.white,
-                  size: widget.size * 0.6,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(widget.size * 0.25),
+                child: Image.asset(
+                  'assets/images/mr_pepe_logo.png',
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) => Center(
+                    child: Icon(
+                      Icons.local_fire_department_rounded,
+                      color: AppTheme.primaryColor,
+                      size: widget.size * 0.58,
+                    ),
+                  ),
                 ),
               ),
             );
@@ -84,22 +87,26 @@ class _BrasaLogoState extends State<BrasaLogo> with SingleTickerProviderStateMix
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'EL BRASERO',
+                'MR. PEPE',
                 style: TextStyle(
-                  fontSize: widget.size * 0.45,
-                  fontWeight: FontWeight.w900,
-                  color: AppTheme.onBackgroundColor,
-                  letterSpacing: -0.5,
+                  fontFamily: 'Inter',
+                  fontSize: widget.size * 0.43,
+                  fontWeight: FontWeight.w800,
+                  color: widget.darkBackground
+                      ? AppTheme.white
+                      : AppTheme.black,
+                  letterSpacing: -0.3,
                   height: 1,
                 ),
               ),
               Text(
-                'POLLERÍA & PARRILLAS',
+                'ROASTER & GRILL',
                 style: TextStyle(
-                  fontSize: widget.size * 0.22,
-                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Inter',
+                  fontSize: widget.size * 0.20,
+                  fontWeight: FontWeight.w600,
                   color: AppTheme.primaryColor,
-                  letterSpacing: 1.5,
+                  letterSpacing: 1.2,
                 ),
               ),
             ],
