@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MR. PEPE - Cocina TV</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background-color: #0D0D0D; color: #FFFFFF; font-family: 'Inter', sans-serif; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
+        header { display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; border-bottom: 1px solid rgba(255,255,255,0.1); background: #000; }
+        .logo-section { display: flex; align-items: center; gap: 15px; }
+        .logo-img { width: 50px; height: 50px; object-fit: contain; }
+        .title h1 { font-size: 20px; font-weight: 900; letter-spacing: -1px; }
+        .title p { font-size: 10px; color: #BF391B; font-weight: bold; letter-spacing: 2px; }
+        .kanban { display: flex; flex: 1; padding: 20px; gap: 20px; overflow-x: auto; }
+        .column { flex: 1; min-width: 300px; display: flex; flex-direction: column; }
+        .col-header { padding: 12px 20px; border-radius: 12px; margin-bottom: 15px; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }
+        .col-pending { background: rgba(245, 158, 11, 0.15); color: #F59E0B; }
+        .col-process { background: rgba(191, 57, 27, 0.15); color: #E54D2A; }
+        .col-ready { background: rgba(26, 137, 82, 0.15); color: #1A8952; }
+        .orders-list { flex: 1; overflow-y: auto; }
+        .card { background: #1A1A1A; border: 1px solid rgba(255,255,255,0.05); border-radius: 15px; padding: 15px; margin-bottom: 12px; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .mesa-tag { background: #BF391B; color: #fff; padding: 4px 10px; border-radius: 6px; font-weight: 900; font-size: 12px; }
+        .timer { font-size: 11px; color: #9AA0A6; font-weight: bold; }
+        .item-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+        .qty { background: #BF391B; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border-radius: 4px; font-size: 9px; font-weight: 900; }
+        .name { font-size: 12px; color: #E4E7EC; }
+        .card-footer { margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; font-size: 10px; color: #555; }
+        .total { color: #fff; font-weight: 900; }
+        #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #BF391B; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div id="loader">
+        <div class="spinner"></div>
+        <p id="loading-text" style="margin-top: 20px; color: #555; font-size: 10px; font-weight: bold; letter-spacing: 2px;">SINCRONIZANDO MR. PEPE...</p>
+    </div>
+
+    <header>
+        <div class="logo-section">
+            <img src="/logo.png" class="logo-img" alt="MrPepe">
+            <div class="title">
+                <h1>MR. PEPE</h1>
+                <p>KITCHEN DISPLAY</p>
+            </div>
+        </div>
+        <div id="clock" style="font-size: 24px; font-weight: 900;">00:00</div>
+    </header>
+
+    <div class="kanban">
+        <div class="column">
+            <div class="col-header col-pending">Pendientes (<span id="count-p">0</span>)</div>
+            <div id="list-p" class="orders-list"></div>
+        </div>
+        <div class="column">
+            <div class="col-header col-process">En Proceso (<span id="count-pr">0</span>)</div>
+            <div id="list-pr" class="orders-list"></div>
+        </div>
+        <div class="column">
+            <div class="col-header col-ready">Listos (<span id="count-r">0</span>)</div>
+            <div id="list-r" class="orders-list"></div>
+        </div>
+    </div>
+
+    <script>
+        var firebaseConfig = {
+            apiKey: "AIzaSyA98oApRkBpFLL4guT9q0UJP4sU5M6LdK8",
+            authDomain: "app-polleria-7e98a.firebaseapp.com",
+            projectId: "app-polleria-7e98a",
+            storageBucket: "app-polleria-7e98a.firebasestorage.app",
+            messagingSenderId: "151579555777",
+            appId: "1:151579555777:web:6457af9b5a139c2d72e140"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        var db = firebase.firestore();
+        db.settings({ experimentalForceLongPolling: true });
+
+        setInterval(function() {
+            var now = new Date();
+            document.getElementById('clock').innerText = now.getHours() + ":" + (now.getMinutes() < 10 ? '0' : '') + now.getMinutes();
+        }, 1000);
+
+        // Auto Login solo si no hay usuario
+        firebase.auth().onAuthStateChanged(function(user) {
+            if (user) {
+                escucharPedidos();
+            } else {
+                firebase.auth().signInWithEmailAndPassword("admin@elbrasero.com", "admin123456");
+            }
+        });
+
+        var unsubscribe = null;
+        function escucharPedidos() {
+            if (unsubscribe) unsubscribe();
+            unsubscribe = db.collection("orders")
+            .limit(25)
+            .onSnapshot(function(snapshot) {
+                var p = [], pr = [], r = [];
+                snapshot.forEach(function(doc) {
+                    var order = doc.data();
+                    order.id = doc.id;
+                    if (order.status === "pendiente") p.push(order);
+                    else if (order.status === "preparando") pr.push(order);
+                    else if (order.status === "listo") r.push(order);
+                });
+                render(p, pr, r);
+                document.getElementById('loader').style.display = 'none';
+            }, function(error) {
+                console.error(error);
+                setTimeout(escucharPedidos, 3000);
+            });
+        }
+
+        function render(p, pr, r) {
+            document.getElementById('count-p').innerText = p.length;
+            document.getElementById('count-pr').innerText = pr.length;
+            document.getElementById('count-r').innerText = r.length;
+            document.getElementById('list-p').innerHTML = p.map(createCard).join('');
+            document.getElementById('list-pr').innerHTML = pr.map(createCard).join('');
+            document.getElementById('list-r').innerHTML = r.map(createCard).join('');
+        }
+
+        function createCard(order) {
+            var itemsHtml = "";
+            if (order.items) {
+                for (var i = 0; i < order.items.length; i++) {
+                    itemsHtml += '<div class="item-row"><div class="qty">' + order.items[i].cantidad + 'x</div><div class="name">' + order.items[i].nombre + '</div></div>';
+                }
+            }
+            var mins = 0;
+            if (order.createdAt) {
+                var created = order.createdAt.toDate ? order.createdAt.toDate() : new Date(order.createdAt);
+                mins = Math.floor((new Date() - created) / 60000);
+            }
+            return '<div class="card"><div class="card-header"><div class="mesa-tag">Mesa ' + (order.mesaNumero || '?') + '</div><div class="timer">' + mins + ' min</div></div><div class="items-box">' + itemsHtml + '</div><div class="card-footer"><span>ID: ' + order.id.substring(0,5).toUpperCase() + '</span><span class="total">S/ ' + (order.total || 0).toFixed(2) + '</span></div></div>';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,125 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", sans-serif;
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    font-family: "Inter", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    background-color: #F0F2F5;
+    color: #191C1E;
+  }
+}
+
+@layer utilities {
+  .ember-gradient {
+    background: linear-gradient(135deg, #8C2510 0%, #BF391B 50%, #E54D2A 100%);
+  }
+
+  .sidebar-gradient {
+    background: linear-gradient(to bottom, #111111 0%, #1A1A1A 100%);
+  }
+
+  .ghost-border {
+    border: 1px solid rgba(228, 231, 236, 0.15);
+  }
+
+  .card-shadow {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  }
+
+  .ember-shadow {
+    box-shadow: 0 8px 32px rgba(140, 37, 16, 0.18);
+  }
+
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+  }
+}
+
+/* Scrollbar personalizado */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F0F2F5;
+}
+::-webkit-scrollbar-thumb {
+  background: #E4E7EC;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #BF391B;
+}
+
+/* Animaciones custom */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pendingPulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.25s ease-out;
+}
+
+.animate-pending {
+  animation: pendingPulse 2s ease-in-out infinite;
+}
+
+/* Print styles para impresión de boletas */
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+  .print-only, .print-only * {
+    visibility: visible !important;
+  }
+  .print-only {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  .print-receipt {
+    width: 80mm !important;
+    margin: 0 auto !important;
+    border: none !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+
+  body { 
+    background: white !important; 
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Forzar colores en la impresión */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}

@@ -485,27 +485,42 @@ class _BillingViewState extends ConsumerState<BillingView> {
   }
 
   void _processCheckout(List<OrderModel> orders, double total) async {
-    // 1. Marcar órdenes como pagadas
+    // 1. Recopilar datos del cliente
+    final String cliente = _isFactura 
+      ? (_razonSocial ?? 'RUC: ${_rucController.text}') 
+      : (_clienteNombre ?? 'CONSUMIDOR FINAL');
+    final String docId = _isFactura ? _rucController.text : _dniController.text;
+    final String tipoDoc = _isFactura ? 'factura' : 'boleta';
+
+    // 2. Marcar órdenes como pagadas guardando los datos del cliente y el N° de boleta
+    final String correlativo = (DateTime.now().millisecondsSinceEpoch % 1000000).toString().padLeft(6, '0');
+    final String voucherNumber = "${_isFactura ? 'F' : 'B'}001-$correlativo";
+
     for (var order in orders) {
-      await FirebaseFirestore.instance.collection('orders').doc(order.id).update({'status': OrderStatus.pagado.name});
+      await FirebaseFirestore.instance.collection('orders').doc(order.id).update({
+        'status': OrderStatus.pagado.name,
+        'clienteNombre': cliente,
+        'clienteDocumento': docId.isEmpty ? null : docId,
+        'tipoDocumento': tipoDoc,
+        'voucherNumber': voucherNumber,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
     }
     
     // 2. Liberar Mesa
     await ref.read(tableProvider.notifier).updateTableStatus(widget.mesa.id, MesaStatus.libre, encargado: null);
     
     if (mounted) {
-      _showReceiptDialog(orders, total);
+      _showReceiptDialog(orders, total, voucherNumber); // Pasamos el número generado
     }
   }
 
-  void _showReceiptDialog(List<OrderModel> orders, double total) {
+  void _showReceiptDialog(List<OrderModel> orders, double total, String voucherNumber) {
     final allItems = orders.expand((o) => o.items).toList();
-    final String correlativo = '000${DateTime.now().millisecond}';
     final String tipoDoc = _isFactura ? 'FACTURA ELECTRÓNICA' : 'BOLETA DE VENTA';
-    final String serie = _isFactura ? 'F001' : 'B001';
     final String cliente = _isFactura 
       ? (_razonSocial ?? 'RUC: ${_rucController.text}') 
-      : (_clienteNombre ?? 'CLIENTES VARIOS');
+      : (_clienteNombre ?? 'CONSUMIDOR FINAL');
     final String docId = _isFactura ? _rucController.text : (_dniController.text.isEmpty ? '-' : _dniController.text);
 
     showDialog(
@@ -523,12 +538,11 @@ class _BillingViewState extends ConsumerState<BillingView> {
               children: [
                 BrasaLogo(size: 40),
                 const SizedBox(height: 8),
-                const Text('EL BRASERO HEARTH S.A.C.', style: TextStyle(fontWeight: FontWeight.bold)),
-                const Text('RUC: 20601428312', style: TextStyle(fontSize: 12)),
-                const Text('AV. LOS PROCERES 456, SURCO', style: TextStyle(fontSize: 10)),
+                const Text('RUC: 10418236103', style: TextStyle(fontSize: 12)),
+                const Text('JR. JUNIN 413 - EL TAMBO - HUANCAYO', style: TextStyle(fontSize: 10)),
                 const Divider(height: 32),
                 Text(tipoDoc, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                Text('$serie-$correlativo', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                Text(voucherNumber, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
                 const SizedBox(height: 16),
                 
                 // Client Info Section
