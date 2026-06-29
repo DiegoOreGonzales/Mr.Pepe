@@ -1,4 +1,4 @@
--- Script de Inicialización de la Base de Datos - Mr. Pepe / Cios
+-- Script de Inicialización de la Base de Datos - Mr. Pepe / Chio's Chicken
 -- Este script se ejecuta automáticamente al levantar el contenedor de la base de datos.
 
 -- 1. Tabla de Usuarios (Autenticación y Roles)

@@ -136,7 +136,7 @@ class _SectionTitle extends StatelessWidget {
       case '/orders':    return 'Pedidos';
       case '/reports':   return 'Reportes';
       case '/billing':   return 'Facturación';
-      default:           return 'Mr. Pepe';
+      default:           return "Chio's Chicken";
     }
   }
 
@@ -341,7 +341,7 @@ class _SideNavBar extends StatelessWidget {
               ),
               const SizedBox(width: 11),
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                const Text('MR. PEPE',
+                const Text("CHIO'S CHICKEN",
                     style: TextStyle(
                         fontFamily: 'Inter',
                         fontSize: 13,

@@ -87,7 +87,7 @@ class _BrasaLogoState extends State<BrasaLogo>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'MR. PEPE',
+                "CHIO'S CHICKEN",
                 style: TextStyle(
                   fontFamily: 'Inter',
                   fontSize: widget.size * 0.43,

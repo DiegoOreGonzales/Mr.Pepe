@@ -1,4 +1,4 @@
-# Dockerfile para la aplicación Web-Admin de Mr. Pepe / Cios
+# Dockerfile para la aplicación Web-Admin de Mr. Pepe / Chio's Chicken
 FROM node:20-alpine AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app

@@ -4,6 +4,7 @@ import '../../../core/theme/app_theme.dart';
 import '../providers/auth_provider.dart';
 import '../../../core/services/seed_service.dart';
 import '../../../core/services/firebase_service.dart';
+import '../../../core/services/api_service.dart';
 import '../../kitchen/views/kitchen_view.dart';
 
 class LoginView extends ConsumerStatefulWidget {
@@ -112,7 +113,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
                           ),
                           const SizedBox(height: 28),
                           const Text(
-                            'Mr. Pepe',
+                            "Chio's Chicken",
                             style: TextStyle(
                               fontFamily: 'Inter',
                               fontSize: 38,
@@ -341,16 +342,56 @@ class _LoginViewState extends ConsumerState<LoginView> {
       floatingActionButton: FloatingActionButton.small(
         backgroundColor: AppTheme.darkSurface,
         foregroundColor: AppTheme.white,
-        tooltip: 'Inicializar sistema',
-        onPressed: () async {
-          final firebaseService = ref.read(firebaseServiceProvider);
-          await SeedService.initializeSystem(firebaseService);
-          if (!mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                  'Sistema inicializado — admin@elbrasero.com / admin123456'),
-              backgroundColor: Color(0xFF1A8952),
+        tooltip: 'Configuración de Servidor',
+        onPressed: () {
+          final apiService = ref.read(apiServiceProvider);
+          final controller = TextEditingController(text: apiService.serverIp);
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Configuración de Servidor Local'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'Ingresa la IP y puerto del servidor local Next.js (ej. 192.168.1.13:3000):',
+                    style: TextStyle(fontSize: 13),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: controller,
+                    decoration: const InputDecoration(
+                      labelText: 'IP del Servidor',
+                      hintText: '192.168.1.13:3000',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('CANCELAR'),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    final newIp = controller.text.trim();
+                    if (newIp.isNotEmpty) {
+                      await apiService.setServerIp(newIp);
+                      if (context.mounted) {
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('IP del servidor actualizada a: $newIp'),
+                            backgroundColor: const Color(0xFF1A8952),
+                          ),
+                        );
+                      }
+                    }
+                  },
+                  child: const Text('GUARDAR'),
+                ),
+              ],
             ),
           );
         },

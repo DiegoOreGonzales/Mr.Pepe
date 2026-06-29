@@ -34,12 +34,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const savedUser = localStorage.getItem("cios_user");
+    const savedUser = localStorage.getItem("chios_user");
     if (savedUser) {
       try {
         setUser(JSON.parse(savedUser));
       } catch (e) {
-        localStorage.removeItem("cios_user");
+        localStorage.removeItem("chios_user");
       }
     }
     setLoading(false);
@@ -54,7 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const data = await res.json();
     if (data.success && data.user) {
       setUser(data.user);
-      localStorage.setItem("cios_user", JSON.stringify(data.user));
+      localStorage.setItem("chios_user", JSON.stringify(data.user));
     } else {
       throw new Error(data.error || "Error de inicio de sesión");
     }
@@ -62,7 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     setUser(null);
-    localStorage.removeItem("cios_user");
+    localStorage.removeItem("chios_user");
   };
 
   return (

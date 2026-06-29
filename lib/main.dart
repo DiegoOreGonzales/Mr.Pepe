@@ -20,9 +20,13 @@ import 'firebase_options.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    print('Firebase initialization skipped/failed in offline mode: $e');
+  }
 
   runApp(
     const ProviderScope(
@@ -93,7 +97,7 @@ class MrPepeApp extends ConsumerWidget {
 
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
-      title: 'Mr. Pepe',
+      title: "Chio's Chicken",
       theme: AppTheme.lightTheme,
       routerConfig: router,
     );

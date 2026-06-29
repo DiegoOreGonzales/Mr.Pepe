@@ -3,7 +3,7 @@ version: '3.8'
 services:
   db:
     image: postgres:15-alpine
-    container_name: cios_postgres_db
+    container_name: chios_postgres_db
     restart: always
     environment:
       POSTGRES_DB: mrpepe
@@ -15,11 +15,11 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./db-init:/docker-entrypoint-initdb.d:ro
     networks:
-      - cios_network
+      - chios_network
 
   pgadmin:
     image: dpage/pgadmin4
-    container_name: cios_pgadmin
+    container_name: chios_pgadmin
     restart: always
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@mrpepe.com
@@ -29,13 +29,13 @@ services:
     depends_on:
       - db
     networks:
-      - cios_network
+      - chios_network
 
   web:
     build:
       context: ./web-admin
       dockerfile: Dockerfile
-    container_name: cios_web_app
+    container_name: chios_web_app
     restart: always
     ports:
       - "3000:3000"
@@ -46,11 +46,11 @@ services:
     depends_on:
       - db
     networks:
-      - cios_network
+      - chios_network
 
 volumes:
   postgres_data:
 
 networks:
-  cios_network:
+  chios_network:
     driver: bridge

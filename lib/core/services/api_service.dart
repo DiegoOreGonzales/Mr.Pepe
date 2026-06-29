@@ -1,17 +1,17 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../features/auth/models/user_model.dart';
 import '../../features/tables/models/mesa_model.dart';
 import '../../features/kitchen/models/order_model.dart';
 import '../../features/orders/providers/order_provider.dart';
 
 class ApiService {
-  // Ajusta la IP del servidor de producción local de Next.js.
-  // En Android Emulator, 10.0.2.2 mapea a localhost de la PC de desarrollo.
-  // Usamos la IP local de red 192.168.1.13 como base por defecto.
-  static const String baseUrl = 'http://192.168.1.13:3000';
+  static const String defaultIp = '192.168.1.13:3000';
+  String _currentServerIp = defaultIp;
+  
   final Dio _dio = Dio(BaseOptions(
-    baseUrl: baseUrl,
+    baseUrl: 'http://$defaultIp',
     connectTimeout: const Duration(seconds: 5),
     receiveTimeout: const Duration(seconds: 5),
     headers: {
@@ -19,6 +19,42 @@ class ApiService {
       'Content-Type': 'application/json',
     },
   ));
+
+  ApiService() {
+    _loadSavedServerIp();
+  }
+
+  String get serverIp => _currentServerIp;
+
+  Future<void> _loadSavedServerIp() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final savedIp = prefs.getString('server_ip');
+      if (savedIp != null && savedIp.isNotEmpty) {
+        _currentServerIp = savedIp;
+        _dio.options.baseUrl = 'http://$_currentServerIp';
+        print('IP del servidor cargada: $_currentServerIp');
+      }
+    } catch (e) {
+      print('Error al cargar IP de servidor: $e');
+    }
+  }
+
+  Future<void> setServerIp(String newIp) async {
+    if (newIp.isEmpty) return;
+    if (!newIp.contains(':')) {
+      newIp = '$newIp:3000';
+    }
+    _currentServerIp = newIp;
+    _dio.options.baseUrl = 'http://$_currentServerIp';
+    
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('server_ip', _currentServerIp);
+    } catch (e) {
+      print('Error al guardar IP de servidor: $e');
+    }
+  }
 
   UserModel? _currentUser;
   UserModel? get currentUser => _currentUser;

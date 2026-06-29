@@ -58,7 +58,7 @@ class SideNavBar extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'MR. PEPE',
+                      "CHIO'S CHICKEN",
                       style: TextStyle(
                         fontFamily: 'Inter',
                         fontSize: 14,
