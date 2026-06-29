@@ -16,18 +16,27 @@ class MainShell extends ConsumerWidget {
     final authState              = ref.watch(authProvider);
     final UserModel? user        = authState.valueOrNull;
 
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final bool isMobile = screenWidth < 800;
+
     return Scaffold(
       backgroundColor: AppTheme.lightGray,
+      drawer: isMobile
+          ? Drawer(
+              child: _SideNavBar(activeRoute: activeRoute, isDrawer: true),
+            )
+          : null,
       body: Row(
         children: [
-          // ── Sidebar oscuro ────────────────────────────────────────────────
-          _SideNavBar(activeRoute: activeRoute),
+          // Sidebar para pantallas grandes
+          if (!isMobile)
+            _SideNavBar(activeRoute: activeRoute, isDrawer: false),
 
-          // ── Área principal ────────────────────────────────────────────────
+          // Área principal
           Expanded(
             child: Column(
               children: [
-                _TopBar(user: user),
+                _TopBar(user: user, isMobile: isMobile),
                 Expanded(
                   child: Container(
                     color: AppTheme.lightGray,
@@ -46,7 +55,8 @@ class MainShell extends ConsumerWidget {
 // ─── Top Bar ─────────────────────────────────────────────────────────────────
 class _TopBar extends StatelessWidget {
   final UserModel? user;
-  const _TopBar({required this.user});
+  final bool isMobile;
+  const _TopBar({required this.user, required this.isMobile});
 
   String get _displayName {
     if (user?.nombre != null && user!.nombre.isNotEmpty) {
@@ -62,62 +72,79 @@ class _TopBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 64,
-      padding: const EdgeInsets.symmetric(horizontal: 28),
+      padding: EdgeInsets.symmetric(horizontal: isMobile ? 12 : 28),
       decoration: const BoxDecoration(
         color: AppTheme.white,
         border: Border(bottom: BorderSide(color: AppTheme.borderGray, width: 1)),
       ),
       child: Row(
         children: [
-          // ── Título de la sección actual ───────────────────────────────────
+          // Botón de menú para móvil
+          if (isMobile) ...[
+            IconButton(
+              icon: const Icon(Icons.menu_rounded, color: AppTheme.black),
+              onPressed: () {
+                Scaffold.of(context).openDrawer();
+              },
+            ),
+            const SizedBox(width: 4),
+          ],
+
+          // Título de la sección actual
           _SectionTitle(path: GoRouterState.of(context).uri.path),
 
           const Spacer(),
 
-          // ── Barra de búsqueda ─────────────────────────────────────────────
-          SizedBox(
-            width: 280,
-            height: 38,
-            child: TextField(
-              style: const TextStyle(fontSize: 13),
-              decoration: InputDecoration(
-                hintText: 'Buscar mesa, producto...',
-                hintStyle:
-                    const TextStyle(color: AppTheme.textMuted, fontSize: 12),
-                prefixIcon: const Icon(Icons.search_rounded,
-                    color: AppTheme.textMuted, size: 18),
-                filled: true,
-                fillColor: AppTheme.lightGray,
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 12),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide:
-                      const BorderSide(color: AppTheme.borderGray),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide:
-                      const BorderSide(color: AppTheme.borderGray),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(
-                      color: AppTheme.primaryColor, width: 1.5),
+          // Barra de búsqueda (solo escritorio)
+          if (!isMobile) ...[
+            SizedBox(
+              width: 280,
+              height: 38,
+              child: TextField(
+                style: const TextStyle(fontSize: 13),
+                decoration: InputDecoration(
+                  hintText: 'Buscar mesa, producto...',
+                  hintStyle:
+                      const TextStyle(color: AppTheme.textMuted, fontSize: 12),
+                  prefixIcon: const Icon(Icons.search_rounded,
+                      color: AppTheme.textMuted, size: 18),
+                  filled: true,
+                  fillColor: AppTheme.lightGray,
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 12),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide:
+                        const BorderSide(color: AppTheme.borderGray),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide:
+                        const BorderSide(color: AppTheme.borderGray),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(
+                        color: AppTheme.primaryColor, width: 1.5),
+                  ),
                 ),
               ),
             ),
-          ),
+            const SizedBox(width: 16),
+          ],
 
-          const SizedBox(width: 16),
-
-          // ── Notificaciones ────────────────────────────────────────────────
+          // Notificaciones
           _NotifButton(),
 
           const SizedBox(width: 16),
 
-          // ── Perfil ────────────────────────────────────────────────────────
-          _UserAvatar(displayName: _displayName, user: user, context: context),
+          // Perfil
+          _UserAvatar(
+            displayName: _displayName,
+            user: user,
+            context: context,
+            isMobile: isMobile,
+          ),
         ],
       ),
     );
@@ -200,15 +227,20 @@ class _UserAvatar extends StatelessWidget {
   final String displayName;
   final UserModel? user;
   final BuildContext context;
-  const _UserAvatar(
-      {required this.displayName, required this.user, required this.context});
+  final bool isMobile;
+  const _UserAvatar({
+    required this.displayName,
+    required this.user,
+    required this.context,
+    required this.isMobile,
+  });
 
   @override
   Widget build(BuildContext _) {
     return GestureDetector(
       onTap: () => _showMenu(context),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: EdgeInsets.symmetric(horizontal: isMobile ? 6 : 12, vertical: 6),
         decoration: BoxDecoration(
           color: AppTheme.lightGray,
           borderRadius: BorderRadius.circular(8),
@@ -230,19 +262,21 @@ class _UserAvatar extends StatelessWidget {
                     fontSize: 12),
               ),
             ),
-            const SizedBox(width: 8),
-            Text(
-              displayName,
-              style: const TextStyle(
-                fontFamily: 'Inter',
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: AppTheme.black,
+            if (!isMobile) ...[
+              const SizedBox(width: 8),
+              Text(
+                displayName,
+                style: const TextStyle(
+                  fontFamily: 'Inter',
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.black,
+                ),
               ),
-            ),
-            const SizedBox(width: 4),
-            const Icon(Icons.keyboard_arrow_down_rounded,
-                size: 16, color: AppTheme.textMuted),
+              const SizedBox(width: 4),
+              const Icon(Icons.keyboard_arrow_down_rounded,
+                  size: 16, color: AppTheme.textMuted),
+            ],
           ],
         ),
       ),
@@ -293,7 +327,8 @@ class _UserAvatar extends StatelessWidget {
 // ─── Sidebar ─────────────────────────────────────────────────────────────────
 class _SideNavBar extends StatelessWidget {
   final String activeRoute;
-  const _SideNavBar({required this.activeRoute});
+  final bool isDrawer;
+  const _SideNavBar({required this.activeRoute, required this.isDrawer});
 
   static const List<_NavItem> _items = [
     _NavItem(Icons.grid_view_rounded, 'Dashboard', '/dashboard'),
@@ -306,11 +341,13 @@ class _SideNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 220,
+      width: isDrawer ? double.infinity : 220,
       height: MediaQuery.of(context).size.height,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: AppTheme.sidebarGradient,
-        border: Border(right: BorderSide(color: Color(0xFF2A2A2A), width: 1)),
+        border: isDrawer
+            ? null
+            : const Border(right: BorderSide(color: Color(0xFF2A2A2A), width: 1)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -382,7 +419,10 @@ class _SideNavBar extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(10, 0, 10, 16),
             child: InkWell(
-              onTap: () => context.go('/login'),
+              onTap: () {
+                if (isDrawer) Navigator.pop(context); // Cerrar drawer
+                context.go('/login');
+              },
               borderRadius: BorderRadius.circular(9),
               child: Container(
                 padding: const EdgeInsets.symmetric(
@@ -411,7 +451,10 @@ class _SideNavBar extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 1.5),
       child: InkWell(
-        onTap: () => context.go(item.route),
+        onTap: () {
+          if (isDrawer) Navigator.pop(context); // Cerrar drawer
+          context.go(item.route);
+        },
         borderRadius: BorderRadius.circular(9),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),

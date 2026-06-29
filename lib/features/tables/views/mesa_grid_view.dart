@@ -30,78 +30,143 @@ class MesaGridView extends ConsumerWidget {
     final free       = tables.where((t) => t.status == MesaStatus.libre).length;
     final reserved   = tables.where((t) => t.status == MesaStatus.reservada).length;
 
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final bool isMobile = screenWidth < 750;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // ── Cabecera ───────────────────────────────────────────────────────
         Container(
           color: AppTheme.white,
-          padding: const EdgeInsets.fromLTRB(28, 20, 28, 0),
+          padding: EdgeInsets.fromLTRB(isMobile ? 16 : 28, 20, isMobile ? 16 : 28, 0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Mapa del Salón',
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 20,
-                          fontWeight: FontWeight.w800,
-                          color: AppTheme.black,
-                        ),
+              if (isMobile) ...[
+                // Layout móvil apilado
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Mapa del Salón',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        color: AppTheme.black,
                       ),
-                      Text(
-                        '${tables.length} mesas en total — actualización en tiempo real',
-                        style: const TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 12,
-                          color: AppTheme.textMuted,
-                        ),
+                    ),
+                    Text(
+                      '${tables.length} mesas — tiempo real',
+                      style: const TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 12,
+                        color: AppTheme.textMuted,
                       ),
-                    ],
-                  ),
-                  const Spacer(),
-                  // Stats rápidas
-                  _StatPill(
-                      label: 'Libres',
-                      count: free,
-                      color: const Color(0xFF1A8952)),
-                  const SizedBox(width: 8),
-                  _StatPill(
-                      label: 'Ocupadas',
-                      count: occupied,
-                      color: AppTheme.primaryColor),
-                  const SizedBox(width: 8),
-                  _StatPill(
-                      label: 'Reservadas',
-                      count: reserved,
-                      color: const Color(0xFF1A6FBF)),
-                  const SizedBox(width: 20),
-                  ElevatedButton.icon(
-                    onPressed: () => context.push('/print-qr'),
-                    icon: const Icon(Icons.qr_code_rounded, size: 16),
-                    label: const Text('Imprimir QR'),
-                  ),
-                ],
-              ),
+                    ),
+                    const SizedBox(height: 12),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      child: Row(
+                        children: [
+                          _StatPill(
+                              label: 'Libres',
+                              count: free,
+                              color: const Color(0xFF1A8952)),
+                          const SizedBox(width: 8),
+                          _StatPill(
+                              label: 'Ocupadas',
+                              count: occupied,
+                              color: AppTheme.primaryColor),
+                          const SizedBox(width: 8),
+                          _StatPill(
+                              label: 'Reservadas',
+                              count: reserved,
+                              color: const Color(0xFF1A6FBF)),
+                          const SizedBox(width: 12),
+                          ElevatedButton.icon(
+                            onPressed: () => context.push('/print-qr'),
+                            icon: const Icon(Icons.qr_code_rounded, size: 14),
+                            label: const Text('QR', style: TextStyle(fontSize: 12)),
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ] else ...[
+                // Layout escritorio original
+                Row(
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Mapa del Salón',
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                            color: AppTheme.black,
+                          ),
+                        ),
+                        Text(
+                          '${tables.length} mesas en total — actualización en tiempo real',
+                          style: const TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 12,
+                            color: AppTheme.textMuted,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Spacer(),
+                    _StatPill(
+                        label: 'Libres',
+                        count: free,
+                        color: const Color(0xFF1A8952)),
+                    const SizedBox(width: 8),
+                    _StatPill(
+                        label: 'Ocupadas',
+                        count: occupied,
+                        color: AppTheme.primaryColor),
+                    const SizedBox(width: 8),
+                    _StatPill(
+                        label: 'Reservadas',
+                        count: reserved,
+                        color: const Color(0xFF1A6FBF)),
+                    const SizedBox(width: 20),
+                    ElevatedButton.icon(
+                      onPressed: () => context.push('/print-qr'),
+                      icon: const Icon(Icons.qr_code_rounded, size: 16),
+                      label: const Text('Imprimir QR'),
+                    ),
+                  ],
+                ),
+              ],
               const SizedBox(height: 16),
 
-              // ── Filtros ────────────────────────────────────────────────────
-              Row(
-                children: [
-                  _FilterTab(ref: ref, label: 'TODAS', count: tables.length),
-                  const SizedBox(width: 6),
-                  _FilterTab(ref: ref, label: 'LIBRES', count: free),
-                  const SizedBox(width: 6),
-                  _FilterTab(ref: ref, label: 'OCUPADAS', count: occupied),
-                  const SizedBox(width: 6),
-                  _FilterTab(
-                      ref: ref, label: 'RESERVADAS', count: reserved),
-                ],
+              // ── Filtros Scrollables ────────────────────────────────────────────
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                child: Row(
+                  children: [
+                    _FilterTab(ref: ref, label: 'TODAS', count: tables.length),
+                    const SizedBox(width: 6),
+                    _FilterTab(ref: ref, label: 'LIBRES', count: free),
+                    const SizedBox(width: 6),
+                    _FilterTab(ref: ref, label: 'OCUPADAS', count: occupied),
+                    const SizedBox(width: 6),
+                    _FilterTab(
+                        ref: ref, label: 'RESERVADAS', count: reserved),
+                  ],
+                ),
               ),
               const SizedBox(height: 0),
             ],

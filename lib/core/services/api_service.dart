@@ -69,11 +69,9 @@ class ApiService {
 
       if (response.statusCode == 200 && response.data['success'] == true) {
         final userData = response.data['user'];
-        _currentUser = UserModel(
-          uid: userData['uid'],
-          nombre: userData['nombre'],
-          email: userData['email'],
-          role: userData['role'] ?? 'user',
+        _currentUser = UserModel.fromMap(
+          userData['uid'],
+          userData,
         );
         return _currentUser;
       }
