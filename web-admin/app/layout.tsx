@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Mr. Pepe — Admin Panel",
-  description: "Panel administrativo de Mr. Pepe Pollería",
+  title: "Chio's Chicken — Admin Panel",
+  description: "Panel administrativo de Chio's Chicken",
 };
 
 export default function RootLayout({

@@ -24,7 +24,7 @@ function getTodayLabel() {
 
 export default function TopBar() {
   const pathname = usePathname();
-  const page     = pageTitles[pathname] ?? { title: "Mr. Pepe", subtitle: "" };
+  const page     = pageTitles[pathname] ?? { title: "Chio's Chicken", subtitle: "" };
   
   const [showNotifications, setShowNotifications] = useState(false);
   const { orders } = useRecentOrders(5); // Obtenemos los 5 pedidos más recientes

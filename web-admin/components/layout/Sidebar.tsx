@@ -39,7 +39,7 @@ export default function Sidebar() {
             className="text-xl font-extrabold tracking-tighter text-white uppercase"
             style={{ letterSpacing: "-0.02em" }}
           >
-            Mr. Pepe
+            Chio's Chicken
           </h1>
         </div>
         <p className="text-[10px] font-semibold uppercase tracking-widest ml-11"

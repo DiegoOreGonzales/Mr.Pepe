@@ -53,7 +53,7 @@ INSERT INTO users (nombre, email, password_hash, role)
 VALUES (
     'Administrador Principal', 
     'admin@elbrasero.com', 
-    '$2a$10$7vN31J.c7XF7lB3qGz5C.eZ.Jz8lF5vXhHhHhHhHhHhHhHhHhHhHi', -- Contraseña encriptada para verificación con bcrypt
+    '$2b$10$csQQ/A.eQmxnIDNi7Du3HuKugGrafNyqZ2/Zh8T4uarDAKRdQJbua', -- Hash real de admin123456
     'admin'
 ) ON CONFLICT (email) DO NOTHING;
 
