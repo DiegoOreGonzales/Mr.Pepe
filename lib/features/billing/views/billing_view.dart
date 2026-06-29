@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../kitchen/models/order_model.dart';
@@ -11,6 +10,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/widgets/brasa_logo.dart';
 
 import '../../../core/services/sunat_service.dart';
+import '../../../core/services/api_service.dart';
 
 class BillingView extends ConsumerStatefulWidget {
   final Mesa mesa;
@@ -86,12 +86,9 @@ class _BillingViewState extends ConsumerState<BillingView> {
         ),
       ),
       body: StreamBuilder<List<OrderModel>>(
-        stream: FirebaseFirestore.instance
-            .collection('orders')
-            .where('mesaNumero', isEqualTo: widget.mesa.numero)
-            .where('status', isNotEqualTo: OrderStatus.pagado.name)
-            .snapshots()
-            .map((s) => s.docs.map((d) => OrderModel.fromFirestore(d)).toList()),
+        stream: Stream.periodic(const Duration(seconds: 3))
+            .asyncMap((_) => ref.read(apiServiceProvider).fetchActiveOrders())
+            .map((orders) => orders.where((o) => o.mesaNumero == widget.mesa.numero).toList()),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return Center(
@@ -496,15 +493,15 @@ class _BillingViewState extends ConsumerState<BillingView> {
     final String correlativo = (DateTime.now().millisecondsSinceEpoch % 1000000).toString().padLeft(6, '0');
     final String voucherNumber = "${_isFactura ? 'F' : 'B'}001-$correlativo";
 
+    final apiService = ref.read(apiServiceProvider);
     for (var order in orders) {
-      await FirebaseFirestore.instance.collection('orders').doc(order.id).update({
-        'status': OrderStatus.pagado.name,
-        'clienteNombre': cliente,
-        'clienteDocumento': docId.isEmpty ? null : docId,
-        'tipoDocumento': tipoDoc,
-        'voucherNumber': voucherNumber,
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
+      await apiService.checkoutOrder(
+        orderId: order.id,
+        clienteNombre: cliente,
+        clienteDocumento: docId.isEmpty ? null : docId,
+        tipoDocumento: tipoDoc,
+        voucherNumber: voucherNumber,
+      );
     }
     
     // 2. Liberar Mesa

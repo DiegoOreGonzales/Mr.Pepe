@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: cios_postgres_db
+    restart: always
+    environment:
+      POSTGRES_DB: mrpepe
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mrpepepassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db-init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - cios_network
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: cios_pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@mrpepe.com
+      PGADMIN_DEFAULT_PASSWORD: adminpassword
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+    networks:
+      - cios_network
+
+  web:
+    build:
+      context: ./web-admin
+      dockerfile: Dockerfile
+    container_name: cios_web_app
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://postgres:mrpepepassword@db:5432/mrpepe
+      NODE_ENV: production
+      PORT: 3000
+    depends_on:
+      - db
+    networks:
+      - cios_network
+
+volumes:
+  postgres_data:
+
+networks:
+  cios_network:
+    driver: bridge

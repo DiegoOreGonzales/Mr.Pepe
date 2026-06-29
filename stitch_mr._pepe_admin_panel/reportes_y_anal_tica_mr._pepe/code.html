@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "background": "#f7f9fc",
+                        "outline": "#8d706a",
+                        "surface-bright": "#f7f9fc",
+                        "on-primary-fixed": "#3d0600",
+                        "tertiary": "#6437a7",
+                        "on-tertiary": "#ffffff",
+                        "primary-fixed": "#ffdad2",
+                        "surface-tint": "#b02e11",
+                        "on-secondary-container": "#636262",
+                        "secondary-fixed": "#e5e2e1",
+                        "tertiary-fixed-dim": "#d6baff",
+                        "error-container": "#ffdad6",
+                        "on-surface-variant": "#5a413b",
+                        "secondary-container": "#e2dfde",
+                        "surface-container-highest": "#e0e3e6",
+                        "surface-container-high": "#e6e8eb",
+                        "on-background": "#191c1e",
+                        "on-tertiary-fixed": "#280057",
+                        "tertiary-fixed": "#ecdcff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-dim": "#d8dadd",
+                        "error": "#ba1a1a",
+                        "surface-container": "#eceef1",
+                        "inverse-on-surface": "#eff1f4",
+                        "surface-container-low": "#f2f4f7",
+                        "inverse-surface": "#2d3133",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-fixed-variant": "#474746",
+                        "primary-container": "#bf391b",
+                        "on-tertiary-container": "#f2e5ff",
+                        "on-error": "#ffffff",
+                        "tertiary-container": "#7d51c1",
+                        "outline-variant": "#e2bfb7",
+                        "on-tertiary-fixed-variant": "#592b9c",
+                        "on-error-container": "#93000a",
+                        "on-primary-fixed-variant": "#8b1900",
+                        "on-primary": "#ffffff",
+                        "primary": "#9d2003",
+                        "surface": "#f7f9fc",
+                        "primary-fixed-dim": "#ffb4a3",
+                        "on-primary-container": "#ffe4de",
+                        "on-surface": "#191c1e",
+                        "secondary": "#5f5e5e",
+                        "secondary-fixed-dim": "#c8c6c5",
+                        "inverse-primary": "#ffb4a3",
+                        "on-secondary-fixed": "#1c1b1b",
+                        "surface-variant": "#e0e3e6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .ember-gradient {
+            background: linear-gradient(135deg, #8C2510 0%, #BF391B 50%, #E54D2A 100%);
+        }
+        .ghost-border { border: 1px solid rgba(228, 231, 236, 0.15); }
+    </style>
+</head>
+<body class="bg-background text-on-background">
+<!-- SideNavBar Shell -->
+<aside class="bg-stone-950 dark:bg-black h-screen w-[240px] fixed left-0 top-0 flex flex-col py-8 shadow-2xl shadow-orange-900/5 z-50">
+<div class="px-8 mb-10">
+<h1 class="text-2xl font-extrabold tracking-tighter text-white">Mr. Pepe</h1>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 text-stone-400 hover:text-stone-100 px-6 py-3 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-xs font-semibold uppercase tracking-wider">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 text-stone-400 hover:text-stone-100 px-6 py-3 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="restaurant">restaurant</span>
+<span class="text-xs font-semibold uppercase tracking-wider">Mesas</span>
+</a>
+<a class="flex items-center gap-3 text-stone-400 hover:text-stone-100 px-6 py-3 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="kitchen">kitchen</span>
+<span class="text-xs font-semibold uppercase tracking-wider">Cocina</span>
+</a>
+<a class="flex items-center gap-3 text-stone-400 hover:text-stone-100 px-6 py-3 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+<span class="text-xs font-semibold uppercase tracking-wider">Pedidos</span>
+</a>
+<a class="flex items-center gap-3 text-stone-400 hover:text-stone-100 px-6 py-3 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="receipt">receipt</span>
+<span class="text-xs font-semibold uppercase tracking-wider">Facturacion</span>
+</a>
+<!-- Active State: Reportes -->
+<a class="bg-stone-900 text-orange-600 border-l-4 border-orange-700 font-bold px-6 py-3 flex items-center gap-3 active:scale-[0.98] ease-out duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="analytics" style="font-variation-settings: 'FILL' 1;">analytics</span>
+<span class="text-xs font-semibold uppercase tracking-wider">Reportes</span>
+</a>
+<a class="flex items-center gap-3 text-stone-400 hover:text-stone-100 px-6 py-3 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+<span class="text-xs font-semibold uppercase tracking-wider">Productos</span>
+</a>
+<a class="flex items-center gap-3 text-stone-400 hover:text-stone-100 px-6 py-3 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="text-xs font-semibold uppercase tracking-wider">Configuracion</span>
+</a>
+</nav>
+<div class="mt-auto px-6 border-t border-stone-800 pt-6">
+<div class="flex items-center gap-3 mb-6">
+<div class="w-8 h-8 rounded-full bg-stone-800 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Close-up professional portrait of an adult male administrator with a warm and confident expression" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAM40tUMtRxe6kzu4ACO5ouielIAVjQCZTgkm6UJKA2xwC2Ft1bnSZkmY9757BPCVNOQ0uQVXo8mJbydjgD9om3gkI_2vQ7LUhQuuO0KC2Zjxm6BndSN_S5rEDTrJGvxEhCmevUv4EwGsoxh_WULQ3-yF59IewGoWf4nDteOCffRQT8KMZHGE40qgrxSr6bYlyogocmQSzaNaOe7WWlAC8MxSES6Fj5hqqII6TfUtXpAqQ0tSm3XrWS38nRlrho3_x3sGVjHF9eV_N5"/>
+</div>
+<div class="flex flex-col">
+<span class="text-stone-200 text-xs font-bold leading-none">Diego Orejon</span>
+<span class="text-stone-500 text-[10px] uppercase font-semibold mt-1">Administrador</span>
+</div>
+</div>
+<a class="flex items-center gap-3 text-stone-400 hover:text-stone-100 py-2 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span class="text-xs font-semibold uppercase tracking-wider">Cerrar Sesión</span>
+</a>
+</div>
+</aside>
+<!-- TopNavBar Shell -->
+<header class="fixed top-0 right-0 w-[calc(100%-240px)] h-16 bg-white/80 dark:bg-stone-950/80 backdrop-blur-md flex items-center justify-between px-8 ml-[240px] border-b border-stone-200/15 dark:border-stone-800/15 z-40">
+<div class="flex items-center gap-4">
+<h2 class="text-[22px] font-extrabold tracking-tight Inter">Análisis de Operaciones</h2>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex bg-surface-container-low p-1 rounded-xl">
+<button class="px-4 py-1.5 text-xs font-bold text-on-surface bg-white shadow-sm rounded-lg">HOY</button>
+<button class="px-4 py-1.5 text-xs font-semibold text-secondary hover:text-on-surface transition-all">ESTA SEMANA</button>
+<button class="px-4 py-1.5 text-xs font-semibold text-secondary hover:text-on-surface transition-all">ESTE MES</button>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 text-stone-500 hover:bg-stone-100 dark:hover:bg-stone-900 rounded-lg transition-all">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-stone-500 hover:bg-stone-100 dark:hover:bg-stone-900 rounded-lg transition-all">
+<span class="material-symbols-outlined" data-icon="apps">apps</span>
+</button>
+<button class="ml-2 ember-gradient text-white px-5 py-2 rounded-xl text-xs font-bold shadow-lg shadow-primary/20 active:scale-[0.98] transition-all">
+                    Ver Mesas
+                </button>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="ml-[240px] pt-16 p-8 min-h-screen">
+<!-- Row 1: Metrics -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+<div class="bg-surface-container-lowest p-6 rounded-[14px] shadow-sm flex flex-col justify-between">
+<div>
+<span class="text-[10px] font-bold text-secondary uppercase tracking-widest">Total Ventas</span>
+<p class="text-3xl font-extrabold tracking-tighter mt-1">S/ 8,920</p>
+</div>
+<div class="flex items-center gap-1 text-[#1A8952] text-xs font-bold mt-4">
+<span class="material-symbols-outlined !text-sm" data-icon="arrow_upward">arrow_upward</span>
+<span>12.5% vs ayer</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-[14px] shadow-sm flex flex-col justify-between">
+<div>
+<span class="text-[10px] font-bold text-secondary uppercase tracking-widest">Ticket Promedio</span>
+<p class="text-3xl font-extrabold tracking-tighter mt-1">S/ 62.30</p>
+</div>
+<div class="flex items-center gap-1 text-[#1A8952] text-xs font-bold mt-4">
+<span class="material-symbols-outlined !text-sm" data-icon="arrow_upward">arrow_upward</span>
+<span>4.2% vs ayer</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-[14px] shadow-sm flex flex-col justify-between">
+<div>
+<span class="text-[10px] font-bold text-secondary uppercase tracking-widest">Pedidos Entregados</span>
+<p class="text-3xl font-extrabold tracking-tighter mt-1">143</p>
+</div>
+<div class="flex items-center gap-1 text-secondary text-xs font-bold mt-4">
+<span class="material-symbols-outlined !text-sm" data-icon="horizontal_rule">horizontal_rule</span>
+<span>Meta 150</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-[14px] shadow-sm flex flex-col justify-between">
+<div>
+<span class="text-[10px] font-bold text-secondary uppercase tracking-widest">Mesas Activas</span>
+<p class="text-3xl font-extrabold tracking-tighter mt-1">36</p>
+</div>
+<div class="flex items-center gap-2 mt-4">
+<div class="flex -space-x-2">
+<div class="w-6 h-6 rounded-full border-2 border-white bg-stone-100 flex items-center justify-center text-[8px] font-bold">JD</div>
+<div class="w-6 h-6 rounded-full border-2 border-white bg-stone-100 flex items-center justify-center text-[8px] font-bold">AL</div>
+<div class="w-6 h-6 rounded-full border-2 border-white bg-stone-100 flex items-center justify-center text-[8px] font-bold">MC</div>
+</div>
+<span class="text-[10px] font-bold text-secondary italic">+5 en espera</span>
+</div>
+</div>
+</div>
+<!-- Row 2: Charts -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+<!-- Line Chart Section -->
+<div class="lg:col-span-2 bg-surface-container-lowest p-6 rounded-[14px] shadow-sm">
+<div class="flex justify-between items-center mb-10">
+<h3 class="text-sm font-bold uppercase tracking-wide text-on-surface">Flujo de Ventas (S/)</h3>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+<span class="text-[10px] font-semibold text-secondary">Hoy</span>
+</div>
+</div>
+</div>
+<div class="relative h-64 w-full">
+<!-- Simple SVG Line Chart Mockup -->
+<svg class="w-full h-full overflow-visible" viewbox="0 0 1000 300">
+<defs>
+<lineargradient id="areaFill" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#BF391B" stop-opacity="0.3"></stop>
+<stop offset="100%" stop-color="#BF391B" stop-opacity="0"></stop>
+</lineargradient>
+</defs>
+<!-- Grid lines -->
+<line stroke="#f1f5f9" stroke-width="1" x1="0" x2="1000" y1="50" y2="50"></line>
+<line stroke="#f1f5f9" stroke-width="1" x1="0" x2="1000" y1="125" y2="125"></line>
+<line stroke="#f1f5f9" stroke-width="1" x1="0" x2="1000" y1="200" y2="200"></line>
+<line stroke="#f1f5f9" stroke-width="1" x1="0" x2="1000" y1="275" y2="275"></line>
+<!-- Area Fill -->
+<path d="M0 275 L0 250 Q 150 220, 300 100 T 600 150 T 900 60 T 1000 40 L 1000 275 Z" fill="url(#areaFill)"></path>
+<!-- Line -->
+<path d="M0 250 Q 150 220, 300 100 T 600 150 T 900 60 T 1000 40" fill="none" stroke="#BF391B" stroke-linecap="round" stroke-width="4"></path>
+<!-- Labels -->
+<text fill="#9AA0A6" font-size="12" font-weight="600" x="0" y="295">12:00</text>
+<text fill="#9AA0A6" font-size="12" font-weight="600" x="250" y="295">14:00</text>
+<text fill="#9AA0A6" font-size="12" font-weight="600" x="500" y="295">16:00</text>
+<text fill="#9AA0A6" font-size="12" font-weight="600" x="750" y="295">18:00</text>
+<text fill="#9AA0A6" font-size="12" font-weight="600" text-anchor="end" x="1000" y="295">22:00</text>
+</svg>
+</div>
+</div>
+<!-- Bar Chart Section -->
+<div class="bg-surface-container-lowest p-6 rounded-[14px] shadow-sm">
+<h3 class="text-sm font-bold uppercase tracking-wide text-on-surface mb-8">Mesas más Usadas</h3>
+<div class="space-y-6">
+<div class="space-y-2">
+<div class="flex justify-between items-end">
+<span class="text-xs font-bold">Mesa 12 (Terraza)</span>
+<span class="text-xs font-bold text-secondary">24 rotaciones</span>
+</div>
+<div class="h-3 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-stone-900 rounded-full" style="width: 95%;"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-end">
+<span class="text-xs font-bold">Mesa 04 (Salón)</span>
+<span class="text-xs font-bold text-secondary">19 rotaciones</span>
+</div>
+<div class="h-3 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-stone-900 rounded-full" style="width: 78%;"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-end">
+<span class="text-xs font-bold">Mesa 22 (Bar)</span>
+<span class="text-xs font-bold text-secondary">15 rotaciones</span>
+</div>
+<div class="h-3 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-stone-900 rounded-full" style="width: 62%;"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-end">
+<span class="text-xs font-bold">Mesa 09 (Ventana)</span>
+<span class="text-xs font-bold text-secondary">12 rotaciones</span>
+</div>
+<div class="h-3 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-stone-900 rounded-full" style="width: 50%;"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-end">
+<span class="text-xs font-bold">Mesa 18 (Privado)</span>
+<span class="text-xs font-bold text-secondary">8 rotaciones</span>
+</div>
+<div class="h-3 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-stone-900 rounded-full" style="width: 32%;"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Row 3: Top Products Table -->
+<div class="bg-surface-container-lowest p-0 rounded-[14px] shadow-sm overflow-hidden">
+<div class="p-6 flex justify-between items-center border-b border-stone-100">
+<h3 class="text-sm font-bold uppercase tracking-wide text-on-surface">Top Productos</h3>
+<button class="text-xs font-bold text-primary-container hover:underline">Exportar Reporte</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead class="bg-surface-container-low">
+<tr>
+<th class="px-6 py-4 text-[10px] font-bold text-secondary uppercase tracking-widest">Producto</th>
+<th class="px-6 py-4 text-[10px] font-bold text-secondary uppercase tracking-widest text-center">Unidades</th>
+<th class="px-6 py-4 text-[10px] font-bold text-secondary uppercase tracking-widest text-center">Rendimiento</th>
+<th class="px-6 py-4 text-[10px] font-bold text-secondary uppercase tracking-widest text-right">Ingresos (S/)</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-stone-100">
+<tr class="hover:bg-surface-container-low transition-colors duration-200">
+<td class="px-6 py-5">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-lg bg-stone-100 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Golden brown whole rotisserie chicken seasoned with Peruvian spices on a wooden serving board" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC7XtkZK9klmQgcgD0R_W4_SYiq-D0242Z4C6rEwD76vtPJHw-3SOLhpBZjXJ7FPtOMevbReBM7yualxx7LTGAsHcDoc5IMEWFizuYjeSlFq1gp2XCghHlYtRBXXJAVN5QHX1ohrSLZihKurr6hWzNnIyadPFwT8DUzE616y01INTFa0CZjZ-5vwYluaEgE_AeTd-DsdW4iujec0ELZuhJnJ8mCjNJKpr-PgTOoDZ9C2rfQxril54YIJOQ-FTuXlivC_1XTfNFSmtp1"/>
+</div>
+<div>
+<p class="text-xs font-bold text-on-surface">1/4 Pollo a la Brasa</p>
+<p class="text-[10px] text-secondary">Categoría: Brasas</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-5 text-center text-xs font-bold">542</td>
+<td class="px-6 py-5 min-w-[200px]">
+<div class="flex items-center gap-3">
+<div class="flex-1 h-1.5 bg-stone-100 rounded-full overflow-hidden">
+<div class="h-full ember-gradient" style="width: 88%;"></div>
+</div>
+<span class="text-[10px] font-bold text-secondary">88%</span>
+</div>
+</td>
+<td class="px-6 py-5 text-right text-xs font-bold">14,634.00</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors duration-200">
+<td class="px-6 py-5">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-lg bg-stone-100 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Hand-cut thick fries in a rustic cone bowl with visible herbs and salt flakes" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBeoEXp8ptDO_HBpiVxcsZW6ukB43Bi1iJVgA5_SsRjuo2ZaDokRbFjK-WaACvGbXyc1l66QP7L4wdA_24g8bLpA-cooQ5BUuSdeTCFXXJGPrbgFRZOBlVaP3wSkAThA5jlEK3u7jqXxmpg3deIi1-809vUWUJFpKkpUS1u8u3gCD70P2rToiOqZlPqrAEe4eXFb5IoO5MvOVqsc4NUFN0OZLqRjnK3nskM8kxdyJvDhOuoe4nHpqMWJlyKafzNUDsK4i9HEmeK0zF3"/>
+</div>
+<div>
+<p class="text-xs font-bold text-on-surface">Papas Nativas Grandes</p>
+<p class="text-[10px] text-secondary">Categoría: Guarniciones</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-5 text-center text-xs font-bold">410</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="flex-1 h-1.5 bg-stone-100 rounded-full overflow-hidden">
+<div class="h-full ember-gradient" style="width: 72%;"></div>
+</div>
+<span class="text-[10px] font-bold text-secondary">72%</span>
+</div>
+</td>
+<td class="px-6 py-5 text-right text-xs font-bold">6,150.00</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors duration-200">
+<td class="px-6 py-5">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-lg bg-stone-100 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Traditional purple corn drink in a glass pitcher with apple and cinnamon stick garnish" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB6s9b_aXpGTZEHVLJrEugs4dKqCjdc0--xVDMqUmsoXcTXMMXGsc0vIpk8wLKfaGlG2roKKSeuEOO3yuvB20gsExsRzIGmhIybFnySBgMZJmpQdfCRmGFK8Q3lzTySIEl2kRqkkCCfLs2hy-IaSlpFd4Xsk3KZRzD6v6LG2Z6ywXzLcdXcfQxzIWtL48ZtCgk4iNDG1axcaQ-fLlVLNsFKVE3q26USvkOWgnlYE9G99Z1hJsPd4YnnFDUTqozAgTr2zA8BIW5ZLLUL"/>
+</div>
+<div>
+<p class="text-xs font-bold text-on-surface">Chicha Morada 1L</p>
+<p class="text-[10px] text-secondary">Categoría: Bebidas</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-5 text-center text-xs font-bold">385</td>
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="flex-1 h-1.5 bg-stone-100 rounded-full overflow-hidden">
+<div class="h-full ember-gradient" style="width: 65%;"></div>
+</div>
+<span class="text-[10px] font-bold text-secondary">65%</span>
+</div>
+</td>
+<td class="px-6 py-5 text-right text-xs font-bold">7,700.00</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</main>
+</body></html>

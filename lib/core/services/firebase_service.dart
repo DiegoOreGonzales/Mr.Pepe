@@ -1,60 +1,30 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/tables/models/mesa_model.dart';
+import 'api_service.dart';
 
 class FirebaseService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final ApiService _apiService;
 
-  // Escuchar cambios en tiempo real de las mesas
+  FirebaseService(this._apiService);
+
+  // Escuchar cambios de las mesas simulado mediante Short Polling reactivo (cada 3 segundos)
   Stream<List<Mesa>> getTablesStream() {
-    return _firestore.collection('tables').orderBy('numero').snapshots().map((snapshot) {
-      return snapshot.docs.map((doc) {
-        final data = doc.data();
-        return Mesa(
-          id: doc.id,
-          numero: data['numero'] ?? 0,
-          capacidad: data['capacidad'] ?? 4,
-          status: _statusFromString(data['status']),
-          encargado: data['encargado'],
-          tiempoOcupada: data['startTime'] != null 
-            ? DateTime.now().difference((data['startTime'] as Timestamp).toDate())
-            : null,
-        );
-      }).toList();
-    });
-  }
-
-  MesaStatus _statusFromString(String? status) {
-    switch (status) {
-      case 'ocupada': return MesaStatus.ocupada;
-      case 'reservada': return MesaStatus.reservada;
-      default: return MesaStatus.libre;
-    }
+    return Stream.periodic(const Duration(seconds: 3))
+        .asyncMap((_) => _apiService.fetchTables());
   }
 
   Future<void> updateTableStatus(String id, MesaStatus status, {String? encargado}) async {
-    await _firestore.collection('tables').doc(id).update({
-      'status': status.name,
-      'encargado': encargado,
-      'startTime': status == MesaStatus.ocupada ? FieldValue.serverTimestamp() : null,
-    });
+    await _apiService.updateTableStatus(id, status, encargado: encargado);
   }
 
-  // Inicializar mesas si la colección está vacía (Seed)
+  // Las mesas se inicializan automáticamente en la base de datos PostgreSQL mediante Docker init.sql
   Future<void> seedTables() async {
-    final snapshot = await _firestore.collection('tables').get();
-    if (snapshot.docs.isEmpty) {
-      for (int i = 1; i <= 40; i++) {
-        await _firestore.collection('tables').doc('mesa_$i').set({
-          'numero': i,
-          'capacidad': 4,
-          'status': 'libre',
-          'encargado': null,
-          'startTime': null,
-        });
-      }
-    }
+    // No-op (ya inicializado en Postgres)
   }
 }
 
-final firebaseServiceProvider = Provider((ref) => FirebaseService());
+final firebaseServiceProvider = Provider((ref) {
+  final api = ref.watch(apiServiceProvider);
+  return FirebaseService(api);
+});

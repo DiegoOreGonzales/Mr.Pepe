@@ -1,29 +1,25 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/services/api_service.dart';
 import '../models/order_model.dart';
 
 final kitchenProvider = StreamProvider<List<OrderModel>>((ref) {
-  final firestore = FirebaseFirestore.instance;
-  
-  // Escuchar órdenes activas (no entregadas aún)
-  return firestore
-      .collection('orders')
-      .where('status', isNotEqualTo: 'entregado')
-      .orderBy('status')
-      .orderBy('createdAt')
-      .snapshots()
-      .map((snapshot) => snapshot.docs.map((doc) => OrderModel.fromFirestore(doc)).toList());
+  final api = ref.watch(apiServiceProvider);
+  return Stream.periodic(const Duration(seconds: 3))
+      .asyncMap((_) => api.fetchActiveOrders());
 });
 
 class KitchenService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final ApiService _apiService;
+
+  KitchenService(this._apiService);
 
   Future<void> updateOrderStatus(String orderId, OrderStatus newStatus) async {
-    await _firestore.collection('orders').doc(orderId).update({
-      'status': newStatus.name,
-      'updatedAt': FieldValue.serverTimestamp(),
-    });
+    await _apiService.updateOrderStatus(orderId, newStatus);
   }
 }
 
-final kitchenServiceProvider = Provider((ref) => KitchenService());
+final kitchenServiceProvider = Provider((ref) {
+  final api = ref.watch(apiServiceProvider);
+  return KitchenService(api);
+});

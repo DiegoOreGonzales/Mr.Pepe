@@ -3,10 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MR. PEPE - Cocina TV</title>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <title>CIOS - Cocina TV</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -40,14 +37,14 @@
 <body>
     <div id="loader">
         <div class="spinner"></div>
-        <p id="loading-text" style="margin-top: 20px; color: #555; font-size: 10px; font-weight: bold; letter-spacing: 2px;">SINCRONIZANDO MR. PEPE...</p>
+        <p id="loading-text" style="margin-top: 20px; color: #555; font-size: 10px; font-weight: bold; letter-spacing: 2px;">CONECTANDO A BASE DE DATOS LOCAL...</p>
     </div>
 
     <header>
         <div class="logo-section">
-            <img src="/logo.png" class="logo-img" alt="MrPepe">
+            <img src="/logo.png" class="logo-img" alt="Cios">
             <div class="title">
-                <h1>MR. PEPE</h1>
+                <h1>CIOS</h1>
                 <p>KITCHEN DISPLAY</p>
             </div>
         </div>
@@ -70,54 +67,42 @@
     </div>
 
     <script>
-        var firebaseConfig = {
-            apiKey: "AIzaSyA98oApRkBpFLL4guT9q0UJP4sU5M6LdK8",
-            authDomain: "app-polleria-7e98a.firebaseapp.com",
-            projectId: "app-polleria-7e98a",
-            storageBucket: "app-polleria-7e98a.firebasestorage.app",
-            messagingSenderId: "151579555777",
-            appId: "1:151579555777:web:6457af9b5a139c2d72e140"
-        };
-
-        firebase.initializeApp(firebaseConfig);
-        var db = firebase.firestore();
-        db.settings({ experimentalForceLongPolling: true });
-
         setInterval(function() {
             var now = new Date();
             document.getElementById('clock').innerText = now.getHours() + ":" + (now.getMinutes() < 10 ? '0' : '') + now.getMinutes();
         }, 1000);
 
-        // Auto Login solo si no hay usuario
-        firebase.auth().onAuthStateChanged(function(user) {
-            if (user) {
-                escucharPedidos();
-            } else {
-                firebase.auth().signInWithEmailAndPassword("admin@elbrasero.com", "admin123456");
-            }
-        });
-
-        var unsubscribe = null;
         function escucharPedidos() {
-            if (unsubscribe) unsubscribe();
-            unsubscribe = db.collection("orders")
-            .limit(25)
-            .onSnapshot(function(snapshot) {
-                var p = [], pr = [], r = [];
-                snapshot.forEach(function(doc) {
-                    var order = doc.data();
-                    order.id = doc.id;
-                    if (order.status === "pendiente") p.push(order);
-                    else if (order.status === "preparando") pr.push(order);
-                    else if (order.status === "listo") r.push(order);
-                });
-                render(p, pr, r);
-                document.getElementById('loader').style.display = 'none';
-            }, function(error) {
-                console.error(error);
-                setTimeout(escucharPedidos, 3000);
-            });
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', '/api/orders?status=active', true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        try {
+                            var json = JSON.parse(xhr.responseText);
+                            if (json.success && json.data) {
+                                var p = [], pr = [], r = [];
+                                json.data.forEach(function(order) {
+                                    if (order.status === "pendiente") p.push(order);
+                                    else if (order.status === "preparando") pr.push(order);
+                                    else if (order.status === "listo") r.push(order);
+                                });
+                                render(p, pr, r);
+                                document.getElementById('loader').style.display = 'none';
+                            }
+                        } catch(e) {
+                            console.error("Parse error:", e);
+                        }
+                    }
+                    // Re-consultar en 3 segundos
+                    setTimeout(escucharPedidos, 3000);
+                }
+            };
+            xhr.send();
         }
+
+        // Iniciar consulta de pedidos
+        escucharPedidos();
 
         function render(p, pr, r) {
             document.getElementById('count-p').innerText = p.length;
@@ -137,7 +122,7 @@
             }
             var mins = 0;
             if (order.createdAt) {
-                var created = order.createdAt.toDate ? order.createdAt.toDate() : new Date(order.createdAt);
+                var created = new Date(order.createdAt);
                 mins = Math.floor((new Date() - created) / 60000);
             }
             return '<div class="card"><div class="card-header"><div class="mesa-tag">Mesa ' + (order.mesaNumero || '?') + '</div><div class="timer">' + mins + ' min</div></div><div class="items-box">' + itemsHtml + '</div><div class="card-footer"><span>ID: ' + order.id.substring(0,5).toUpperCase() + '</span><span class="total">S/ ' + (order.total || 0).toFixed(2) + '</span></div></div>';

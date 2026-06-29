@@ -1,39 +1,36 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../tables/models/mesa_model.dart';
-
 enum OrderStatus { pendiente, preparando, listo, entregado, pagado }
 
 class OrderItem {
-  final String productId;
   final String nombre;
   final int cantidad;
   final double precio;
+  final String? productId;
   final String? notas;
 
   OrderItem({
-    required this.productId,
     required this.nombre,
     required this.cantidad,
     required this.precio,
+    this.productId,
     this.notas,
   });
 
   factory OrderItem.fromMap(Map<String, dynamic> map) {
     return OrderItem(
-      productId: map['productId'] ?? '',
       nombre: map['nombre'] ?? '',
-      cantidad: map['cantidad'] ?? 1,
+      cantidad: map['cantidad'] ?? 0,
       precio: (map['precio'] ?? 0.0).toDouble(),
+      productId: map['productId'],
       notas: map['notas'],
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
-      'productId': productId,
       'nombre': nombre,
       'cantidad': cantidad,
       'precio': precio,
+      'productId': productId,
       'notas': notas,
     };
   }
@@ -56,36 +53,12 @@ class OrderModel {
     required this.total,
   });
 
-  factory OrderModel.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
-    return OrderModel(
-      id: doc.id,
-      mesaNumero: data['mesaNumero'] ?? 0,
-      items: (data['items'] as List? ?? [])
-          .map((item) => OrderItem.fromMap(item))
-          .toList(),
-      status: _statusFromString(data['status']),
-      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      total: (data['total'] ?? 0.0).toDouble(),
-    );
-  }
-
-  static OrderStatus _statusFromString(String? status) {
-    switch (status) {
-      case 'preparando': return OrderStatus.preparando;
-      case 'listo': return OrderStatus.listo;
-      case 'entregado': return OrderStatus.entregado;
-      case 'pagado': return OrderStatus.pagado;
-      default: return OrderStatus.pendiente;
-    }
-  }
-
   Map<String, dynamic> toMap() {
     return {
       'mesaNumero': mesaNumero,
       'items': items.map((i) => i.toMap()).toList(),
       'status': status.name,
-      'createdAt': FieldValue.serverTimestamp(),
+      'createdAt': createdAt.toIso8601String(),
       'total': total,
     };
   }

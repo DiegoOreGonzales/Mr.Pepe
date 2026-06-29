@@ -7,16 +7,16 @@ import {
   useState,
   ReactNode,
 } from "react";
-import {
-  User,
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  signOut,
-} from "firebase/auth";
-import { auth } from "@/lib/firebase/config";
+
+export interface LocalUser {
+  uid: string;
+  nombre: string;
+  email: string;
+  role: string;
+}
 
 interface AuthContextValue {
-  user: User | null;
+  user: LocalUser | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -30,23 +30,39 @@ const AuthContext = createContext<AuthContextValue>({
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser]       = useState<User | null>(null);
+  const [user, setUser]       = useState<LocalUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => {
-      setUser(u);
-      setLoading(false);
-    });
-    return unsub;
+    const savedUser = localStorage.getItem("cios_user");
+    if (savedUser) {
+      try {
+        setUser(JSON.parse(savedUser));
+      } catch (e) {
+        localStorage.removeItem("cios_user");
+      }
+    }
+    setLoading(false);
   }, []);
 
   const login = async (email: string, password: string) => {
-    await signInWithEmailAndPassword(auth, email, password);
+    const res = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+    const data = await res.json();
+    if (data.success && data.user) {
+      setUser(data.user);
+      localStorage.setItem("cios_user", JSON.stringify(data.user));
+    } else {
+      throw new Error(data.error || "Error de inicio de sesión");
+    }
   };
 
   const logout = async () => {
-    await signOut(auth);
+    setUser(null);
+    localStorage.removeItem("cios_user");
   };
 
   return (

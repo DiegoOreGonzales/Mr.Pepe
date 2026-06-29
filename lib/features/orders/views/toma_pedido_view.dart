@@ -6,7 +6,7 @@ import '../../tables/models/mesa_model.dart';
 import '../../../../core/services/order_service.dart';
 import '../../tables/providers/table_provider.dart';
 import '../../kitchen/models/order_model.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../../core/services/api_service.dart';
 
 final categoryFilterProvider = StateProvider<Categoria>((ref) => Categoria.parrillas);
 
@@ -60,12 +60,9 @@ class TomaPedidoView extends ConsumerWidget {
           
           // --- NUEVA SECCIÓN: VER PEDIDOS ACTUALES ---
           StreamBuilder<List<OrderModel>>(
-            stream: FirebaseFirestore.instance
-                .collection('orders')
-                .where('mesaNumero', isEqualTo: mesa.numero)
-                .where('status', isNotEqualTo: OrderStatus.pagado.name)
-                .snapshots()
-                .map((snapshot) => snapshot.docs.map((doc) => OrderModel.fromFirestore(doc)).toList()),
+            stream: Stream.periodic(const Duration(seconds: 3))
+                .asyncMap((_) => ref.read(apiServiceProvider).fetchActiveOrders())
+                .map((orders) => orders.where((o) => o.mesaNumero == mesa.numero).toList()),
             builder: (context, snapshot) {
               if (!snapshot.hasData || snapshot.data!.isEmpty) return const SizedBox();
               

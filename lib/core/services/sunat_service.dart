@@ -112,14 +112,49 @@ class SunatService {
   }
 
   static Future<Map<String, String>?> consultarDni(String dni) async {
-    // Intentar con el endpoint estándar
-    var result = await _tryDniEndpoint('https://api.decolecta.com/v1/reniec/dni?numero=$dni', dni);
+    const String token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6ImpmY2M5NTAxMjMwOUBnbWFpbC5jb20ifQ.UaK6eecpbt-mVnF9hI-BYSHtl6QQ5hCLU1MNItWe9P8';
+    final String url = 'https://dniruc.apisperu.com/api/v1/dni/$dni?token=$token';
     
-    // Si falla, intentar con el endpoint alternativo
-    if (result == null) {
-      result = await _tryDniEndpoint('https://api.decolecta.com/v1/dni?numero=$dni', dni);
+    try {
+      final response = await _dio.get(
+        url,
+        options: Options(
+          headers: {
+            'Accept': 'application/json',
+          },
+          sendTimeout: const Duration(seconds: 8),
+          receiveTimeout: const Duration(seconds: 8),
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data != null && data['success'] == true) {
+          final actualData = data['data'];
+          if (actualData != null) {
+            final String nombres = (actualData['nombres'] ?? '').toString();
+            final String apellidoPaterno = (actualData['apellido_paterno'] ?? '').toString();
+            final String apellidoMaterno = (actualData['apellido_materno'] ?? '').toString();
+            final String nombreCompleto = (actualData['nombre_completo'] ?? '').toString();
+            
+            String finalName = nombreCompleto;
+            if (finalName.isEmpty) {
+              finalName = '$nombres $apellidoPaterno $apellidoMaterno'.trim();
+            }
+            if (finalName.isEmpty) {
+              finalName = nombres;
+            }
+            
+            return {
+              'nombres': finalName,
+              'dni': dni,
+            };
+          }
+        }
+      }
+    } catch (e) {
+      print('Error al consultar DNI en ApisPerú: $e');
     }
-    
-    return result;
+    return null;
   }
 }

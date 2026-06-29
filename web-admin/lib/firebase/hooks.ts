@@ -1,16 +1,6 @@
 "use client";
 
-import {
-  collection,
-  query,
-  where,
-  orderBy,
-  limit,
-  onSnapshot,
-  Timestamp,
-} from "firebase/firestore";
 import { useEffect, useState } from "react";
-import { db } from "@/lib/firebase/config";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -49,6 +39,11 @@ export interface DayMetrics {
   totalTables: number;
 }
 
+// Helper to parse dates safely
+function parseDate(d: any): Date {
+  return d ? new Date(d) : new Date();
+}
+
 // ── Hook: Recent Orders ───────────────────────────────────────────────────────
 
 export function useRecentOrders(limitCount = 8) {
@@ -56,34 +51,29 @@ export function useRecentOrders(limitCount = 8) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const q = query(
-      collection(db, "orders"),
-      orderBy("createdAt", "desc"),
-      limit(limitCount)
-    );
+    async function fetchRecent() {
+      try {
+        const res = await fetch(`/api/orders?limit=${limitCount}`);
+        const json = await res.json();
+        if (json.success && json.data) {
+          setOrders(
+            json.data.map((o: any) => ({
+              ...o,
+              createdAt: parseDate(o.createdAt),
+              updatedAt: parseDate(o.updatedAt),
+            }))
+          );
+        }
+      } catch (e) {
+        console.error("Error in useRecentOrders:", e);
+      } finally {
+        setLoading(false);
+      }
+    }
 
-    const unsub = onSnapshot(q, (snap) => {
-      setOrders(
-        snap.docs.map((d) => {
-          const data = d.data();
-          return {
-            id: d.id,
-            mesaNumero: data.mesaNumero ?? 0,
-            items: data.items ?? [],
-            total: data.total ?? 0,
-            status: data.status ?? "pendiente",
-            createdAt:
-              data.createdAt instanceof Timestamp
-                ? data.createdAt.toDate()
-                : new Date(data.createdAt ?? Date.now()),
-            printed: data.printed ?? false,
-          } as Order;
-        })
-      );
-      setLoading(false);
-    });
-
-    return unsub;
+    fetchRecent();
+    const interval = setInterval(fetchRecent, 3000);
+    return () => clearInterval(interval);
   }, [limitCount]);
 
   return { orders, loading };
@@ -96,38 +86,29 @@ export function useActiveOrders() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Quitamos orderBy para evitar errores de índices en Firestore
-    const q = query(
-      collection(db, "orders"),
-      where("status", "in", ["pendiente", "preparando", "listo"])
-    );
+    async function fetchActive() {
+      try {
+        const res = await fetch(`/api/orders?status=active`);
+        const json = await res.json();
+        if (json.success && json.data) {
+          setOrders(
+            json.data.map((o: any) => ({
+              ...o,
+              createdAt: parseDate(o.createdAt),
+              updatedAt: parseDate(o.updatedAt),
+            }))
+          );
+        }
+      } catch (e) {
+        console.error("Error in useActiveOrders:", e);
+      } finally {
+        setLoading(false);
+      }
+    }
 
-    const unsub = onSnapshot(q, (snap) => {
-      const list = snap.docs.map((d) => {
-        const data = d.data();
-        return {
-          id: d.id,
-          mesaNumero: data.mesaNumero ?? 0,
-          items: data.items ?? [],
-          total: data.total ?? 0,
-          status: data.status ?? "pendiente",
-          createdAt:
-            data.createdAt instanceof Timestamp
-              ? data.createdAt.toDate()
-              : new Date(data.createdAt ?? Date.now()),
-        } as Order;
-      });
-      
-      // Ordenamos en el cliente por hora de creación
-      list.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
-      
-      setOrders(list);
-      setLoading(false);
-    }, (error) => {
-      console.error("Error en Cocina:", error);
-    });
-
-    return unsub;
+    fetchActive();
+    const interval = setInterval(fetchActive, 3000);
+    return () => clearInterval(interval);
   }, []);
 
   return { orders, loading };
@@ -140,25 +121,23 @@ export function useMesas() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Cambiamos a 'tables' que es el nombre que usa tu App Flutter
-    const unsub = onSnapshot(collection(db, "tables"), (snap) => {
-      setMesas(
-        snap.docs.map((d) => {
-          const data = d.data();
-          return {
-            id: d.id,
-            // Soporte para ambos nombres de campo
-            numero: data.numero ?? data.mesaNumero ?? 0,
-            status: data.status ?? "libre",
-            capacidad: data.capacidad ?? 4,
-          } as Mesa;
-        })
-      );
-      setLoading(false);
-    }, (error) => {
-      console.error("Error cargando mesas:", error);
-    });
-    return unsub;
+    async function fetchMesas() {
+      try {
+        const res = await fetch("/api/tables");
+        const json = await res.json();
+        if (json.success && json.data) {
+          setMesas(json.data);
+        }
+      } catch (e) {
+        console.error("Error loading mesas:", e);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchMesas();
+    const interval = setInterval(fetchMesas, 3000);
+    return () => clearInterval(interval);
   }, []);
 
   return { mesas, loading };
@@ -210,46 +189,42 @@ export function useReportOrders(period: ReportPeriod) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const now  = new Date();
-    const from = new Date();
+    async function fetchReport() {
+      try {
+        const res = await fetch(`/api/orders?status=billing`); // Obtenemos las órdenes cobradas
+        const json = await res.json();
+        if (json.success && json.data) {
+          const now  = new Date();
+          const from = new Date();
 
-    if (period === "hoy") {
-      from.setHours(0, 0, 0, 0);
-    } else if (period === "semana") {
-      from.setDate(now.getDate() - 7);
-      from.setHours(0, 0, 0, 0);
-    } else {
-      from.setDate(1);
-      from.setHours(0, 0, 0, 0);
+          if (period === "hoy") {
+            from.setHours(0, 0, 0, 0);
+          } else if (period === "semana") {
+            from.setDate(now.getDate() - 7);
+            from.setHours(0, 0, 0, 0);
+          } else {
+            from.setDate(1);
+            from.setHours(0, 0, 0, 0);
+          }
+
+          const parsed = json.data.map((o: any) => ({
+            ...o,
+            createdAt: parseDate(o.createdAt),
+          }));
+
+          const filtered = parsed.filter((o: any) => o.createdAt >= from);
+          setOrders(filtered);
+        }
+      } catch (e) {
+        console.error("Error in useReportOrders:", e);
+      } finally {
+        setLoading(false);
+      }
     }
 
-    const q = query(
-      collection(db, "orders"),
-      where("createdAt", ">=", Timestamp.fromDate(from)),
-      orderBy("createdAt", "desc")
-    );
-
-    const unsub = onSnapshot(q, (snap) => {
-      setOrders(
-        snap.docs.map((d) => {
-          const data = d.data();
-          return {
-            id: d.id,
-            mesaNumero: data.mesaNumero ?? 0,
-            items: data.items ?? [],
-            total: data.total ?? 0,
-            status: data.status ?? "pendiente",
-            createdAt:
-              data.createdAt instanceof Timestamp
-                ? data.createdAt.toDate()
-                : new Date(),
-          } as Order;
-        })
-      );
-      setLoading(false);
-    });
-
-    return unsub;
+    fetchReport();
+    const interval = setInterval(fetchReport, 5000);
+    return () => clearInterval(interval);
   }, [period]);
 
   return { orders, loading };
@@ -262,42 +237,28 @@ export function useBillingOrders() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const q = query(
-      collection(db, "orders"),
-      where("status", "in", ["pagado", "entregado"]),
-      limit(50)
-    );
+    async function fetchBilling() {
+      try {
+        const res = await fetch("/api/orders?status=billing");
+        const json = await res.json();
+        if (json.success && json.data) {
+          setOrders(
+            json.data.map((o: any) => ({
+              ...o,
+              createdAt: parseDate(o.createdAt),
+            }))
+          );
+        }
+      } catch (e) {
+        console.error("Error in useBillingOrders:", e);
+      } finally {
+        setLoading(false);
+      }
+    }
 
-    const unsub = onSnapshot(q, (snap) => {
-      const list = snap.docs.map((d) => {
-        const data = d.data();
-        return {
-          id: d.id,
-          mesaNumero: data.mesaNumero ?? 0,
-          items: data.items ?? [],
-          total: data.total ?? 0,
-          status: data.status ?? "pendiente",
-          clienteNombre: data.clienteNombre,
-          clienteDocumento: data.clienteDocumento,
-          tipoDocumento: data.tipoDocumento ?? "boleta",
-          voucherNumber: data.voucherNumber,
-          createdAt:
-            data.createdAt instanceof Timestamp
-              ? data.createdAt.toDate()
-              : new Date(),
-        } as Order;
-      });
-
-      // Ordenamos localmente para evitar error de índice
-      list.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-      
-      setOrders(list);
-      setLoading(false);
-    }, (error) => {
-      console.error("Error en Facturación:", error);
-    });
-
-    return unsub;
+    fetchBilling();
+    const interval = setInterval(fetchBilling, 3000);
+    return () => clearInterval(interval);
   }, []);
 
   return { orders, loading };

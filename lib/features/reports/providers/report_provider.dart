@@ -1,6 +1,6 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../kitchen/models/order_model.dart';
+import '../../../core/services/api_service.dart';
 
 class ReportMetrics {
   final double totalSales;
@@ -23,7 +23,7 @@ enum ReportPeriod { hoy, semana, mes }
 final reportPeriodProvider = StateProvider<ReportPeriod>((ref) => ReportPeriod.hoy);
 
 final reportMetricsProvider = StreamProvider<ReportMetrics>((ref) {
-  final firestore = FirebaseFirestore.instance;
+  final api = ref.watch(apiServiceProvider);
   final period = ref.watch(reportPeriodProvider);
   final now = DateTime.now();
   
@@ -40,19 +40,16 @@ final reportMetricsProvider = StreamProvider<ReportMetrics>((ref) {
       break;
   }
 
-  return firestore
-      .collection('orders')
-      .where('status', whereIn: [OrderStatus.pagado.name, OrderStatus.entregado.name])
-      .where('createdAt', isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
-      .snapshots()
-      .map((snapshot) {
-    final orders = snapshot.docs.map((doc) => OrderModel.fromFirestore(doc)).toList();
+  return Stream.periodic(const Duration(seconds: 5))
+      .asyncMap((_) => api.fetchReportOrders())
+      .map((orders) {
+    final filtered = orders.where((o) => o.createdAt.isAfter(startDate)).toList();
     
     double total = 0;
     List<double> hourly = List.filled(24, 0.0);
     Map<int, int> usage = {};
     
-    for (var order in orders) {
+    for (var order in filtered) {
       total += order.total;
       int hour = order.createdAt.hour;
       if (hour < 24) hourly[hour] += order.total;
@@ -62,8 +59,8 @@ final reportMetricsProvider = StreamProvider<ReportMetrics>((ref) {
 
     return ReportMetrics(
       totalSales: total,
-      totalOrders: orders.length,
-      averageTicket: orders.isEmpty ? 0 : total / orders.length,
+      totalOrders: filtered.length,
+      averageTicket: filtered.isEmpty ? 0 : total / filtered.length,
       hourlySales: hourly,
       tableUsage: usage,
     );

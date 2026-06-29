@@ -1,32 +1,26 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../features/kitchen/models/order_model.dart';
 import '../../features/orders/providers/order_provider.dart';
+import 'api_service.dart';
 
 class OrderService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final ApiService _apiService;
+
+  OrderService(this._apiService);
 
   Future<void> submitOrder({
     required int mesaNumero,
     required List<CartItem> items,
     required double total,
   }) async {
-    final List<Map<String, dynamic>> itemsMap = items.map((item) => {
-      'productId': item.producto.id,
-      'nombre': item.producto.nombre,
-      'cantidad': item.cantidad,
-      'precio': item.producto.precio,
-      'notas': null, // Por ahora
-    }).toList();
-
-    await _firestore.collection('orders').add({
-      'mesaNumero': mesaNumero,
-      'items': itemsMap,
-      'status': OrderStatus.pendiente.name,
-      'createdAt': FieldValue.serverTimestamp(),
-      'total': total,
-    });
+    await _apiService.submitOrder(
+      mesaNumero: mesaNumero,
+      items: items,
+      total: total,
+    );
   }
 }
 
-final orderServiceProvider = Provider((ref) => OrderService());
+final orderServiceProvider = Provider((ref) {
+  final api = ref.watch(apiServiceProvider);
+  return OrderService(api);
+});

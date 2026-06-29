@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../kitchen/models/order_model.dart';
 import '../../tables/providers/table_provider.dart';
 import '../../tables/models/mesa_model.dart';
 import '../../reports/providers/report_provider.dart';
+import '../../../core/services/api_service.dart';
 
 class DashboardView extends ConsumerWidget {
   const DashboardView({super.key});
@@ -311,16 +311,12 @@ class _SectionCard extends StatelessWidget {
 }
 
 // ─── Recent Orders Stream ─────────────────────────────────────────────────────
-class _RecentOrdersStream extends StatelessWidget {
+class _RecentOrdersStream extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return StreamBuilder<List<OrderModel>>(
-      stream: FirebaseFirestore.instance
-          .collection('orders')
-          .orderBy('createdAt', descending: true)
-          .limit(7)
-          .snapshots()
-          .map((s) => s.docs.map((d) => OrderModel.fromFirestore(d)).toList()),
+      stream: Stream.periodic(const Duration(seconds: 3))
+          .asyncMap((_) => ref.read(apiServiceProvider).fetchRecentOrders()),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator(strokeWidth: 2));

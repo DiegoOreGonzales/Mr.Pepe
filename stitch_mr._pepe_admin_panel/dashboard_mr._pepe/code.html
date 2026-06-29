@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "background": "#f7f9fc",
+                "outline": "#8d706a",
+                "surface-bright": "#f7f9fc",
+                "on-primary-fixed": "#3d0600",
+                "tertiary": "#6437a7",
+                "on-tertiary": "#ffffff",
+                "primary-fixed": "#ffdad2",
+                "surface-tint": "#b02e11",
+                "on-secondary-container": "#636262",
+                "secondary-fixed": "#e5e2e1",
+                "tertiary-fixed-dim": "#d6baff",
+                "error-container": "#ffdad6",
+                "on-surface-variant": "#5a413b",
+                "secondary-container": "#e2dfde",
+                "surface-container-highest": "#e0e3e6",
+                "surface-container-high": "#e6e8eb",
+                "on-background": "#191c1e",
+                "on-tertiary-fixed": "#280057",
+                "tertiary-fixed": "#ecdcff",
+                "surface-container-lowest": "#ffffff",
+                "surface-dim": "#d8dadd",
+                "error": "#ba1a1a",
+                "surface-container": "#eceef1",
+                "inverse-on-surface": "#eff1f4",
+                "surface-container-low": "#f2f4f7",
+                "inverse-surface": "#2d3133",
+                "on-secondary": "#ffffff",
+                "on-secondary-fixed-variant": "#474746",
+                "primary-container": "#bf391b",
+                "on-tertiary-container": "#f2e5ff",
+                "on-error": "#ffffff",
+                "tertiary-container": "#7d51c1",
+                "outline-variant": "#e2bfb7",
+                "on-tertiary-fixed-variant": "#592b9c",
+                "on-error-container": "#93000a",
+                "on-primary-fixed-variant": "#8b1900",
+                "on-primary": "#ffffff",
+                "primary": "#9d2003",
+                "surface": "#f7f9fc",
+                "primary-fixed-dim": "#ffb4a3",
+                "on-primary-container": "#ffe4de",
+                "on-surface": "#191c1e",
+                "secondary": "#5f5e5e",
+                "secondary-fixed-dim": "#c8c6c5",
+                "inverse-primary": "#ffb4a3",
+                "on-secondary-fixed": "#1c1b1b",
+                "surface-variant": "#e0e3e6"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+            },
+            "fontFamily": {
+                "headline": ["Inter"],
+                "body": ["Inter"],
+                "label": ["Inter"]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .ember-gradient {
+            background: linear-gradient(135deg, #8C2510 0%, #BF391B 50%, #E54D2A 100%);
+        }
+        .ghost-border {
+            border: 1px solid rgba(228, 231, 236, 0.15);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen">
+<!-- SideNavBar -->
+<aside class="bg-stone-950 dark:bg-black h-screen w-[240px] fixed left-0 top-0 shadow-2xl shadow-orange-900/5 flex flex-col py-8 z-50">
+<div class="px-6 mb-10">
+<h1 class="text-2xl font-extrabold tracking-tighter text-white">Mr. Pepe</h1>
+<p class="text-[10px] font-semibold text-stone-500 uppercase tracking-widest mt-1">Admin Diego Orejon</p>
+</div>
+<nav class="flex-1 flex flex-col space-y-1">
+<a class="bg-stone-900 text-orange-600 border-l-4 border-orange-700 font-bold px-6 py-3 flex items-center gap-3 transition-all duration-200 scale-[0.98] ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-xs font-semibold tracking-wider uppercase">Dashboard</span>
+</a>
+<a class="text-stone-400 hover:text-stone-100 px-6 py-3 flex items-center gap-3 transition-colors duration-200 hover:bg-stone-900/50" href="#">
+<span class="material-symbols-outlined" data-icon="restaurant">restaurant</span>
+<span class="text-xs font-semibold tracking-wider uppercase">Mesas</span>
+</a>
+<a class="text-stone-400 hover:text-stone-100 px-6 py-3 flex items-center gap-3 transition-colors duration-200 hover:bg-stone-900/50" href="#">
+<span class="material-symbols-outlined" data-icon="kitchen">kitchen</span>
+<span class="text-xs font-semibold tracking-wider uppercase">Cocina</span>
+</a>
+<a class="text-stone-400 hover:text-stone-100 px-6 py-3 flex items-center gap-3 transition-colors duration-200 hover:bg-stone-900/50" href="#">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+<span class="text-xs font-semibold tracking-wider uppercase">Pedidos</span>
+</a>
+<a class="text-stone-400 hover:text-stone-100 px-6 py-3 flex items-center gap-3 transition-colors duration-200 hover:bg-stone-900/50" href="#">
+<span class="material-symbols-outlined" data-icon="receipt">receipt</span>
+<span class="text-xs font-semibold tracking-wider uppercase">Facturacion</span>
+</a>
+<a class="text-stone-400 hover:text-stone-100 px-6 py-3 flex items-center gap-3 transition-colors duration-200 hover:bg-stone-900/50" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="text-xs font-semibold tracking-wider uppercase">Reportes</span>
+</a>
+<a class="text-stone-400 hover:text-stone-100 px-6 py-3 flex items-center gap-3 transition-colors duration-200 hover:bg-stone-900/50" href="#">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+<span class="text-xs font-semibold tracking-wider uppercase">Productos</span>
+</a>
+<a class="text-stone-400 hover:text-stone-100 px-6 py-3 flex items-center gap-3 transition-colors duration-200 hover:bg-stone-900/50" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="text-xs font-semibold tracking-wider uppercase">Configuracion</span>
+</a>
+</nav>
+<div class="mt-auto px-6 border-t border-stone-800/50 pt-6">
+<a class="text-stone-400 hover:text-stone-100 flex items-center gap-3 transition-colors duration-200 group" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span class="text-xs font-semibold tracking-wider uppercase">Cerrar Sesión</span>
+</a>
+</div>
+</aside>
+<!-- TopNavBar -->
+<header class="fixed top-0 right-0 w-[calc(100%-240px)] h-16 bg-white/80 dark:bg-stone-950/80 backdrop-blur-md border-b border-stone-200/15 dark:border-stone-800/15 flex items-center justify-between px-8 z-40">
+<div>
+<h2 class="text-[22px] font-extrabold tracking-tight text-on-surface">Resumen del día</h2>
+<p class="text-[10px] font-bold text-outline uppercase tracking-tighter">LUNES, 21 de abril de 2026</p>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-4">
+<button class="p-2 text-secondary hover:bg-stone-100 dark:hover:bg-stone-900 rounded-lg transition-all">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-secondary hover:bg-stone-100 dark:hover:bg-stone-900 rounded-lg transition-all">
+<span class="material-symbols-outlined" data-icon="apps">apps</span>
+</button>
+</div>
+<div class="h-8 w-[1px] bg-stone-200/50 dark:bg-stone-800/50"></div>
+<div class="flex items-center gap-3">
+<button class="px-4 py-2 text-xs font-bold text-orange-700 hover:bg-orange-50 rounded-lg transition-all">Cocina</button>
+<button class="ember-gradient px-5 py-2 text-xs font-bold text-white rounded-[10px] shadow-lg shadow-orange-900/20 hover:brightness-110 transition-all">Ver Mesas</button>
+<img alt="Diego Orejon Avatar" class="w-8 h-8 rounded-full border-2 border-primary/20" data-alt="Close-up professional portrait of a male restaurant manager in a clean white uniform with soft lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBTv6H_3ESANayo8nfPoWVvgMd7ju1TRm8F44TUnNIPSHbc5zIoaL3K6yETET0JmnBP9b_V9Yhf0eR7EHGmvy3dd4H27B3RXtMTo6hAns_gOEigEE15vqmwWJ3O-lhpyimvgg7yrBrVqWDCqAtDhamX9IjiqDI0AS2uIGgZ00l12xPTpvitgygXdkdgqxMuFoFiu_18gzuY3H0Ppf1khifOpfKUf4AGQJSLMNEUjXpgZldpGD_8becZxRmSVOoHmGPZiz1hDr7iRa1i"/>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="ml-[240px] pt-24 px-8 pb-12">
+<!-- KPI Row -->
+<div class="grid grid-cols-4 gap-6 mb-8">
+<!-- Card 1 -->
+<div class="bg-surface-lowest p-6 rounded-[14px] shadow-sm flex flex-col gap-1 border border-stone-100/50">
+<span class="text-[10px] font-bold text-secondary uppercase tracking-widest mb-2">Ventas del día</span>
+<div class="flex items-end justify-between">
+<span class="text-3xl font-extrabold tracking-tight text-on-background">S/ 2,450.00</span>
+<span class="flex items-center text-[#1A8952] bg-[#1A8952]/10 px-2 py-0.5 rounded-full text-[10px] font-bold">
+<span class="material-symbols-outlined text-xs mr-1" data-icon="trending_up">trending_up</span>
+                        +12%
+                    </span>
+</div>
+<div class="w-full h-1 bg-[#1A8952]/20 mt-4 rounded-full overflow-hidden">
+<div class="h-full bg-[#1A8952]" style="width: 75%"></div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-lowest p-6 rounded-[14px] shadow-sm flex flex-col gap-1 border border-stone-100/50">
+<span class="text-[10px] font-bold text-secondary uppercase tracking-widest mb-2">Pedidos hoy</span>
+<div class="flex items-end justify-between">
+<span class="text-3xl font-extrabold tracking-tight text-on-background">38</span>
+<span class="material-symbols-outlined text-primary-container" data-icon="restaurant_menu">restaurant_menu</span>
+</div>
+<div class="w-full h-1 bg-primary-container/20 mt-4 rounded-full overflow-hidden">
+<div class="h-full bg-primary-container" style="width: 60%"></div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-lowest p-6 rounded-[14px] shadow-sm flex flex-col gap-1 border border-stone-100/50">
+<span class="text-[10px] font-bold text-secondary uppercase tracking-widest mb-2">Mesas ocupadas</span>
+<div class="flex items-end justify-between">
+<span class="text-3xl font-extrabold tracking-tight text-on-background">12 / 40</span>
+<span class="material-symbols-outlined text-[#1A6FBF]" data-icon="grid_view">grid_view</span>
+</div>
+<div class="w-full h-1 bg-[#1A6FBF]/20 mt-4 rounded-full overflow-hidden">
+<div class="h-full bg-[#1A6FBF]" style="width: 30%"></div>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="bg-surface-lowest p-6 rounded-[14px] shadow-sm flex flex-col gap-1 border border-stone-100/50">
+<span class="text-[10px] font-bold text-secondary uppercase tracking-widest mb-2">Ticket promedio</span>
+<div class="flex items-end justify-between">
+<span class="text-3xl font-extrabold tracking-tight text-on-background">S/ 64.47</span>
+<span class="material-symbols-outlined text-tertiary-container" data-icon="payments">payments</span>
+</div>
+<div class="w-full h-1 bg-tertiary-container/20 mt-4 rounded-full overflow-hidden">
+<div class="h-full bg-tertiary-container" style="width: 45%"></div>
+</div>
+</div>
+</div>
+<!-- Dashboard Body -->
+<div class="grid grid-cols-12 gap-8">
+<!-- Recent Orders (Flex 3) -->
+<div class="col-span-8 bg-surface-lowest rounded-[14px] shadow-sm border border-stone-100/50 overflow-hidden">
+<div class="px-6 py-6 flex items-center justify-between border-b border-stone-50">
+<div>
+<h3 class="text-lg font-extrabold text-on-background leading-tight">Pedidos Recientes</h3>
+<p class="text-xs text-secondary font-medium mt-0.5">Últimas actualizaciones en tiempo real</p>
+</div>
+<button class="text-xs font-bold text-primary-container hover:underline">Ver todo</button>
+</div>
+<div class="p-2">
+<table class="w-full text-left">
+<thead>
+<tr class="text-[10px] font-bold text-secondary uppercase tracking-widest">
+<th class="px-4 py-3">Mesa</th>
+<th class="px-4 py-3">Tiempo</th>
+<th class="px-4 py-3">Monto</th>
+<th class="px-4 py-3">Estado</th>
+<th class="px-4 py-3 text-right">Acciones</th>
+</tr>
+</thead>
+<tbody class="text-sm">
+<tr class="hover:bg-stone-50 transition-colors duration-200">
+<td class="px-4 py-4">
+<div class="flex items-center gap-3">
+<span class="w-8 h-8 rounded-lg bg-primary-container text-white text-[10px] font-extrabold flex items-center justify-center">M7</span>
+<span class="font-bold text-on-background">Mesa 7</span>
+</div>
+</td>
+<td class="px-4 py-4 text-secondary font-medium">hace 3 min</td>
+<td class="px-4 py-4 font-bold text-on-background">S/ 85.00</td>
+<td class="px-4 py-4">
+<span class="px-3 py-1 rounded-full text-[10px] font-extrabold bg-orange-50 text-orange-600 uppercase">PENDIENTE</span>
+</td>
+<td class="px-4 py-4 text-right">
+<button class="text-secondary hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-stone-50 transition-colors duration-200">
+<td class="px-4 py-4">
+<div class="flex items-center gap-3">
+<span class="w-8 h-8 rounded-lg bg-primary-container text-white text-[10px] font-extrabold flex items-center justify-center">M12</span>
+<span class="font-bold text-on-background">Mesa 12</span>
+</div>
+</td>
+<td class="px-4 py-4 text-secondary font-medium">hace 8 min</td>
+<td class="px-4 py-4 font-bold text-on-background">S/ 142.50</td>
+<td class="px-4 py-4">
+<span class="px-3 py-1 rounded-full text-[10px] font-extrabold bg-red-50 text-red-600 animate-pulse uppercase">EN PROCESO</span>
+</td>
+<td class="px-4 py-4 text-right">
+<button class="text-secondary hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-stone-50 transition-colors duration-200">
+<td class="px-4 py-4">
+<div class="flex items-center gap-3">
+<span class="w-8 h-8 rounded-lg bg-primary-container text-white text-[10px] font-extrabold flex items-center justify-center">M2</span>
+<span class="font-bold text-on-background">Mesa 2</span>
+</div>
+</td>
+<td class="px-4 py-4 text-secondary font-medium">hace 15 min</td>
+<td class="px-4 py-4 font-bold text-on-background">S/ 45.00</td>
+<td class="px-4 py-4">
+<span class="px-3 py-1 rounded-full text-[10px] font-extrabold bg-green-50 text-green-600 uppercase">LISTO</span>
+</td>
+<td class="px-4 py-4 text-right">
+<button class="text-secondary hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-stone-50 transition-colors duration-200">
+<td class="px-4 py-4">
+<div class="flex items-center gap-3">
+<span class="w-8 h-8 rounded-lg bg-primary-container text-white text-[10px] font-extrabold flex items-center justify-center">M15</span>
+<span class="font-bold text-on-background">Mesa 15</span>
+</div>
+</td>
+<td class="px-4 py-4 text-secondary font-medium">hace 18 min</td>
+<td class="px-4 py-4 font-bold text-on-background">S/ 210.00</td>
+<td class="px-4 py-4">
+<span class="px-3 py-1 rounded-full text-[10px] font-extrabold bg-green-50 text-green-600 uppercase">LISTO</span>
+</td>
+<td class="px-4 py-4 text-right">
+<button class="text-secondary hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-stone-50 transition-colors duration-200">
+<td class="px-4 py-4">
+<div class="flex items-center gap-3">
+<span class="w-8 h-8 rounded-lg bg-primary-container text-white text-[10px] font-extrabold flex items-center justify-center">M4</span>
+<span class="font-bold text-on-background">Mesa 4</span>
+</div>
+</td>
+<td class="px-4 py-4 text-secondary font-medium">hace 22 min</td>
+<td class="px-4 py-4 font-bold text-on-background">S/ 92.00</td>
+<td class="px-4 py-4">
+<span class="px-3 py-1 rounded-full text-[10px] font-extrabold bg-red-50 text-red-600 uppercase">EN PROCESO</span>
+</td>
+<td class="px-4 py-4 text-right">
+<button class="text-secondary hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-stone-50 transition-colors duration-200">
+<td class="px-4 py-4">
+<div class="flex items-center gap-3">
+<span class="w-8 h-8 rounded-lg bg-primary-container text-white text-[10px] font-extrabold flex items-center justify-center">M21</span>
+<span class="font-bold text-on-background">Mesa 21</span>
+</div>
+</td>
+<td class="px-4 py-4 text-secondary font-medium">hace 25 min</td>
+<td class="px-4 py-4 font-bold text-on-background">S/ 120.00</td>
+<td class="px-4 py-4">
+<span class="px-3 py-1 rounded-full text-[10px] font-extrabold bg-orange-50 text-orange-600 uppercase">PENDIENTE</span>
+</td>
+<td class="px-4 py-4 text-right">
+<button class="text-secondary hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Side Column (Flex 2) -->
+<div class="col-span-4 flex flex-col gap-8">
+<!-- Estado del Salón -->
+<div class="bg-surface-lowest p-6 rounded-[14px] shadow-sm border border-stone-100/50">
+<h3 class="text-lg font-extrabold text-on-background leading-tight mb-6">Estado del Salón</h3>
+<div class="space-y-6">
+<div>
+<div class="flex justify-between items-center mb-2">
+<span class="text-[10px] font-bold text-secondary uppercase tracking-widest">Ocupadas (12)</span>
+<span class="text-xs font-bold text-red-600">30%</span>
+</div>
+<div class="h-2 w-full bg-red-100 rounded-full overflow-hidden">
+<div class="h-full bg-red-500" style="width: 30%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-center mb-2">
+<span class="text-[10px] font-bold text-secondary uppercase tracking-widest">Libres (24)</span>
+<span class="text-xs font-bold text-green-600">60%</span>
+</div>
+<div class="h-2 w-full bg-green-100 rounded-full overflow-hidden">
+<div class="h-full bg-green-500" style="width: 60%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-center mb-2">
+<span class="text-[10px] font-bold text-secondary uppercase tracking-widest">Reservadas (4)</span>
+<span class="text-xs font-bold text-blue-600">10%</span>
+</div>
+<div class="h-2 w-full bg-blue-100 rounded-full overflow-hidden">
+<div class="h-full bg-blue-500" style="width: 10%"></div>
+</div>
+</div>
+</div>
+<div class="mt-8 p-4 bg-background rounded-xl flex items-center gap-4">
+<span class="material-symbols-outlined text-primary-container" data-icon="info">info</span>
+<p class="text-xs text-on-surface-variant leading-relaxed">Picos de ocupación detectados entre las <span class="font-bold">1:00 PM y 2:30 PM</span>.</p>
+</div>
+</div>
+<!-- Accesos Rápidos -->
+<div class="bg-surface-lowest p-6 rounded-[14px] shadow-sm border border-stone-100/50">
+<h3 class="text-lg font-extrabold text-on-background leading-tight mb-4">Accesos Rápidos</h3>
+<div class="flex flex-col gap-3">
+<button class="w-full p-4 flex items-center justify-between bg-white ghost-border rounded-xl hover:bg-stone-50 transition-all duration-200 group text-left">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined p-2 bg-orange-100 text-orange-700 rounded-lg" data-icon="add_circle">add_circle</span>
+<div>
+<p class="text-xs font-bold text-on-background">Nueva Orden</p>
+<p class="text-[10px] text-secondary">Comenzar un nuevo pedido</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-stone-300 group-hover:text-primary transition-colors" data-icon="chevron_right">chevron_right</span>
+</button>
+<button class="w-full p-4 flex items-center justify-between bg-white ghost-border rounded-xl hover:bg-stone-50 transition-all duration-200 group text-left">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined p-2 bg-stone-100 text-stone-700 rounded-lg" data-icon="monitor">monitor</span>
+<div>
+<p class="text-xs font-bold text-on-background">Panel Cocina</p>
+<p class="text-[10px] text-secondary">Monitorizar despachos</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-stone-300 group-hover:text-primary transition-colors" data-icon="chevron_right">chevron_right</span>
+</button>
+<button class="w-full p-4 flex items-center justify-between bg-white ghost-border rounded-xl hover:bg-stone-50 transition-all duration-200 group text-left">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined p-2 bg-stone-100 text-stone-700 rounded-lg" data-icon="auto_graph">auto_graph</span>
+<div>
+<p class="text-xs font-bold text-on-background">Ver Reportes</p>
+<p class="text-[10px] text-secondary">Análisis de ventas semanal</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-stone-300 group-hover:text-primary transition-colors" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Contextual FAB -->
+<button class="fixed bottom-8 right-8 ember-gradient w-14 h-14 rounded-full flex items-center justify-center text-white shadow-2xl shadow-orange-900/40 hover:scale-110 active:scale-95 transition-all z-50">
+<span class="material-symbols-outlined" data-icon="add" style="font-size: 32px;">add</span>
+</button>
+</body></html>

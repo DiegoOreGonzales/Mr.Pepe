@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../orders/providers/order_provider.dart';
 import '../../tables/models/mesa_model.dart';
+import '../../../core/services/api_service.dart';
 
 class DigitalMenuView extends ConsumerWidget {
   final int mesaNumero;
@@ -25,7 +25,7 @@ class DigitalMenuView extends ConsumerWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _callWaiter(context),
+        onPressed: () => _callWaiter(context, ref),
         label: const Text('LLAMAR MESERO', style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1)),
         icon: const Icon(Icons.notifications_active),
         backgroundColor: AppTheme.primaryColor,
@@ -151,13 +151,8 @@ class DigitalMenuView extends ConsumerWidget {
     );
   }
 
-  void _callWaiter(BuildContext context) {
-    FirebaseFirestore.instance.collection('alerts').add({
-      'type': 'call_waiter',
-      'mesa': mesaNumero,
-      'createdAt': FieldValue.serverTimestamp(),
-      'status': 'pending',
-    });
+  void _callWaiter(BuildContext context, WidgetRef ref) {
+    ref.read(apiServiceProvider).sendAlert(mesaNumero);
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Notificación enviada. Un mesero vendrá pronto.')));
   }
 }

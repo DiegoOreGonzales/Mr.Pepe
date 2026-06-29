@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import 'dart:html' as html;
 import '../../../core/widgets/brasa_logo.dart';
