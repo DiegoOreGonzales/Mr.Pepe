@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../../core/theme/app_theme.dart';
-import 'dart:html' as html;
+import 'package:universal_html/html.dart' as html;
 import '../../../core/widgets/brasa_logo.dart';
 
 class QrGridView extends StatelessWidget {
@@ -44,9 +44,14 @@ class QrGridView extends StatelessWidget {
         itemCount: mesas.length,
         itemBuilder: (context, index) {
           final mesaNum = mesas[index];
-          // URL Dinámica basada en el puerto actual de Flutter Web (Local)
-          // En producción esta URL debería ser el dominio real
-          final String qrData = 'http://${html.window.location.host}/#/menu/$mesaNum';
+          String host = 'localhost:3000';
+          try {
+            final locHost = html.window.location.host;
+            if (locHost.isNotEmpty) {
+              host = locHost;
+            }
+          } catch (_) {}
+          final String qrData = 'http://$host/#/menu/$mesaNum';
           
           return _buildQrCard(context, mesaNum, qrData);
         },
