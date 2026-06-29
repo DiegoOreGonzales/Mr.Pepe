@@ -26,27 +26,29 @@ class MainShell extends ConsumerWidget {
               child: _SideNavBar(activeRoute: activeRoute, isDrawer: true),
             )
           : null,
-      body: Row(
-        children: [
-          // Sidebar para pantallas grandes
-          if (!isMobile)
-            _SideNavBar(activeRoute: activeRoute, isDrawer: false),
+      body: SafeArea(
+        child: Row(
+          children: [
+            // Sidebar para pantallas grandes
+            if (!isMobile)
+              _SideNavBar(activeRoute: activeRoute, isDrawer: false),
 
-          // Área principal
-          Expanded(
-            child: Column(
-              children: [
-                _TopBar(user: user, isMobile: isMobile),
-                Expanded(
-                  child: Container(
-                    color: AppTheme.lightGray,
-                    child: child,
+            // Área principal
+            Expanded(
+              child: Column(
+                children: [
+                  _TopBar(user: user, isMobile: isMobile),
+                  Expanded(
+                    child: Container(
+                      color: AppTheme.lightGray,
+                      child: child,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

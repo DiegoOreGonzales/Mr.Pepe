@@ -18,165 +18,314 @@ class DashboardView extends ConsumerWidget {
     final occupied = tables.where((m) => m.status == MesaStatus.ocupada).length;
     final free     = tables.where((m) => m.status == MesaStatus.libre).length;
 
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final bool isMobile = screenWidth < 750;
+
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(28),
+      padding: EdgeInsets.all(isMobile ? 16 : 28),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // ── Encabezado ────────────────────────────────────────────────────
-          Row(
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Resumen del día',
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 22,
-                      fontWeight: FontWeight.w800,
-                      color: AppTheme.black,
+          isMobile
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Resumen del día',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                        color: AppTheme.black,
+                      ),
                     ),
-                  ),
-                  Text(
-                    _todayLabel(),
-                    style: const TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 13,
-                      color: AppTheme.textMuted,
+                    Text(
+                      _todayLabel(),
+                      style: const TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 13,
+                        color: AppTheme.textMuted,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              const Spacer(),
-              ElevatedButton.icon(
-                onPressed: () => context.go('/mesas'),
-                icon: const Icon(Icons.table_restaurant_rounded, size: 16),
-                label: const Text('Ver Mesas'),
-              ),
-              const SizedBox(width: 10),
-              OutlinedButton.icon(
-                onPressed: () => context.go('/kitchen'),
-                icon: const Icon(Icons.restaurant_rounded, size: 16),
-                label: const Text('Cocina'),
-              ),
-            ],
-          ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: () => context.go('/mesas'),
+                            icon: const Icon(Icons.table_restaurant_rounded, size: 16),
+                            label: const Text('Mesas'),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () => context.go('/kitchen'),
+                            icon: const Icon(Icons.restaurant_rounded, size: 16),
+                            label: const Text('Cocina'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                )
+              : Row(
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Resumen del día',
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 22,
+                            fontWeight: FontWeight.w800,
+                            color: AppTheme.black,
+                          ),
+                        ),
+                        Text(
+                          _todayLabel(),
+                          style: const TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 13,
+                            color: AppTheme.textMuted,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Spacer(),
+                    ElevatedButton.icon(
+                      onPressed: () => context.go('/mesas'),
+                      icon: const Icon(Icons.table_restaurant_rounded, size: 16),
+                      label: const Text('Ver Mesas'),
+                    ),
+                    const SizedBox(width: 10),
+                    OutlinedButton.icon(
+                      onPressed: () => context.go('/kitchen'),
+                      icon: const Icon(Icons.restaurant_rounded, size: 16),
+                      label: const Text('Cocina'),
+                    ),
+                  ],
+                ),
           const SizedBox(height: 24),
 
           // ── Métricas ──────────────────────────────────────────────────────
-          Row(
-            children: [
-              Expanded(
-                child: _MetricCard(
-                  label: 'Ventas del día',
-                  value: metrics.maybeWhen(
-                    data: (m) => 'S/ ${m.totalSales.toStringAsFixed(2)}',
-                    orElse: () => 'S/ 0.00',
-                  ),
-                  icon: Icons.payments_rounded,
-                  accent: const Color(0xFF1A8952),
-                  sub: 'Total facturado hoy',
+          isMobile
+              ? GridView.count(
+                  crossAxisCount: 2,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  mainAxisSpacing: 12,
+                  crossAxisSpacing: 12,
+                  childAspectRatio: 1.35,
+                  children: [
+                    _MetricCard(
+                      label: 'Ventas del día',
+                      value: metrics.maybeWhen(
+                        data: (m) => 'S/ ${m.totalSales.toStringAsFixed(2)}',
+                        orElse: () => 'S/ 0.00',
+                      ),
+                      icon: Icons.payments_rounded,
+                      accent: const Color(0xFF1A8952),
+                      sub: 'Facturado hoy',
+                    ),
+                    _MetricCard(
+                      label: 'Pedidos hoy',
+                      value: metrics.maybeWhen(
+                        data: (m) => '${m.totalOrders}',
+                        orElse: () => '0',
+                      ),
+                      icon: Icons.receipt_long_rounded,
+                      accent: AppTheme.primaryColor,
+                      sub: 'Registradas',
+                    ),
+                    _MetricCard(
+                      label: 'Mesas ocupadas',
+                      value: '$occupied / ${tables.length}',
+                      icon: Icons.table_restaurant_rounded,
+                      accent: const Color(0xFF1A6FBF),
+                      sub: '$free disponibles',
+                    ),
+                    _MetricCard(
+                      label: 'Ticket promedio',
+                      value: metrics.maybeWhen(
+                        data: (m) => m.totalOrders > 0
+                            ? 'S/ ${(m.totalSales / m.totalOrders).toStringAsFixed(2)}'
+                            : 'S/ 0.00',
+                        orElse: () => 'S/ 0.00',
+                      ),
+                      icon: Icons.trending_up_rounded,
+                      accent: const Color(0xFF7B4FBF),
+                      sub: 'Promedio hoy',
+                    ),
+                  ],
+                )
+              : Row(
+                  children: [
+                    Expanded(
+                      child: _MetricCard(
+                        label: 'Ventas del día',
+                        value: metrics.maybeWhen(
+                          data: (m) => 'S/ ${m.totalSales.toStringAsFixed(2)}',
+                          orElse: () => 'S/ 0.00',
+                        ),
+                        icon: Icons.payments_rounded,
+                        accent: const Color(0xFF1A8952),
+                        sub: 'Total facturado hoy',
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _MetricCard(
+                        label: 'Pedidos hoy',
+                        value: metrics.maybeWhen(
+                          data: (m) => '${m.totalOrders}',
+                          orElse: () => '0',
+                        ),
+                        icon: Icons.receipt_long_rounded,
+                        accent: AppTheme.primaryColor,
+                        sub: 'Órdenes registradas',
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _MetricCard(
+                        label: 'Mesas ocupadas',
+                        value: '$occupied / ${tables.length}',
+                        icon: Icons.table_restaurant_rounded,
+                        accent: const Color(0xFF1A6FBF),
+                        sub: '$free mesas disponibles',
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _MetricCard(
+                        label: 'Ticket promedio',
+                        value: metrics.maybeWhen(
+                          data: (m) => m.totalOrders > 0
+                              ? 'S/ ${(m.totalSales / m.totalOrders).toStringAsFixed(2)}'
+                              : 'S/ 0.00',
+                          orElse: () => 'S/ 0.00',
+                        ),
+                        icon: Icons.trending_up_rounded,
+                        accent: const Color(0xFF7B4FBF),
+                        sub: 'Por orden promedio',
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _MetricCard(
-                  label: 'Pedidos hoy',
-                  value: metrics.maybeWhen(
-                    data: (m) => '${m.totalOrders}',
-                    orElse: () => '0',
-                  ),
-                  icon: Icons.receipt_long_rounded,
-                  accent: AppTheme.primaryColor,
-                  sub: 'Órdenes registradas',
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _MetricCard(
-                  label: 'Mesas ocupadas',
-                  value: '$occupied / ${tables.length}',
-                  icon: Icons.table_restaurant_rounded,
-                  accent: const Color(0xFF1A6FBF),
-                  sub: '$free mesas disponibles',
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _MetricCard(
-                  label: 'Ticket promedio',
-                  value: metrics.maybeWhen(
-                    data: (m) => m.totalOrders > 0
-                        ? 'S/ ${(m.totalSales / m.totalOrders).toStringAsFixed(2)}'
-                        : 'S/ 0.00',
-                    orElse: () => 'S/ 0.00',
-                  ),
-                  icon: Icons.trending_up_rounded,
-                  accent: const Color(0xFF7B4FBF),
-                  sub: 'Por orden promedio',
-                ),
-              ),
-            ],
-          ),
           const SizedBox(height: 28),
 
           // ── Cuerpo principal ──────────────────────────────────────────────
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Pedidos recientes
-              Expanded(
-                flex: 3,
-                child: _SectionCard(
-                  title: 'Pedidos Recientes',
-                  trailing: TextButton(
-                    onPressed: () => context.go('/orders'),
-                    child: const Text('Ver todos →'),
-                  ),
-                  child: _RecentOrdersStream(),
-                ),
-              ),
-              const SizedBox(width: 20),
+          isMobile
+              ? Column(
+                  children: [
+                    // Pedidos recientes
+                    _SectionCard(
+                      title: 'Pedidos Recientes',
+                      trailing: TextButton(
+                        onPressed: () => context.go('/orders'),
+                        child: const Text('Ver todos →'),
+                      ),
+                      child: _RecentOrdersStream(),
+                    ),
+                    const SizedBox(height: 20),
+                    // Estado del salón
+                    _SectionCard(
+                      title: 'Estado del Salón',
+                      child: _TableStatusBars(
+                          occupied: occupied,
+                          free: free,
+                          total: tables.length),
+                    ),
+                    const SizedBox(height: 20),
+                    // Accesos rápidos
+                    _SectionCard(
+                      title: 'Accesos Rápidos',
+                      child: Column(
+                        children: [
+                          _QuickActionTile(
+                            icon: Icons.add_circle_rounded,
+                            label: 'Nueva Orden',
+                            onTap: () => context.go('/mesas'),
+                          ),
+                          const SizedBox(height: 8),
+                          _QuickActionTile(
+                            icon: Icons.kitchen_rounded,
+                            label: 'Panel Cocina',
+                            onTap: () => context.go('/kitchen'),
+                          ),
+                          const SizedBox(height: 8),
+                          _QuickActionTile(
+                            icon: Icons.bar_chart_rounded,
+                            label: 'Ver Reportes',
+                            onTap: () => context.go('/reports'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                )
+              : Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Pedidos recientes
+                    Expanded(
+                      flex: 3,
+                      child: _SectionCard(
+                        title: 'Pedidos Recientes',
+                        trailing: TextButton(
+                          onPressed: () => context.go('/orders'),
+                          child: const Text('Ver todos →'),
+                        ),
+                        child: _RecentOrdersStream(),
+                      ),
+                    ),
+                    const SizedBox(width: 20),
 
-              // Estado de mesas + accesos rápidos
-              Expanded(
-                flex: 2,
-                child: Column(children: [
-                  _SectionCard(
-                    title: 'Estado del Salón',
-                    child: _TableStatusBars(
-                        occupied: occupied,
-                        free: free,
-                        total: tables.length),
-                  ),
-                  const SizedBox(height: 16),
-                  _SectionCard(
-                    title: 'Accesos Rápidos',
-                    child: Column(children: [
-                      _QuickActionTile(
-                        icon: Icons.add_circle_rounded,
-                        label: 'Nueva Orden',
-                        onTap: () => context.go('/mesas'),
+                    // Estado de mesas + accesos rápidos
+                    Expanded(
+                      flex: 2,
+                      child: Column(
+                        children: [
+                          _SectionCard(
+                            title: 'Estado del Salón',
+                            child: _TableStatusBars(
+                                occupied: occupied,
+                                free: free,
+                                total: tables.length),
+                          ),
+                          const SizedBox(height: 20),
+                          _SectionCard(
+                            title: 'Accesos Rápidos',
+                            child: Column(
+                              children: [
+                                _QuickActionTile(
+                                  icon: Icons.add_circle_rounded,
+                                  label: 'Nueva Orden',
+                                  onTap: () => context.go('/mesas'),
+                                ),
+                                const SizedBox(height: 8),
+                                _QuickActionTile(
+                                  icon: Icons.kitchen_rounded,
+                                  label: 'Panel Cocina',
+                                  onTap: () => context.go('/kitchen'),
+                                ),
+                                const SizedBox(height: 8),
+                                _QuickActionTile(
+                                  icon: Icons.bar_chart_rounded,
+                                  label: 'Ver Reportes',
+                                  onTap: () => context.go('/reports'),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 8),
-                      _QuickActionTile(
-                        icon: Icons.kitchen_rounded,
-                        label: 'Panel Cocina',
-                        onTap: () => context.go('/kitchen'),
-                      ),
-                      const SizedBox(height: 8),
-                      _QuickActionTile(
-                        icon: Icons.bar_chart_rounded,
-                        label: 'Ver Reportes',
-                        onTap: () => context.go('/reports'),
-                      ),
-                    ]),
-                  ),
-                ]),
-              ),
-            ],
-          ),
+                    ),
+                  ],
+                ),
         ],
       ),
     );
@@ -248,9 +397,9 @@ class _MetricCard extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Text(value,
-              style: const TextStyle(
+              style: TextStyle(
                   fontFamily: 'Inter',
-                  fontSize: 26,
+                  fontSize: MediaQuery.of(context).size.width < 750 ? 18 : 26,
                   fontWeight: FontWeight.w800,
                   color: AppTheme.black)),
           const SizedBox(height: 4),
