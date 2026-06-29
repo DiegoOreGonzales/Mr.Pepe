@@ -136,7 +136,7 @@ function KitchenDisplayContent() {
              <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
           </div>
           <div>
-            <h1 className="text-xl font-black text-white tracking-tight uppercase">MR. PEPE</h1>
+            <h1 className="text-xl font-black text-white tracking-tight uppercase">CHIO'S CHICKEN</h1>
             <p className="text-[10px] font-bold text-[#BF391B] uppercase tracking-[0.2em]">Kitchen Display</p>
           </div>
         </div>
