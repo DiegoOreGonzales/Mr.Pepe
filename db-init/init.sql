@@ -47,14 +47,31 @@ CREATE TABLE IF NOT EXISTS alerts (
 
 -- 5. Semillas de Datos Iniciales (Seeders)
 
--- Crear Usuario Administrador Principal por Defecto: admin@elbrasero.com / admin123456
--- Hash bcrypt de 'admin123456': $2b$10$wK1W5pD3lD77pG2Jz3X.8unV8Jj/hQ1YhD1HwF1Gz.D9WfWd9V9wS (o similar)
+-- Crear Usuario Administrador Principal por Defecto: admin@chioschicken.com / admin123456
 INSERT INTO users (nombre, email, password_hash, role)
 VALUES (
-    'Administrador Principal', 
-    'admin@elbrasero.com', 
-    '$2b$10$csQQ/A.eQmxnIDNi7Du3HuKugGrafNyqZ2/Zh8T4uarDAKRdQJbua', -- Hash real de admin123456
+    'Administrador Chios', 
+    'admin@chioschicken.com', 
+    '$2b$10$MWV3uMSUdrk6B5p6V7wUV.tKwvxiC5q3nfCdj7t8Lpigug6aOuhNa',
     'admin'
+) ON CONFLICT (email) DO NOTHING;
+
+-- Crear Mesero Genérico por Defecto: mesero@chioschicken.com / mesero123456
+INSERT INTO users (nombre, email, password_hash, role)
+VALUES (
+    'Mesero Principal', 
+    'mesero@chioschicken.com', 
+    '$2b$10$bRsf5/BFZH4z.ae4lu2X1ucCM73Lss2saPOb/lsfXVrdoiUfmNtju',
+    'mesero'
+) ON CONFLICT (email) DO NOTHING;
+
+-- Crear Cocinero Genérico por Defecto: cocinero@chioschicken.com / cocina123456
+INSERT INTO users (nombre, email, password_hash, role)
+VALUES (
+    'Cocinero Principal', 
+    'cocinero@chioschicken.com', 
+    '$2b$10$4M6VoefSaKiuHMXUoOGR9eWjCrgI7dPggJw.6iIDoE/t647ArHFYW',
+    'cocina'
 ) ON CONFLICT (email) DO NOTHING;
 
 -- Crear las 40 Mesas por Defecto

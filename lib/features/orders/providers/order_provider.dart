@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../tables/models/mesa_model.dart';
+import '../../kitchen/models/order_model.dart';
 
 final productProvider = Provider<List<Producto>>((ref) {
   return [

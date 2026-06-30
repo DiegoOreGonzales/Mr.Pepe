@@ -66,7 +66,7 @@ class _BrasaLogoState extends State<BrasaLogo>
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(widget.size * 0.25),
                 child: Image.asset(
-                  'assets/images/mr_pepe_logo.png',
+                  'assets/images/cios.png',
                   fit: BoxFit.contain,
                   errorBuilder: (context, error, stackTrace) => Center(
                     child: Icon(

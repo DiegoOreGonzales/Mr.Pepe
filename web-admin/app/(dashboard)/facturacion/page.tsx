@@ -24,7 +24,7 @@ function PrintTicket({ order }: { order: Order | null }) {
                 <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
              </div>
           </div>
-          <h2 className="text-[20px] font-black tracking-tight text-[#0D0D0D]">MR. PEPE</h2>
+          <h2 className="text-[20px] font-black tracking-tight text-[#0D0D0D]">CHIO'S CHICKEN</h2>
           <p className="text-[10px] uppercase font-bold text-[#BF391B] tracking-[0.2em] mb-2">ROASTER & GRILL</p>
           
           <div className="space-y-0.5 text-[10px] text-stone-500 font-medium">
@@ -97,7 +97,7 @@ function PrintTicket({ order }: { order: Order | null }) {
 
         <div className="text-center mt-10 space-y-1">
           <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">¡Gracias por su preferencia!</p>
-          <p className="text-[9px] text-[#BF391B] font-bold underline">www.mrpepe.com.pe</p>
+          <p className="text-[9px] text-[#BF391B] font-bold underline">www.chioschicken.com.pe</p>
         </div>
       </div>
     </div>

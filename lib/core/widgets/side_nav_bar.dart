@@ -43,7 +43,7 @@ class SideNavBar extends StatelessWidget {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(10),
                     child: Image.asset(
-                      'assets/images/mr_pepe_logo.png',
+                      'assets/images/cios.png',
                       fit: BoxFit.contain,
                       errorBuilder: (_, __, ___) => const Icon(
                         Icons.local_fire_department_rounded,

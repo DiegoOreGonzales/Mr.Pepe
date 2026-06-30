@@ -105,12 +105,12 @@ class _LoginViewState extends ConsumerState<LoginView> {
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(20),
                                     child: Image.asset(
-                                      'assets/images/mr_pepe_logo.png',
+                                      'assets/images/chios_icon.png',
                                       fit: BoxFit.contain,
                                       errorBuilder: (_, __, ___) => const Icon(
                                         Icons.local_fire_department_rounded,
                                         color: AppTheme.primaryColor,
-                                        size: 50,
+                                        size: 70,
                                       ),
                                     ),
                                   ),
@@ -204,12 +204,12 @@ class _LoginViewState extends ConsumerState<LoginView> {
                                       child: ClipRRect(
                                         borderRadius: BorderRadius.circular(16),
                                         child: Image.asset(
-                                          'assets/images/mr_pepe_logo.png',
+                                          'assets/images/chios_icon.png',
                                           fit: BoxFit.contain,
                                           errorBuilder: (_, __, ___) => const Icon(
                                             Icons.local_fire_department_rounded,
                                             color: AppTheme.primaryColor,
-                                            size: 40,
+                                            size: 50,
                                           ),
                                         ),
                                       ),

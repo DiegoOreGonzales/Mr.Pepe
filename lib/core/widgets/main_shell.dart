@@ -23,7 +23,7 @@ class MainShell extends ConsumerWidget {
       backgroundColor: AppTheme.lightGray,
       drawer: isMobile
           ? Drawer(
-              child: _SideNavBar(activeRoute: activeRoute, isDrawer: true),
+              child: _SideNavBar(activeRoute: activeRoute, isDrawer: true, role: user?.role),
             )
           : null,
       body: SafeArea(
@@ -31,7 +31,7 @@ class MainShell extends ConsumerWidget {
           children: [
             // Sidebar para pantallas grandes
             if (!isMobile)
-              _SideNavBar(activeRoute: activeRoute, isDrawer: false),
+              _SideNavBar(activeRoute: activeRoute, isDrawer: false, role: user?.role),
 
             // Área principal
             Expanded(
@@ -330,15 +330,31 @@ class _UserAvatar extends StatelessWidget {
 class _SideNavBar extends StatelessWidget {
   final String activeRoute;
   final bool isDrawer;
-  const _SideNavBar({required this.activeRoute, required this.isDrawer});
+  final UserRole? role;
+  const _SideNavBar({required this.activeRoute, required this.isDrawer, this.role});
 
-  static const List<_NavItem> _items = [
-    _NavItem(Icons.grid_view_rounded, 'Dashboard', '/dashboard'),
-    _NavItem(Icons.table_restaurant_rounded, 'Mesas', '/mesas'),
-    _NavItem(Icons.restaurant_rounded, 'Cocina', '/kitchen'),
-    _NavItem(Icons.receipt_long_rounded, 'Pedidos', '/orders'),
-    _NavItem(Icons.bar_chart_rounded, 'Reportes', '/reports'),
-  ];
+  List<_NavItem> get _filteredItems {
+    if (role == UserRole.cocina) {
+      return const [
+        _NavItem(Icons.restaurant_rounded, 'Cocina', '/kitchen'),
+        _NavItem(Icons.receipt_long_rounded, 'Pedidos', '/orders'),
+      ];
+    }
+    if (role == UserRole.mesero) {
+      return const [
+        _NavItem(Icons.table_restaurant_rounded, 'Mesas', '/mesas'),
+        _NavItem(Icons.receipt_long_rounded, 'Pedidos', '/orders'),
+      ];
+    }
+    // admin / fallback
+    return const [
+      _NavItem(Icons.grid_view_rounded, 'Dashboard', '/dashboard'),
+      _NavItem(Icons.table_restaurant_rounded, 'Mesas', '/mesas'),
+      _NavItem(Icons.restaurant_rounded, 'Cocina', '/kitchen'),
+      _NavItem(Icons.receipt_long_rounded, 'Pedidos', '/orders'),
+      _NavItem(Icons.bar_chart_rounded, 'Reportes', '/reports'),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -368,7 +384,7 @@ class _SideNavBar extends StatelessWidget {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(9),
                   child: Image.asset(
-                    'assets/images/mr_pepe_logo.png',
+                    'assets/images/cios.png',
                     fit: BoxFit.contain,
                     errorBuilder: (_, __, ___) => const Icon(
                       Icons.local_fire_department_rounded,
@@ -411,7 +427,7 @@ class _SideNavBar extends StatelessWidget {
                     letterSpacing: 1.5)),
           ),
 
-          for (final item in _items) _buildItem(context, item),
+          for (final item in _filteredItems) _buildItem(context, item),
 
           const Spacer(),
           Container(height: 1, color: const Color(0xFF262626)),

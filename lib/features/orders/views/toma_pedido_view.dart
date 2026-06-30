@@ -246,6 +246,7 @@ class TomaPedidoView extends ConsumerWidget {
                 ),
               ],
             ),
+      ),
     );
   }
 
