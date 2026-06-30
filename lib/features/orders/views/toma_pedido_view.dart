@@ -22,13 +22,31 @@ class TomaPedidoView extends ConsumerWidget {
     final cart = ref.watch(cartProvider);
     final total = ref.read(cartProvider.notifier).total;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Mesa #${mesa.numero} - Toma de Pedido'),
-        backgroundColor: Colors.white,
-        foregroundColor: AppTheme.onBackgroundColor,
-        elevation: 0,
-      ),
+    final editingOrder = ref.watch(editingOrderProvider);
+
+    return PopScope(
+      canPop: true,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) {
+          ref.read(editingOrderProvider.notifier).state = null;
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(editingOrder != null 
+              ? 'Editar Pedido - Mesa #${mesa.numero}' 
+              : 'Mesa #${mesa.numero} - Toma de Pedido'),
+          backgroundColor: Colors.white,
+          foregroundColor: AppTheme.onBackgroundColor,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              ref.read(editingOrderProvider.notifier).state = null;
+              Navigator.pop(context);
+            },
+          ),
+        ),
       body: Column(
         children: [
           // Categorías
@@ -175,28 +193,45 @@ class TomaPedidoView extends ConsumerWidget {
                         onPressed: () async {
                           if (cart.isEmpty) return;
                           
-                          // 1. Enviar la orden a Firestore
-                          await ref.read(orderServiceProvider).submitOrder(
-                            mesaNumero: mesa.numero,
-                            items: cart,
-                            total: total,
-                          );
+                          final editingOrder = ref.read(editingOrderProvider);
+                          if (editingOrder != null) {
+                            // 1. Actualizar la orden existente
+                            await ref.read(orderServiceProvider).updateOrder(
+                              orderId: editingOrder.id,
+                              items: cart,
+                              total: total,
+                            );
+                            
+                            // 2. Limpiar estado de edición
+                            ref.read(editingOrderProvider.notifier).state = null;
+                          } else {
+                            // 1. Enviar una nueva orden
+                            await ref.read(orderServiceProvider).submitOrder(
+                              mesaNumero: mesa.numero,
+                              items: cart,
+                              total: total,
+                            );
 
-                          // 2. Limpiar Carrito
+                            // 2. Marcar la mesa como ocupada
+                            await ref.read(tableProvider.notifier).updateTableStatus(
+                              mesa.id, 
+                              MesaStatus.ocupada,
+                              encargado: 'Mesero Admin',
+                            );
+                          }
+
+                          // Limpiar Carrito
                           ref.read(cartProvider.notifier).clear();
 
-                          // 3. Marcar la mesa como ocupada
-                          await ref.read(tableProvider.notifier).updateTableStatus(
-                            mesa.id, 
-                            MesaStatus.ocupada,
-                            encargado: 'Mesero Admin',
-                          );
-
-                          // 4. Volver y mostrar mensaje
+                          // Volver y mostrar mensaje
                           if (context.mounted) {
                             Navigator.pop(context);
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('¡Pedido enviado a cocina!')),
+                              SnackBar(
+                                content: Text(editingOrder != null 
+                                  ? '¡Pedido actualizado con éxito!' 
+                                  : '¡Pedido enviado a cocina!')
+                              ),
                             );
                           }
                         },
@@ -204,7 +239,7 @@ class TomaPedidoView extends ConsumerWidget {
                           backgroundColor: AppTheme.primaryColor,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                         ),
-                        child: const Text('CONFIRMAR PEDIDO'),
+                        child: Text(editingOrder != null ? 'ACTUALIZAR PEDIDO' : 'CONFIRMAR PEDIDO'),
                       ),
                     ],
                   ),

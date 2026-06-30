@@ -156,5 +156,11 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
     state = [];
   }
 
+  void setItems(List<CartItem> items) {
+    state = items;
+  }
+
   double get total => state.fold(0, (sum, item) => sum + (item.producto.precio * item.cantidad));
 }
+
+final editingOrderProvider = StateProvider<OrderModel?>((ref) => null);

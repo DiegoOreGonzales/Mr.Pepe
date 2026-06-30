@@ -96,45 +96,54 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
   try {
-    const { id, status, clienteNombre, clienteDocumento, tipoDocumento, voucherNumber } = await request.json();
+    const { id, status, items, total, clienteNombre, clienteDocumento, tipoDocumento, voucherNumber } = await request.json();
     
-    if (!id || !status) {
-      return NextResponse.json({ success: false, error: 'ID de orden y Estado requeridos' }, { status: 400 });
+    if (!id) {
+      return NextResponse.json({ success: false, error: 'ID de orden requerido' }, { status: 400 });
     }
     
-    // Si se trata de un cobro (checkout), actualizamos los datos y liberamos la mesa
-    if (status === 'pagado') {
-      // 1. Obtener la orden para saber la mesa
-      const orderSearch = await query('SELECT mesa_numero FROM orders WHERE id = $1', [id]);
-      if (orderSearch.rows.length > 0) {
-        const mesaNumero = orderSearch.rows[0].mesa_numero;
-        
-        // 2. Actualizar orden a pagado con comprobante
-        await query(
-          `UPDATE orders 
-           SET status = $1, cliente_nombre = $2, cliente_documento = $3, tipo_documento = $4, voucher_number = $5, updated_at = CURRENT_TIMESTAMP 
-           WHERE id = $6`,
-          [status, clienteNombre || null, clienteDocumento || null, tipoDocumento || null, voucherNumber || null, id]
-        );
-        
-        // 3. Liberar Mesa
-        const tableId = `mesa_${mesaNumero}`;
-        await query(
-          "UPDATE tables SET status = 'libre', encargado = NULL, start_time = NULL WHERE id = $1",
-          [tableId]
-        );
-      } else {
-        return NextResponse.json({ success: false, error: 'Orden no encontrada' }, { status: 404 });
-      }
-    } else {
-      // Si es un cambio de estado normal (ej. preparando, listo, entregado)
+    // Si viene items o total, actualizamos los detalles de la orden
+    if (items !== undefined && total !== undefined) {
       await query(
-        'UPDATE orders SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
-        [status, id]
+        `UPDATE orders 
+         SET items = $1, total = $2, updated_at = CURRENT_TIMESTAMP 
+         WHERE id = $3`,
+        [JSON.stringify(items), total, id]
       );
-      
-      // Si pasa a 'entregado', verificamos si ya fue pagado o si se libera la mesa al final
-      // En tu flujo de Mr. Pepe, el pago (checkout) es el que libera la mesa.
+    }
+    
+    if (status) {
+      // Si se trata de un cobro (checkout), actualizamos los datos y liberamos la mesa
+      if (status === 'pagado') {
+        // 1. Obtener la orden para saber la mesa
+        const orderSearch = await query('SELECT mesa_numero FROM orders WHERE id = $1', [id]);
+        if (orderSearch.rows.length > 0) {
+          const mesaNumero = orderSearch.rows[0].mesa_numero;
+          
+          // 2. Actualizar orden a pagado con comprobante
+          await query(
+            `UPDATE orders 
+             SET status = $1, cliente_nombre = $2, cliente_documento = $3, tipo_documento = $4, voucher_number = $5, updated_at = CURRENT_TIMESTAMP 
+             WHERE id = $6`,
+            [status, clienteNombre || null, clienteDocumento || null, tipoDocumento || null, voucherNumber || null, id]
+          );
+          
+          // 3. Liberar Mesa
+          const tableId = `mesa_${mesaNumero}`;
+          await query(
+            "UPDATE tables SET status = 'libre', encargado = NULL, start_time = NULL WHERE id = $1",
+            [tableId]
+          );
+        } else {
+          return NextResponse.json({ success: false, error: 'Orden no encontrada' }, { status: 404 });
+        }
+      } else {
+        // Si es un cambio de estado normal (ej. preparando, listo, entregado)
+        await query(
+          'UPDATE orders SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
+          [status, id]
+        );
+      }
     }
     
     return NextResponse.json({ success: true, message: 'Orden actualizada con éxito' });

@@ -170,6 +170,31 @@ class ApiService {
     }
   }
 
+  Future<void> updateOrder({
+    required String orderId,
+    required List<CartItem> items,
+    required double total,
+  }) async {
+    try {
+      final List<Map<String, dynamic>> itemsMap = items.map((item) => {
+        'productId': item.producto.id,
+        'nombre': item.producto.nombre,
+        'cantidad': item.cantidad,
+        'precio': item.producto.precio,
+        'notas': null,
+      }).toList();
+
+      await _dio.put('/api/orders', data: {
+        'id': orderId,
+        'items': itemsMap,
+        'total': total,
+      });
+    } catch (e) {
+      print('Error al actualizar orden: $e');
+      rethrow;
+    }
+  }
+
   Future<void> checkoutOrder({
     required String orderId,
     required String clienteNombre,

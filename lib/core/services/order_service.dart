@@ -18,6 +18,18 @@ class OrderService {
       total: total,
     );
   }
+
+  Future<void> updateOrder({
+    required String orderId,
+    required List<CartItem> items,
+    required double total,
+  }) async {
+    await _apiService.updateOrder(
+      orderId: orderId,
+      items: items,
+      total: total,
+    );
+  }
 }
 
 final orderServiceProvider = Provider((ref) {

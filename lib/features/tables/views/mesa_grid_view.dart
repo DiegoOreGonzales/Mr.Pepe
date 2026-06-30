@@ -7,6 +7,8 @@ import 'mesa_card.dart';
 import '../../orders/views/toma_pedido_view.dart';
 import '../models/mesa_model.dart';
 import '../../orders/providers/order_provider.dart';
+import '../../kitchen/models/order_model.dart';
+import '../../../../core/services/api_service.dart';
 
 final tableFilterProvider = StateProvider<String>((ref) => 'TODAS');
 
@@ -278,6 +280,132 @@ class _MesaActionDialog extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 20),
+            
+            // Pedidos Activos
+            FutureBuilder<List<OrderModel>>(
+              future: ref.read(apiServiceProvider).fetchUnpaidOrdersByTable(mesa.numero),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                      child: SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    ),
+                  );
+                }
+                final orders = snapshot.data ?? [];
+                if (orders.isEmpty) {
+                  return const SizedBox();
+                }
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Pedidos Activos:',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                        color: AppTheme.textMuted,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    ...orders.map((order) {
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade50,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.grey.shade200),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Pedido #${order.id.substring(0, 5)} - S/ ${order.total.toStringAsFixed(2)}',
+                                    style: const TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    order.items.map((i) => '${i.cantidad}x ${i.nombre}').join(', '),
+                                    style: TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontSize: 11,
+                                      color: Colors.grey.shade600,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            TextButton.icon(
+                              onPressed: () {
+                                // 1. Limpiar Carrito
+                                ref.read(cartProvider.notifier).clear();
+                                
+                                // 2. Poblar Carrito
+                                final List<CartItem> cartItems = [];
+                                for (var item in order.items) {
+                                  final producto = ref.read(productProvider).firstWhere(
+                                    (p) => p.id == item.productId,
+                                    orElse: () => Producto(
+                                      id: item.productId ?? '',
+                                      nombre: item.nombre,
+                                      descripcion: '',
+                                      precio: item.precio,
+                                      imagen: '',
+                                      categoria: Categoria.parrillas,
+                                    ),
+                                  );
+                                  cartItems.add(CartItem(producto: producto, cantidad: item.cantidad));
+                                }
+                                ref.read(cartProvider.notifier).setItems(cartItems);
+                                
+                                // 3. Establecer orden en edición
+                                ref.read(editingOrderProvider.notifier).state = order;
+                                
+                                // 4. Ir a TomaPedidoView
+                                Navigator.pop(context);
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => TomaPedidoView(mesa: mesa),
+                                  ),
+                                );
+                              },
+                              icon: const Icon(Icons.edit, size: 14),
+                              label: const Text('Editar', style: TextStyle(fontSize: 11)),
+                              style: TextButton.styleFrom(
+                                foregroundColor: AppTheme.primaryColor,
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                minimumSize: Size.zero,
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
+                    const SizedBox(height: 12),
+                  ],
+                );
+              },
+            ),
+
             const Text('¿Qué deseas hacer?',
                 style: TextStyle(
                     fontFamily: 'Inter',
@@ -289,6 +417,7 @@ class _MesaActionDialog extends StatelessWidget {
               child: OutlinedButton.icon(
                 onPressed: () {
                   ref.read(cartProvider.notifier).clear();
+                  ref.read(editingOrderProvider.notifier).state = null;
                   Navigator.pop(context);
                   Navigator.push(
                     context,
