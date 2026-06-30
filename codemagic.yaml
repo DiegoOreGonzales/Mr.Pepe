@@ -20,7 +20,8 @@ workflows:
         - push
       branch_patterns:
         - pattern: main
-          target_type: primary
+          include: true
+          source: true
     scripts:
       - name: Set up keychain and code signing
         script: |
