@@ -218,6 +218,19 @@ class ApiService {
     return [];
   }
 
+  Future<List<OrderModel>> fetchUnpaidOrdersByTable(int mesaNumero) async {
+    try {
+      final response = await _dio.get('/api/orders?mesa=$mesaNumero&unpaid=true');
+      if (response.statusCode == 200 && response.data['success'] == true) {
+        final List list = response.data['data'] ?? [];
+        return list.map((item) => _orderFromMap(item)).toList();
+      }
+    } catch (e) {
+      print('Error al obtener órdenes no pagadas para la mesa $mesaNumero: $e');
+    }
+    return [];
+  }
+
   Future<List<OrderModel>> fetchReportOrders() async {
     try {
       final response = await _dio.get('/api/orders?status=billing');

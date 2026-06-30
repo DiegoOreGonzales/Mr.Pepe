@@ -87,8 +87,7 @@ class _BillingViewState extends ConsumerState<BillingView> {
       ),
       body: StreamBuilder<List<OrderModel>>(
         stream: Stream.periodic(const Duration(seconds: 3))
-            .asyncMap((_) => ref.read(apiServiceProvider).fetchActiveOrders())
-            .map((orders) => orders.where((o) => o.mesaNumero == widget.mesa.numero).toList()),
+            .asyncMap((_) => ref.read(apiServiceProvider).fetchUnpaidOrdersByTable(widget.mesa.numero)),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return Center(

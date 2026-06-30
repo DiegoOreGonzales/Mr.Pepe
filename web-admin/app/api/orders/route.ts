@@ -6,9 +6,16 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const statusParam = searchParams.get('status');
     const limitParam = searchParams.get('limit') || '50';
+    const mesaParam = searchParams.get('mesa');
+    const unpaidParam = searchParams.get('unpaid');
     
     let res;
-    if (statusParam === 'active') {
+    if (mesaParam && unpaidParam === 'true') {
+      res = await query(
+        "SELECT * FROM orders WHERE mesa_numero = $1 AND status != 'pagado' ORDER BY created_at ASC",
+        [parseInt(mesaParam)]
+      );
+    } else if (statusParam === 'active') {
       res = await query(
         "SELECT * FROM orders WHERE status IN ('pendiente', 'preparando', 'listo') ORDER BY created_at ASC"
       );
