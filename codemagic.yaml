@@ -32,14 +32,18 @@ workflows:
           # app-store-connect fetch-signing-files "$BUNDLE_ID" --project-id "$APP_STORE_APPLE_ID" --create
           # keychain add-certificates
           # xcode-project use-profiles
+      - name: Set iOS deployment target
+        script: |
+          # Firebase Swift packages require iOS 15.0 minimum
+          sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = .*/IPHONEOS_DEPLOYMENT_TARGET = 15.0;/g' ios/Runner.xcodeproj/project.pbxproj
       - name: Get Flutter dependencies
         script: |
           flutter pub get
+      - name: Install CocoaPods
+        script: |
+          cd ios && pod install
       - name: Build iOS IPA
         script: |
-          # Construir archivo .ipa para distribución.
-          # Si se configuró la firma digital arriba, se puede usar "flutter build ipa --release"
-          # De lo contrario, se genera sin firma para empaquetar en local:
           flutter build ipa --release --no-codesign
     artifacts:
       - build/ios/ipa/*.ipa
