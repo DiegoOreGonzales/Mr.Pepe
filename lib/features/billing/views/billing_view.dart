@@ -156,6 +156,27 @@ class _BillingViewState extends ConsumerState<BillingView> {
           final double igv = subtotal * 0.18;
           final double total = subtotal + igv;
 
+          final double screenWidth = MediaQuery.of(context).size.width;
+          final bool isMobile = screenWidth < 750;
+
+          if (isMobile) {
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildSummarySection(allItems, subtotal, igv, total),
+                  const SizedBox(height: 20),
+                  _buildPaymentMethodSection(),
+                  const SizedBox(height: 20),
+                  _buildInvoiceSection(),
+                  const SizedBox(height: 24),
+                  _buildActionButtons(total, orders),
+                ],
+              ),
+            );
+          }
+
           return SingleChildScrollView(
             padding: const EdgeInsets.all(32),
             child: Row(
