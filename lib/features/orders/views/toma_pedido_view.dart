@@ -58,7 +58,10 @@ class TomaPedidoView extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 20),
               children: [
                 _buildCategoryToken(ref, 'Parrillas', Categoria.parrillas),
-                _buildCategoryToken(ref, 'Piqueos', Categoria.piqueos),
+                _buildCategoryToken(ref, 'Broaster', Categoria.broaster),
+                _buildCategoryToken(ref, 'Alitas / Piqueos', Categoria.piqueos),
+                _buildCategoryToken(ref, 'Combos', Categoria.combos),
+                _buildCategoryToken(ref, 'Extras', Categoria.extras),
                 _buildCategoryToken(ref, 'Bebidas', Categoria.bebidas),
                 _buildCategoryToken(ref, 'Postres', Categoria.postres),
               ],

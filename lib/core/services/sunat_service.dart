@@ -129,24 +129,20 @@ class SunatService {
 
       if (response.statusCode == 200) {
         final data = response.data;
-        if (data != null && data['success'] == true) {
-          final actualData = data['data'];
-          if (actualData != null) {
-            final String nombres = (actualData['nombres'] ?? '').toString();
-            final String apellidoPaterno = (actualData['apellido_paterno'] ?? '').toString();
-            final String apellidoMaterno = (actualData['apellido_materno'] ?? '').toString();
-            final String nombreCompleto = (actualData['nombre_completo'] ?? '').toString();
-            
-            String finalName = nombreCompleto;
-            if (finalName.isEmpty) {
-              finalName = '$nombres $apellidoPaterno $apellidoMaterno'.trim();
-            }
-            if (finalName.isEmpty) {
-              finalName = nombres;
-            }
-            
+        print('RENIEC API Response: $data');
+        
+        if (data != null && data['success'] != false) {
+          // La API devuelve los campos DIRECTAMENTE en la raíz (no anidados en 'data')
+          // Claves: nombres, apellidoPaterno, apellidoMaterno (camelCase)
+          final String nombres = (data['nombres'] ?? '').toString();
+          final String apellidoPaterno = (data['apellidoPaterno'] ?? '').toString();
+          final String apellidoMaterno = (data['apellidoMaterno'] ?? '').toString();
+          
+          final String nombreCompleto = '$nombres $apellidoPaterno $apellidoMaterno'.trim();
+          
+          if (nombreCompleto.isNotEmpty) {
             return {
-              'nombres': finalName,
+              'nombres': nombreCompleto,
               'dni': dni,
             };
           }

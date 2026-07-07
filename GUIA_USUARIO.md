@@ -13,7 +13,7 @@ El sistema está configurado con los datos oficiales del negocio para todos los 
 ## 👤 2. Acceso al Sistema
 Para ingresar a los módulos administrativos y de cocina:
 - **URL Base:** `http://192.168.1.13:3000`
-- **Email:** `admin@elbrasero.com`
+- **Email:** `admin@chioschicken.com`
 - **Contraseña:** `admin123456`
 
 ---

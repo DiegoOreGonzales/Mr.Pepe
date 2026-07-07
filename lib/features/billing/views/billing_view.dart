@@ -39,14 +39,30 @@ class _BillingViewState extends ConsumerState<BillingView> {
       return;
     }
 
-    setState(() => _isLoadingDNI = true);
+    setState(() {
+      _isLoadingDNI = true;
+      _clienteNombre = 'Buscando...';
+    });
     final result = await SunatService.consultarDni(dni);
     setState(() {
       _isLoadingDNI = false;
       if (result != null) {
         _clienteNombre = result['nombres'];
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('✅ ¡Identidad Verificada!'),
+            backgroundColor: Color(0xFF1A8952),
+            duration: Duration(seconds: 2),
+          ),
+        );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('DNI no encontrado')));
+        _clienteNombre = null;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('DNI no encontrado. Ingrese el nombre manualmente.'),
+            backgroundColor: Colors.orange,
+          ),
+        );
       }
     });
   }
@@ -384,12 +400,28 @@ class _BillingViewState extends ConsumerState<BillingView> {
                     controller: _dniController,
                     keyboardType: TextInputType.number,
                     maxLength: 8,
+                    onChanged: (value) {
+                      // Auto-consulta cuando se escriben 8 dígitos
+                      if (value.trim().length == 8) {
+                        _consultarDNI();
+                      } else {
+                        setState(() => _clienteNombre = null);
+                      }
+                    },
                     decoration: InputDecoration(
                       hintText: 'DNI (Opcional)',
                       counterText: '',
                       filled: true,
                       fillColor: const Color(0xFFF7F9FF),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                      suffixIcon: _isLoadingDNI
+                        ? const Padding(
+                            padding: EdgeInsets.all(12),
+                            child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
+                          )
+                        : (_clienteNombre != null && _clienteNombre != 'Buscando...')
+                          ? const Icon(Icons.check_circle, color: Color(0xFF1A8952))
+                          : null,
                     ),
                   ),
                 ),

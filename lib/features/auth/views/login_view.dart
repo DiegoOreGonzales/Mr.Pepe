@@ -276,7 +276,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
                               style: const TextStyle(
                                   fontFamily: 'Inter', fontSize: 14),
                               decoration: const InputDecoration(
-                                hintText: 'admin@elbrasero.com',
+                                hintText: 'admin@chioschicken.com',
                                 prefixIcon: Icon(Icons.email_outlined,
                                     size: 18, color: AppTheme.textMuted),
                               ),

@@ -40,7 +40,7 @@ class DigitalMenuView extends ConsumerWidget {
       expandedHeight: 120,
       backgroundColor: Colors.white,
       flexibleSpace: FlexibleSpaceBar(
-        title: Text('Mesa $mesaNumero • El Brasero', style: const TextStyle(color: AppTheme.primaryColor, fontWeight: FontWeight.w800, fontSize: 16)),
+        title: Text('Mesa $mesaNumero • Mr. Pepe', style: const TextStyle(color: AppTheme.primaryColor, fontWeight: FontWeight.w800, fontSize: 16)),
         centerTitle: true,
       ),
     );

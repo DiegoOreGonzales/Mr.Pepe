@@ -7,7 +7,7 @@ import '../../features/kitchen/models/order_model.dart';
 import '../../features/orders/providers/order_provider.dart';
 
 class ApiService {
-  static const String defaultIp = '192.168.1.13:3000';
+  static const String defaultIp = 'localhost:3000';
   String _currentServerIp = defaultIp;
   
   final Dio _dio = Dio(BaseOptions(

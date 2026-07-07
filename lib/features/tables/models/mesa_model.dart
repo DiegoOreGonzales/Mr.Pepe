@@ -41,7 +41,7 @@ class Mesa {
   }
 }
 
-enum Categoria { parrillas, piqueos, bebidas, postres, ensaladas }
+enum Categoria { parrillas, piqueos, bebidas, postres, ensaladas, broaster, extras, combos }
 
 class Producto {
   final String id;

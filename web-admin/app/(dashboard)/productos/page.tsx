@@ -234,9 +234,6 @@ export default function ProductosPage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {filteredProducts.map((p) => {
-            const isLowStock = p.cantidad > 0 && p.cantidad < 5;
-            const isOutOfStock = p.cantidad === 0;
-
             return (
               <div 
                 key={p.id} 
@@ -262,23 +259,6 @@ export default function ProductosPage() {
                       Destacado
                     </span>
                   )}
-
-                  {/* Stock Badge */}
-                  <div className="absolute bottom-3 left-3">
-                    {isOutOfStock ? (
-                      <span className="bg-red-100 text-red-700 text-[10px] font-bold px-2.5 py-0.5 rounded-md border border-red-200">
-                        Agotado
-                      </span>
-                    ) : isLowStock ? (
-                      <span className="bg-amber-100 text-amber-700 text-[10px] font-bold px-2.5 py-0.5 rounded-md border border-amber-200">
-                        Poco Stock ({p.cantidad})
-                      </span>
-                    ) : (
-                      <span className="bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2.5 py-0.5 rounded-md border border-emerald-200">
-                        Stock: {p.cantidad}
-                      </span>
-                    )}
-                  </div>
                 </div>
 
                 {/* Content */}
@@ -361,33 +341,19 @@ export default function ProductosPage() {
                 </select>
               </div>
 
-              {/* Precio y Stock */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-stone-600 uppercase mb-1">Precio (S/) *</label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    min="0"
-                    required
-                    value={precio}
-                    onChange={(e) => setPrecio(e.target.value)}
-                    placeholder="25.50"
-                    className="w-full p-2.5 rounded-lg border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#E94E1B]/20 focus:border-[#E94E1B]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-stone-600 uppercase mb-1">Cantidad / Stock *</label>
-                  <input
-                    type="number"
-                    min="0"
-                    required
-                    value={cantidad}
-                    onChange={(e) => setCantidad(e.target.value)}
-                    placeholder="50"
-                    className="w-full p-2.5 rounded-lg border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#E94E1B]/20 focus:border-[#E94E1B]"
-                  />
-                </div>
+              {/* Precio */}
+              <div>
+                <label className="block text-xs font-bold text-stone-600 uppercase mb-1">Precio (S/) *</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  required
+                  value={precio}
+                  onChange={(e) => setPrecio(e.target.value)}
+                  placeholder="25.50"
+                  className="w-full p-2.5 rounded-lg border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#E94E1B]/20 focus:border-[#E94E1B]"
+                />
               </div>
 
               {/* Descripcion */}

@@ -96,7 +96,7 @@ function KitchenDisplayContent() {
   // Auto-login silencioso
   useEffect(() => {
     if (!user) {
-      login("admin@elbrasero.com", "admin123456")
+      login("admin@chioschicken.com", "admin123456")
         .then(function() { console.log("✅ Autenticado"); })
         .catch(function(e) { console.error("❌ Login error:", e); });
     }

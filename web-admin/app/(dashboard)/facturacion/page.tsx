@@ -1,6 +1,218 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useBillingOrders, Order } from "@/lib/firebase/hooks";
+
+// ── API RENIEC - Consulta DNI (via /api/reniec proxy) ─────────────────────────
+
+interface DniResult {
+  nombres: string;
+  apellidos: string;
+  verified: boolean;
+}
+
+function DniLookup() {
+  const [dni, setDni] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<DniResult | null>(null);
+  const [nombres, setNombres] = useState("");
+  const [apellidos, setApellidos] = useState("");
+  const [readOnly, setReadOnly] = useState(false);
+  const [toast, setToast] = useState<{ type: "success" | "error" | "warning"; message: string } | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const showToast = useCallback((type: "success" | "error" | "warning", message: string) => {
+    setToast({ type, message });
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => setToast(null), 3500);
+  }, []);
+
+  const handleDniChange = async (value: string) => {
+    // Solo permitir números
+    const cleaned = value.replace(/\D/g, "").slice(0, 8);
+    setDni(cleaned);
+
+    if (cleaned.length === 8) {
+      setLoading(true);
+      setNombres("Buscando...");
+      setApellidos("Buscando...");
+
+      try {
+        const response = await fetch(`/api/reniec?dni=${cleaned}`);
+        const data = await response.json();
+
+        if (!data.success) {
+          showToast("error", data.error || "DNI no encontrado en RENIEC");
+          setNombres("");
+          setApellidos("");
+          setReadOnly(false);
+          setResult(null);
+        } else {
+          const info = data.data;
+          setNombres(info.nombres);
+          setApellidos(`${info.apellidoPaterno} ${info.apellidoMaterno}`);
+          setReadOnly(true);
+          setResult({
+            nombres: info.nombres,
+            apellidos: `${info.apellidoPaterno} ${info.apellidoMaterno}`,
+            verified: true,
+          });
+          showToast("success", "¡Identidad Verificada con RENIEC!");
+        }
+      } catch {
+        showToast("warning", "No se pudo conectar con RENIEC. Ingrese manualmente.");
+        setReadOnly(false);
+        setNombres("");
+        setApellidos("");
+        setResult(null);
+      } finally {
+        setLoading(false);
+      }
+
+    } else {
+      // Reset si cambia el DNI
+      if (result) {
+        setResult(null);
+        setNombres("");
+        setApellidos("");
+        setReadOnly(false);
+      }
+    }
+  };
+
+  const handleClear = () => {
+    setDni("");
+    setNombres("");
+    setApellidos("");
+    setReadOnly(false);
+    setResult(null);
+    setLoading(false);
+  };
+
+  return (
+    <div className="bg-white rounded-[14px] border border-stone-100/60 card-shadow p-6 no-print animate-fade-in">
+      {/* Toast Notification */}
+      {toast && (
+        <div
+          className={`fixed top-6 right-6 z-[100] flex items-center gap-3 px-5 py-3 rounded-xl shadow-2xl text-sm font-bold transition-all animate-fade-in ${
+            toast.type === "success"
+              ? "bg-[#1A8952] text-white"
+              : toast.type === "error"
+              ? "bg-[#BF391B] text-white"
+              : "bg-amber-500 text-white"
+          }`}
+        >
+          <span className="material-symbols-outlined text-[20px]">
+            {toast.type === "success" ? "verified" : toast.type === "error" ? "error" : "warning"}
+          </span>
+          {toast.message}
+        </div>
+      )}
+
+      {/* Header */}
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-3">
+          <span className="flex items-center justify-center w-10 h-10 rounded-xl bg-[#BF391B]/10">
+            <span className="material-symbols-outlined text-[#BF391B] text-[22px]">badge</span>
+          </span>
+          <div>
+            <h3 className="text-[15px] font-extrabold text-[#0D0D0D]">Consulta DNI — RENIEC</h3>
+            <p className="text-[11px] text-[#9AA0A6] font-medium">Ingrese 8 dígitos para autocompletar datos del cliente</p>
+          </div>
+        </div>
+        {result?.verified && (
+          <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#1A8952]/10 text-[#1A8952] text-[10px] font-extrabold uppercase tracking-widest">
+            <span className="material-symbols-outlined text-[14px]">verified</span>
+            Verificado
+          </span>
+        )}
+      </div>
+
+      {/* Form */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* DNI Input */}
+        <div className="relative">
+          <label className="block text-[10px] font-bold text-[#9AA0A6] uppercase tracking-widest mb-2">
+            N° DNI
+          </label>
+          <div className="relative">
+            <input
+              type="text"
+              value={dni}
+              onChange={(e) => handleDniChange(e.target.value)}
+              placeholder="Ej: 70123456"
+              maxLength={8}
+              className="w-full px-4 py-3 rounded-xl border border-stone-200 outline-none focus:border-[#BF391B] focus:ring-2 focus:ring-[#BF391B]/10 transition-all bg-white text-sm font-bold text-[#0D0D0D] placeholder:text-stone-300 pr-12"
+            />
+            {/* Loader */}
+            {loading && (
+              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                <div className="w-5 h-5 border-2 border-[#BF391B]/30 border-t-[#BF391B] rounded-full animate-spin" />
+              </div>
+            )}
+            {/* Clear button */}
+            {!loading && dni.length > 0 && (
+              <button
+                onClick={handleClear}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-[#BF391B] transition-colors"
+              >
+                <span className="material-symbols-outlined text-[18px]">close</span>
+              </button>
+            )}
+          </div>
+          {/* Progress bar */}
+          <div className="mt-2 h-1 w-full rounded-full bg-stone-100 overflow-hidden">
+            <div
+              className="h-full rounded-full transition-all duration-300"
+              style={{
+                width: `${(dni.length / 8) * 100}%`,
+                background: dni.length === 8 ? (result?.verified ? "#1A8952" : "#BF391B") : "#BF391B",
+              }}
+            />
+          </div>
+          <p className="text-[10px] text-stone-400 mt-1">{dni.length}/8 dígitos</p>
+        </div>
+
+        {/* Nombres */}
+        <div>
+          <label className="block text-[10px] font-bold text-[#9AA0A6] uppercase tracking-widest mb-2">
+            Nombres
+          </label>
+          <input
+            type="text"
+            value={nombres}
+            onChange={(e) => !readOnly && setNombres(e.target.value)}
+            readOnly={readOnly}
+            placeholder="Se autocompleta..."
+            className={`w-full px-4 py-3 rounded-xl border outline-none transition-all text-sm font-medium ${
+              readOnly
+                ? "bg-[#1A8952]/5 border-[#1A8952]/30 text-[#0D0D0D] cursor-default"
+                : "bg-white border-stone-200 focus:border-[#BF391B] focus:ring-2 focus:ring-[#BF391B]/10 text-[#0D0D0D] placeholder:text-stone-300"
+            }`}
+          />
+        </div>
+
+        {/* Apellidos */}
+        <div>
+          <label className="block text-[10px] font-bold text-[#9AA0A6] uppercase tracking-widest mb-2">
+            Apellidos
+          </label>
+          <input
+            type="text"
+            value={apellidos}
+            onChange={(e) => !readOnly && setApellidos(e.target.value)}
+            readOnly={readOnly}
+            placeholder="Se autocompleta..."
+            className={`w-full px-4 py-3 rounded-xl border outline-none transition-all text-sm font-medium ${
+              readOnly
+                ? "bg-[#1A8952]/5 border-[#1A8952]/30 text-[#0D0D0D] cursor-default"
+                : "bg-white border-stone-200 focus:border-[#BF391B] focus:ring-2 focus:ring-[#BF391B]/10 text-[#0D0D0D] placeholder:text-stone-300"
+            }`}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // ── Componente de Boleta (DISEÑO PREMIUM IDENTICO AL MOVIL) ──────────────────
 
@@ -125,6 +337,9 @@ export default function FacturacionPage() {
 
   return (
     <div className="space-y-6">
+      {/* Consulta DNI - RENIEC */}
+      <DniLookup />
+
       {/* Buscador */}
       <div className="flex items-center gap-4 no-print">
         <div className="relative flex-1 max-w-md">

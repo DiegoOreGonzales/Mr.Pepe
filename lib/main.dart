@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -24,8 +25,14 @@ void main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+    // Silent sign-in for Firestore authorization
+    await FirebaseAuth.instance.signInWithEmailAndPassword(
+      email: 'admin@elbrasero.com',
+      password: 'admin123456',
+    );
+    print('🔥 Firebase Auth synchronized successfully in Flutter');
   } catch (e) {
-    print('Firebase initialization skipped/failed in offline mode: $e');
+    print('Firebase initialization or Auth skipped/failed: $e');
   }
 
   runApp(
