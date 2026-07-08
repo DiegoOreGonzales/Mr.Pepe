@@ -270,30 +270,75 @@ export default function ReportesPage() {
               <h3 className="text-sm font-bold text-[#0D0D0D] uppercase tracking-wide">Top Productos</h3>
               <button
                 onClick={() => {
-                  const headers = ["Producto", "Unidades", "Ingresos (S/)"];
-                  const rows = metrics.topProducts.map((p) => [
-                    p.name,
-                    p.units,
-                    p.revenue.toFixed(2)
-                  ]);
-                  
-                  // Formato ordenado con Punto y Coma (estándar Excel ES) y BOM para tildes
-                  const csvContent = [headers, ...rows]
-                    .map((e) => e.join(";"))
-                    .join("\n");
-                    
-                  const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
-                  const url  = URL.createObjectURL(blob);
-                  const a    = document.createElement("a");
-                  a.href     = url;
-                  a.download = `reporte_${period}_mrpepe_${new Date().toISOString().slice(0,10)}.csv`;
-                  a.click();
-                  URL.revokeObjectURL(url);
+                  const htmlContent = `
+                    <!DOCTYPE html>
+                    <html>
+                      <head>
+                        <title>Reporte Top Productos - Mr Pepe</title>
+                        <meta charset="utf-8" />
+                        <style>
+                          body { font-family: 'Inter', sans-serif; color: #0D0D0D; margin: 40px; }
+                          .header { text-align: center; margin-bottom: 40px; display: flex; flex-direction: column; align-items: center; }
+                          .logo { max-width: 120px; margin-bottom: 10px; }
+                          .title { font-size: 26px; font-weight: 900; color: #BF391B; margin: 0; }
+                          .subtitle { font-size: 13px; color: #9AA0A6; margin: 5px 0 0 0; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; }
+                          .meta-info { margin-top: 20px; font-size: 11px; color: #555; border-top: 1px solid #E4E7EC; border-bottom: 1px solid #E4E7EC; padding: 12px; width: 100%; max-width: 600px; text-align: left; }
+                          table { width: 100%; max-width: 600px; border-collapse: collapse; margin: 30px auto 0 auto; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); border-radius: 12px; overflow: hidden; }
+                          th { background-color: #F8F9FA; padding: 14px 18px; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #9AA0A6; border-bottom: 2px solid #E4E7EC; text-align: left; }
+                          td { padding: 14px 18px; font-size: 13px; border-bottom: 1px solid #F0F2F5; color: #0D0D0D; text-align: left; }
+                          .bold { font-weight: 700; }
+                          .text-right { text-align: right; }
+                          .text-center { text-align: center; }
+                          .rank { display: inline-flex; width: 24px; height: 24px; background: #BF391B15; color: #BF391B; border-radius: 6px; align-items: center; justify-content: center; font-weight: 800; font-size: 11px; margin-right: 10px; }
+                          @media print {
+                            .no-print { display: none; }
+                            body { margin: 20px; }
+                          }
+                        </style>
+                      </head>
+                      <body>
+                        <div class="header">
+                          <img class="logo" src="/logo.png" alt="Mr Pepe Logo" />
+                          <h1 class="title">MR. PEPE</h1>
+                          <p class="subtitle">Broaster y Brasas</p>
+                          <div class="meta-info">
+                            <p style="margin: 3px 0;"><strong>REPORTE DE VENTAS:</strong> TOP PRODUCTOS</p>
+                            <p style="margin: 3px 0;"><strong>PERÍODO:</strong> ${period.toUpperCase()}</p>
+                            <p style="margin: 3px 0;"><strong>FECHA DE EXPORTACIÓN:</strong> ${new Date().toLocaleString("es-PE")}</p>
+                          </div>
+                        </div>
+                        <table>
+                          <thead>
+                            <tr>
+                              <th style="text-align: left;">Ranking / Producto</th>
+                              <th class="text-center">Unidades Vendidas</th>
+                              <th class="text-right">Ingresos Totales (S/)</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            ${metrics.topProducts.map((p, idx) => `
+                              <tr>
+                                <td><span class="rank">#${idx + 1}</span><span class="bold">${p.name}</span></td>
+                                <td class="text-center bold">${p.units}</td>
+                                <td class="text-right bold">S/ ${p.revenue.toFixed(2)}</td>
+                              </tr>
+                            `).join('')}
+                          </tbody>
+                        </table>
+                        <div class="no-print" style="margin-top: 40px; text-align: center;">
+                          <button onclick="window.print()" style="padding: 12px 24px; background: #BF391B; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 6px rgba(191, 57, 27, 0.2);">Imprimir o Guardar PDF</button>
+                        </div>
+                      </body>
+                    </html>
+                  `;
+                  const blob = new Blob([htmlContent], { type: "text/html;charset=utf-8;" });
+                  const url = URL.createObjectURL(blob);
+                  window.open(url, "_blank");
                 }}
                 className="text-xs font-bold text-[#BF391B] hover:underline flex items-center gap-1"
               >
                 <span className="material-symbols-outlined text-[14px]">download</span>
-                Exportar CSV
+                Exportar Reporte Imprimible
               </button>
             </div>
             <div className="overflow-x-auto">

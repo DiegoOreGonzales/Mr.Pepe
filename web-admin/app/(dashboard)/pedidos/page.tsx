@@ -20,21 +20,62 @@ export default function PedidosPage() {
     search === "" || String(o.mesaNumero).includes(search) || o.status.includes(search.toLowerCase())
   );
 
+  const handleExportCSV = () => {
+    const headers = ["ID Pedido", "Mesa", "Items / Productos", "Total (S/)", "Estado", "Fecha y Hora"];
+    const rows = filtered.map((o: Order) => [
+      o.id,
+      `Mesa ${o.mesaNumero}`,
+      o.items?.map(item => `${item.cantidad}x ${item.nombre}`).join(" | ") || "Sin items",
+      o.total.toFixed(2),
+      o.status.toUpperCase(),
+      o.createdAt.toLocaleString("es-PE")
+    ]);
+
+    // Formato con cabecera de la marca, BOM para Excel en español
+    const csvContent = [
+      ["MR. PEPE - BROASTER Y BRASAS"],
+      ["REPORTE GENERAL DE PEDIDOS DE HOY"],
+      [`Fecha de exportacion: ${new Date().toLocaleString("es-PE")}`],
+      [], 
+      headers,
+      ...rows
+    ].map(e => e.map(val => `"${String(val).replace(/"/g, '""')}"`).join(",")).join("\n");
+
+    const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `pedidos_mrpepe_${new Date().toISOString().slice(0,10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="space-y-5">
-      {/* Search */}
-      <div className="flex items-center gap-3">
-        <div className="relative flex-1 max-w-xs">
-          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#9AA0A6] text-[18px]">search</span>
-          <input
-            type="text"
-            placeholder="Buscar por mesa o estado..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 text-sm rounded-[10px] outline-none border border-[#E4E7EC] bg-white focus:border-[#BF391B] transition-all"
-          />
+      {/* Search & Export */}
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3 flex-1">
+          <div className="relative flex-1 max-w-xs">
+            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#9AA0A6] text-[18px]">search</span>
+            <input
+              type="text"
+              placeholder="Buscar por mesa o estado..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-9 pr-4 py-2.5 text-sm rounded-[10px] outline-none border border-[#E4E7EC] bg-white focus:border-[#BF391B] transition-all"
+            />
+          </div>
+          <span className="text-xs text-[#9AA0A6] font-medium">{filtered.length} resultados</span>
         </div>
-        <span className="text-xs text-[#9AA0A6] font-medium">{filtered.length} resultados</span>
+        
+        <button
+          onClick={handleExportCSV}
+          className="flex items-center gap-1.5 px-4 py-2.5 bg-white border border-[#E4E7EC] hover:bg-stone-50 text-stone-700 hover:text-black font-bold text-xs rounded-xl shadow-sm transition-all"
+        >
+          <span className="material-symbols-outlined text-[16px]">download</span>
+          Exportar CSV
+        </button>
       </div>
 
       {/* Table */}
