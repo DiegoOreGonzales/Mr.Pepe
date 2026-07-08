@@ -1,22 +1,15 @@
-
-
-# Codemagic CI/CD Configuration File
+# Codemagic CI/CD Configuration File for Unsigned iOS Build (.ipa)
 # Documentation: https://docs.codemagic.io/yaml/building/
 
 workflows:
-  ios-release:
-    name: Chio's Chicken - iOS Release (.ipa)
+  ios-unsigned:
+    name: Mr Pepe - iOS Unsigned IPA
     max_build_duration: 120
     instance_type: mac_mini_m1 # Requerido para construir iOS (.ipa)
     environment:
       flutter: stable
       xcode: latest
       cocoapods: default
-      groups:
-        - apple_credentials # Grupo de variables para App Store Connect y Certificados
-      vars:
-        APP_STORE_APPLE_ID: 1234567890 # Reemplazar con tu ID de aplicación real
-        BUNDLE_ID: "com.polleria.elbrasero.el_brasero"
     triggering:
       events:
         - push
@@ -25,30 +18,23 @@ workflows:
           include: true
           source: true
     scripts:
-      - name: Set up keychain and code signing
-        script: |
-          keychain initialize
-          # Nota: En la interfaz de Codemagic debes configurar las claves de App Store Connect para que este paso descargue y aplique
-          # automáticamente los certificados de producción de Apple Developer y perfiles de aprovisionamiento (Provisioning Profiles).
-          #
-          # app-store-connect fetch-signing-files "$BUNDLE_ID" --project-id "$APP_STORE_APPLE_ID" --create
-          # keychain add-certificates
-          # xcode-project use-profiles
       - name: Set iOS deployment target
         script: |
-          # Firebase Swift packages require iOS 15.0 minimum
-          sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = .*/IPHONEOS_DEPLOYMENT_TARGET = 15.0;/g' ios/Runner.xcodeproj/project.pbxproj
+          # Set deployment target to iOS 16.5 (compatible with iPad)
+          sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = .*/IPHONEOS_DEPLOYMENT_TARGET = 16.5;/g' ios/Runner.xcodeproj/project.pbxproj
       - name: Get Flutter dependencies
         script: |
           flutter pub get
-      - name: Build iOS IPA (Unsigned)
+      - name: Build iOS App (.app) without codesigning
         script: |
           flutter build ios --release --no-codesign
+      - name: Package Unsigned IPA
+        script: |
           mkdir -p build/ios/ipa
           cd build/ios/iphoneos
           mkdir Payload
           cp -r Runner.app Payload/
-          zip -r ../ipa/Runner.ipa Payload
+          zip -r ../ipa/MrPepeUnsigned.ipa Payload
     artifacts:
       - build/ios/ipa/*.ipa
     publishing:
