@@ -36,14 +36,14 @@ class _ProductsViewState extends ConsumerState<ProductsView> {
       final matchesSearch = _searchQuery.isEmpty ||
           p.nombre.toLowerCase().contains(_searchQuery.toLowerCase()) ||
           p.descripcion.toLowerCase().contains(_searchQuery.toLowerCase());
-      final matchesCat = _selectedCategory == null || p.categoria == _selectedCategory;
+      final matchesCat = _selectedCategory == null || p.effectiveCategory == _selectedCategory;
       return matchesSearch && matchesCat;
     }).toList();
 
     // Count by category
     final catCounts = <String, int>{};
     for (final p in allProducts) {
-      catCounts[p.categoria] = (catCounts[p.categoria] ?? 0) + 1;
+      catCounts[p.effectiveCategory] = (catCounts[p.effectiveCategory] ?? 0) + 1;
     }
 
     return SingleChildScrollView(
@@ -641,7 +641,7 @@ class _ProductCard extends StatelessWidget {
     return Consumer(
       builder: (context, ref, _) {
         final categories = ref.watch(categoryProvider);
-        final cat = categories.where((c) => c.id == producto.categoria).firstOrNull;
+        final cat = categories.where((c) => c.id == producto.effectiveCategory).firstOrNull;
         final colors = CategoryIcon.colorsFor(cat);
 
         return Container(

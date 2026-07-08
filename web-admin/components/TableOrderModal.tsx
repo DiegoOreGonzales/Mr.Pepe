@@ -24,13 +24,39 @@ interface TableOrderModalProps {
   onSuccess?: () => void;
 }
 
-const CATEGORIES = [
-  { id: "pollo", label: "Pollo a la Brasa" },
-  { id: "parrillas", label: "Parrillas" },
-  { id: "broaster", label: "Broaster" },
-  { id: "bebidas", label: "Bebidas" },
-  { id: "porciones", label: "Porciones" },
-];
+interface CategoriaDoc {
+  id: string;
+  label: string;
+  emoji: string;
+}
+
+// Smart Product Category Matcher based on name and fallback to Firestore category
+function getEffectiveCategory(nombre: string, categoriaOriginal: string): string {
+  const nameLower = nombre.toLowerCase();
+  
+  if (nameLower.includes("brasa") || nameLower.includes("pollo a la brasa")) return "parrillas";
+  if (nameLower.includes("broaster")) return "broaster";
+  if (nameLower.includes("alitas") || nameLower.includes("piqueo") || nameLower.includes("tequeño")) return "piqueos";
+  if (
+    nameLower.includes("pepsi") || nameLower.includes("cola") || nameLower.includes("chicha") || 
+    nameLower.includes("maracuya") || nameLower.includes("limonada") || nameLower.includes("agua") || 
+    nameLower.includes("mate") || nameLower.includes("jugo") || nameLower.includes("bebida")
+  ) {
+    return "bebidas";
+  }
+  if (nameLower.includes("flan") || nameLower.includes("marquesa") || nameLower.includes("gelatina") || nameLower.includes("postre")) return "postres";
+  if (nameLower.includes("ensalada")) return "ensaladas";
+  if (nameLower.includes("combo")) return "combos";
+  if (
+    nameLower.includes("guarnicion") || nameLower.includes("porcion") || nameLower.includes("papas") || 
+    nameLower.includes("arroz") || nameLower.includes("chaufa") || nameLower.includes("lomo") || 
+    nameLower.includes("tallarin")
+  ) {
+    return "extras";
+  }
+  
+  return categoriaOriginal.toLowerCase();
+}
 
 export default function TableOrderModal({ mesaNumero, onClose, onSuccess }: TableOrderModalProps) {
   // Current active order state (if occupied)
@@ -39,7 +65,8 @@ export default function TableOrderModal({ mesaNumero, onClose, onSuccess }: Tabl
 
   // Cart / Menu State
   const [products, setProducts] = useState<Product[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState("pollo");
+  const [categories, setCategories] = useState<CategoriaDoc[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState("parrillas");
   const [searchQuery, setSearchQuery] = useState("");
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isAddingItems, setIsAddingItems] = useState(false);
@@ -68,6 +95,29 @@ export default function TableOrderModal({ mesaNumero, onClose, onSuccess }: Tabl
         ...doc.data(),
       })) as Product[];
       setProducts(prods);
+    });
+    return unsubscribe;
+  }, []);
+
+  // 1b. Fetch categories from Firestore
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, "categories"), (snapshot) => {
+      const loaded: CategoriaDoc[] = [];
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        loaded.push({
+          id: doc.id,
+          label: data.label || "",
+          emoji: data.emoji || "🍔"
+        });
+      });
+      loaded.sort((a, b) => a.label.localeCompare(b.label));
+      setCategories(loaded);
+      
+      // Auto select first category
+      if (loaded.length > 0) {
+        setSelectedCategory(loaded[0].id);
+      }
     });
     return unsubscribe;
   }, []);
@@ -307,7 +357,8 @@ export default function TableOrderModal({ mesaNumero, onClose, onSuccess }: Tabl
 
   // Filter products by search and category
   const filteredProducts = products.filter((p) => {
-    const matchesCategory = p.categoria === selectedCategory;
+    const effectiveCategory = getEffectiveCategory(p.nombre, p.categoria);
+    const matchesCategory = effectiveCategory === selectedCategory;
     const matchesSearch = searchQuery === "" || p.nombre.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesSearch && (searchQuery !== "" || matchesCategory);
   });
@@ -517,17 +568,18 @@ export default function TableOrderModal({ mesaNumero, onClose, onSuccess }: Tabl
                 {/* Categories Bar */}
                 {searchQuery === "" && (
                   <div className="flex gap-1.5 overflow-x-auto pb-3 mb-3 border-b border-stone-50 scrollbar-thin">
-                    {CATEGORIES.map((cat) => (
+                    {categories.map((cat) => (
                       <button
                         key={cat.id}
                         onClick={() => setSelectedCategory(cat.id)}
-                        className={`px-3 py-1.5 rounded-full text-[10px] font-bold tracking-wider uppercase transition-all whitespace-nowrap ${
+                        className={`px-3 py-1.5 rounded-full text-[10px] font-bold tracking-wider uppercase transition-all whitespace-nowrap flex items-center gap-1 ${
                           selectedCategory === cat.id
                             ? "bg-black text-white"
                             : "bg-stone-100 text-stone-600 hover:bg-stone-200"
                         }`}
                       >
-                        {cat.label}
+                        <span>{cat.emoji}</span>
+                        <span>{cat.label}</span>
                       </button>
                     ))}
                   </div>

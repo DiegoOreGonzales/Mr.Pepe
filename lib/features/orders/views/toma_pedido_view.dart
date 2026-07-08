@@ -42,7 +42,7 @@ class _TomaPedidoViewState extends ConsumerState<TomaPedidoView> {
     final searchQuery = ref.watch(searchQueryProvider).toLowerCase();
 
     final productos = ref.watch(productProvider).where((p) {
-      final matchesCategory = p.categoria == selectedCategory;
+      final matchesCategory = p.effectiveCategory == selectedCategory;
       final matchesSearch = searchQuery.isEmpty || p.nombre.toLowerCase().contains(searchQuery);
       return matchesSearch && (searchQuery.isNotEmpty || matchesCategory);
     }).toList();
