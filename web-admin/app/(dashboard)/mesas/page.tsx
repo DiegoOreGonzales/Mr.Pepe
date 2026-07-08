@@ -1,5 +1,7 @@
 "use client";
+import { useState } from "react";
 import { useMesas, Mesa } from "@/lib/firebase/hooks";
+import TableOrderModal from "@/components/TableOrderModal";
 
 const STATUS_COLOR: Record<string, { bg: string; border: string; dot: string; label: string }> = {
   libre:     { bg: "#1A895210", border: "#1A895240", dot: "#1A8952", label: "Libre"     },
@@ -9,6 +11,7 @@ const STATUS_COLOR: Record<string, { bg: string; border: string; dot: string; la
 
 export default function MesasPage() {
   const { mesas, loading } = useMesas();
+  const [selectedMesa, setSelectedMesa] = useState<number | null>(null);
 
   // Fill to 40 if Firestore has fewer
   const grid: (Mesa | null)[] = Array.from({ length: 40 }, (_, i) => {
@@ -43,6 +46,7 @@ export default function MesasPage() {
             return (
               <div
                 key={i}
+                onClick={() => setSelectedMesa(num)}
                 className="rounded-[14px] p-3 flex flex-col items-center justify-center gap-1.5 cursor-pointer transition-all duration-200 hover:scale-105"
                 style={{
                   background: style.bg,
@@ -61,6 +65,14 @@ export default function MesasPage() {
             );
           })}
         </div>
+      )}
+
+      {/* Table Order Modal */}
+      {selectedMesa !== null && (
+        <TableOrderModal
+          mesaNumero={selectedMesa}
+          onClose={() => setSelectedMesa(null)}
+        />
       )}
     </div>
   );

@@ -37,6 +37,7 @@ export interface DayMetrics {
   averageTicket: number;
   occupiedTables: number;
   totalTables: number;
+  averagePrepTime: number;
 }
 
 // Helper to parse dates safely
@@ -152,6 +153,7 @@ export function useDayMetrics() {
     averageTicket:  0,
     occupiedTables: 0,
     totalTables:    0,
+    averagePrepTime: 0,
   });
 
   const { orders } = useRecentOrders(500);
@@ -168,12 +170,27 @@ export function useDayMetrics() {
     const totalSales  = todayOrders.reduce((s, o) => s + o.total, 0);
     const totalOrders = todayOrders.length;
 
+    // Calcular tiempo de preparación promedio (en minutos)
+    const completedOrders = todayOrders.filter(
+      (o) => ["listo", "entregado", "pagado"].includes(o.status)
+    );
+    let totalPrepMs = 0;
+    completedOrders.forEach((o) => {
+      const created = new Date(o.createdAt);
+      const updated = new Date(o.updatedAt || o.createdAt);
+      totalPrepMs += (updated.getTime() - created.getTime());
+    });
+    const averagePrepTime = completedOrders.length > 0
+      ? Math.round((totalPrepMs / completedOrders.length) / 60000)
+      : 0;
+
     setMetrics({
       totalSales,
       totalOrders,
       averageTicket: totalOrders > 0 ? totalSales / totalOrders : 0,
       occupiedTables: mesas.filter((m) => m.status === "ocupada").length,
       totalTables:    mesas.length,
+      averagePrepTime,
     });
   }, [orders, mesas]);
 

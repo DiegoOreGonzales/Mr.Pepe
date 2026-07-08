@@ -320,11 +320,78 @@ export default function FacturacionPage() {
   const [search, setSearch] = useState("");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
+  // Edit / Delete State
+  const [editingOrder, setEditingOrder] = useState<Order | null>(null);
+  const [editNombre, setEditNombre] = useState("");
+  const [editDoc, setEditDoc] = useState("");
+  const [editTipo, setEditTipo] = useState<"boleta" | "factura">("boleta");
+  const [editVoucher, setEditVoucher] = useState("");
+  const [editTotal, setEditTotal] = useState("");
+
   const handlePrint = (order: Order) => {
     setSelectedOrder(order);
     setTimeout(() => {
       window.print();
     }, 400);
+  };
+
+  const openEditModal = (o: Order) => {
+    setEditingOrder(o);
+    setEditNombre(o.clienteNombre || "");
+    setEditDoc(o.clienteDocumento || "");
+    setEditTipo(o.tipoDocumento || "boleta");
+    setEditVoucher(o.voucherNumber || "");
+    setEditTotal(String(o.total));
+  };
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingOrder) return;
+
+    try {
+      const res = await fetch("/api/orders", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: editingOrder.id,
+          status: "pagado",
+          clienteNombre: editNombre,
+          clienteDocumento: editDoc,
+          tipoDocumento: editTipo,
+          voucherNumber: editVoucher,
+          total: parseFloat(editTotal)
+        })
+      });
+      const json = await res.json();
+      if (json.success) {
+        setEditingOrder(null);
+        alert("Comprobante editado correctamente");
+      } else {
+        alert("Error al editar: " + json.error);
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Error de conexión al editar");
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("¿Está seguro de que desea eliminar permanentemente este comprobante/boleta?")) return;
+
+    try {
+      const res = await fetch(`/api/orders?id=${id}`, {
+        method: "DELETE"
+      });
+      const json = await res.json();
+      if (json.success) {
+        alert("Comprobante eliminado con éxito");
+      } else {
+        alert("Error al eliminar: " + json.error);
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Error de conexión al eliminar");
+    }
   };
 
   const filtered = orders.filter(o => 
@@ -389,12 +456,27 @@ export default function FacturacionPage() {
                 <td className="px-6 py-4 font-extrabold text-sm text-[#0D0D0D]">
                   S/ {o.total.toFixed(2)}
                 </td>
-                <td className="px-6 py-4 text-right">
+                <td className="px-6 py-4 text-right flex justify-end gap-1.5">
                   <button 
                     onClick={() => handlePrint(o)}
                     className="p-2 rounded-lg bg-[#BF391B]/5 text-[#BF391B] hover:bg-[#BF391B] hover:text-white transition-all"
+                    title="Imprimir Boleta"
                   >
-                    <span className="material-symbols-outlined text-[20px]">print</span>
+                    <span className="material-symbols-outlined text-[18px]">print</span>
+                  </button>
+                  <button 
+                    onClick={() => openEditModal(o)}
+                    className="p-2 rounded-lg bg-[#BF391B]/5 text-[#BF391B] hover:bg-[#BF391B] hover:text-white transition-all"
+                    title="Editar Datos"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">edit</span>
+                  </button>
+                  <button 
+                    onClick={() => handleDelete(o.id)}
+                    className="p-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all"
+                    title="Eliminar Boleta"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">delete</span>
                   </button>
                 </td>
               </tr>
@@ -405,6 +487,98 @@ export default function FacturacionPage() {
 
       {/* Ticket Invisible */}
       <PrintTicket order={selectedOrder} />
+
+      {/* Modal Editar Boleta */}
+      {editingOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-[14px] w-full max-w-md p-6 shadow-2xl animate-in fade-in duration-200">
+            <div className="flex items-center justify-between pb-3 border-b border-stone-100 mb-4">
+              <h3 className="text-base font-extrabold text-[#0D0D0D]">Editar Comprobante</h3>
+              <button 
+                onClick={() => setEditingOrder(null)} 
+                className="text-stone-400 hover:text-stone-600 material-symbols-outlined"
+              >
+                close
+              </button>
+            </div>
+            
+            <form onSubmit={handleEditSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-stone-600 uppercase mb-1">Tipo de Documento</label>
+                <select
+                  value={editTipo}
+                  onChange={(e) => setEditTipo(e.target.value as any)}
+                  className="w-full p-2.5 rounded-lg border border-stone-200 text-sm focus:outline-none focus:border-[#BF391B]"
+                >
+                  <option value="boleta">Boleta (DNI)</option>
+                  <option value="factura">Factura (RUC)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-stone-600 uppercase mb-1">N° Documento</label>
+                <input
+                  type="text"
+                  required
+                  value={editDoc}
+                  onChange={(e) => setEditDoc(e.target.value)}
+                  className="w-full p-2.5 rounded-lg border border-stone-200 text-sm focus:outline-none focus:border-[#BF391B]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-stone-600 uppercase mb-1">Nombre / Razón Social</label>
+                <input
+                  type="text"
+                  required
+                  value={editNombre}
+                  onChange={(e) => setEditNombre(e.target.value)}
+                  className="w-full p-2.5 rounded-lg border border-stone-200 text-sm focus:outline-none focus:border-[#BF391B]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-stone-600 uppercase mb-1">N° Comprobante</label>
+                <input
+                  type="text"
+                  required
+                  value={editVoucher}
+                  onChange={(e) => setEditVoucher(e.target.value)}
+                  className="w-full p-2.5 rounded-lg border border-stone-200 text-sm font-mono focus:outline-none focus:border-[#BF391B]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-stone-600 uppercase mb-1">Monto Total (S/)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  required
+                  value={editTotal}
+                  onChange={(e) => setEditTotal(e.target.value)}
+                  className="w-full p-2.5 rounded-lg border border-stone-200 text-sm focus:outline-none focus:border-[#BF391B]"
+                />
+              </div>
+
+              <div className="pt-4 border-t border-stone-100 flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setEditingOrder(null)}
+                  className="flex-1 py-2.5 border border-stone-200 text-stone-600 font-bold rounded-lg hover:bg-stone-50 transition-all text-xs"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-2.5 bg-[#BF391B] hover:bg-[#8C2510] text-white font-bold rounded-lg transition-all text-xs"
+                >
+                  Guardar Cambios
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

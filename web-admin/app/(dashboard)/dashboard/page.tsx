@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useDayMetrics, useRecentOrders, useMesas, Order, Mesa } from "@/lib/firebase/hooks";
+import TableOrderModal from "@/components/TableOrderModal";
 
 // ── Status helpers ─────────────────────────────────────────────────────────
 
@@ -63,7 +64,7 @@ function KpiCard({
 
 // ── Order Row ─────────────────────────────────────────────────────────────────
 
-function OrderRow({ order }: { order: Order }) {
+function OrderRow({ order, onAttend }: { order: Order; onAttend: (mesaNumero: number) => void }) {
   const mins    = minutesSince(order.createdAt);
   const styles  = STATUS_STYLES[order.status] ?? STATUS_STYLES.entregado;
   const isPulse = order.status === "preparando";
@@ -94,13 +95,20 @@ function OrderRow({ order }: { order: Order }) {
           {STATUS_LABELS[order.status] ?? order.status}
         </span>
       </td>
-      <td className="px-5 py-3.5 text-right">
+      <td className="px-5 py-3.5 text-right flex items-center justify-end gap-2">
+        <button
+          onClick={() => onAttend(order.mesaNumero)}
+          className="text-[#9AA0A6] hover:text-[#BF391B] transition-colors"
+          title="Atender Mesa"
+        >
+          <span className="material-symbols-outlined text-[20px]">restaurant</span>
+        </button>
         <button
           onClick={() => window.print()}
           className="text-[#9AA0A6] hover:text-[#BF391B] transition-colors"
           title="Imprimir orden"
         >
-          <span className="material-symbols-outlined text-[20px]">more_vert</span>
+          <span className="material-symbols-outlined text-[20px]">print</span>
         </button>
       </td>
     </tr>
@@ -230,6 +238,7 @@ function PrintTicket({ order }: { order: Order | null }) {
 
 export default function DashboardPage() {
   const router  = useRouter();
+  const [selectedMesa, setSelectedMesa] = useState<number | null>(null);
   const metrics = useDayMetrics();
   const { orders, loading: ordersLoading } = useRecentOrders(8);
   const { mesas } = useMesas();
@@ -244,7 +253,7 @@ export default function DashboardPage() {
   return (
     <div className="space-y-7">
       {/* KPI Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
         <KpiCard
           label="Ventas del día"
           value={`S/ ${metrics.totalSales.toFixed(2)}`}
@@ -276,6 +285,14 @@ export default function DashboardPage() {
           icon="trending_up"
           accent="#7B4FBF"
           progress={(metrics.averageTicket / 150) * 100}
+        />
+        <KpiCard
+          label="Tiempo de atención"
+          value={`${metrics.averagePrepTime} min`}
+          sub="Promedio de preparación"
+          icon="schedule"
+          accent="#E57A18"
+          progress={(metrics.averagePrepTime / 30) * 100}
         />
       </div>
 
@@ -326,7 +343,7 @@ export default function DashboardPage() {
                     </td>
                   </tr>
                 ) : (
-                  orders.map((o: Order) => <OrderRow key={o.id} order={o} />)
+                  orders.map((o: Order) => <OrderRow key={o.id} order={o} onAttend={(mesaNum) => setSelectedMesa(mesaNum)} />)
                 )}
               </tbody>
             </table>
@@ -362,7 +379,17 @@ export default function DashboardPage() {
                 icon="add_circle"
                 label="Nueva Orden"
                 sub="Comenzar un nuevo pedido"
-                onClick={() => router.push("/mesas")}
+                onClick={() => {
+                  const num = prompt("Ingrese el número de mesa a atender:");
+                  if (num) {
+                    const mesaNum = parseInt(num);
+                    if (!isNaN(mesaNum) && mesaNum > 0 && mesaNum <= 100) {
+                      setSelectedMesa(mesaNum);
+                    } else {
+                      alert("Número de mesa inválido.");
+                    }
+                  }
+                }}
               />
               <QuickAction
                 icon="tv"
@@ -383,7 +410,17 @@ export default function DashboardPage() {
 
       {/* FAB */}
       <button
-        onClick={() => router.push("/mesas")}
+        onClick={() => {
+          const num = prompt("Ingrese el número de mesa a atender:");
+          if (num) {
+            const mesaNum = parseInt(num);
+            if (!isNaN(mesaNum) && mesaNum > 0 && mesaNum <= 100) {
+              setSelectedMesa(mesaNum);
+            } else {
+              alert("Número de mesa inválido.");
+            }
+          }
+        }}
         className="fixed bottom-8 right-8 w-14 h-14 rounded-full flex items-center justify-center text-white ember-gradient ember-shadow hover:scale-110 active:scale-95 transition-all z-50 no-print"
         title="Nueva orden"
       >
@@ -392,6 +429,14 @@ export default function DashboardPage() {
 
       {/* Ticket Invisible (Solo se ve al imprimir) */}
       <PrintTicket order={orderToPrint} />
+
+      {/* Table Order Modal */}
+      {selectedMesa !== null && (
+        <TableOrderModal
+          mesaNumero={selectedMesa}
+          onClose={() => setSelectedMesa(null)}
+        />
+      )}
     </div>
   );
 }

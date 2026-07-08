@@ -152,3 +152,36 @@ export async function PUT(request: Request) {
     return NextResponse.json({ success: false, error: e.message }, { status: 500 });
   }
 }
+
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    
+    if (!id) {
+      return NextResponse.json({ success: false, error: 'ID de orden requerido' }, { status: 400 });
+    }
+    
+    const orderSearch = await query('SELECT mesa_numero, status FROM orders WHERE id = $1', [id]);
+    if (orderSearch.rows.length > 0) {
+      const { mesa_numero, status } = orderSearch.rows[0];
+      
+      await query('DELETE FROM orders WHERE id = $1', [id]);
+      
+      if (status !== 'pagado') {
+        const tableId = `mesa_${mesa_numero}`;
+        await query(
+          "UPDATE tables SET status = 'libre', encargado = NULL, start_time = NULL WHERE id = $1",
+          [tableId]
+        );
+      }
+    } else {
+      return NextResponse.json({ success: false, error: 'Orden no encontrada' }, { status: 404 });
+    }
+    
+    return NextResponse.json({ success: true, message: 'Orden eliminada con éxito' });
+  } catch (e: any) {
+    console.error('Error deleting order:', e);
+    return NextResponse.json({ success: false, error: e.message }, { status: 500 });
+  }
+}

@@ -356,6 +356,20 @@ export default function ProductosPage() {
                 />
               </div>
 
+              {/* Cantidad */}
+              <div>
+                <label className="block text-xs font-bold text-stone-600 uppercase mb-1">Cantidad / Stock *</label>
+                <input
+                  type="number"
+                  min="0"
+                  required
+                  value={cantidad}
+                  onChange={(e) => setCantidad(e.target.value)}
+                  placeholder="100"
+                  className="w-full p-2.5 rounded-lg border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#E94E1B]/20 focus:border-[#E94E1B]"
+                />
+              </div>
+
               {/* Descripcion */}
               <div>
                 <label className="block text-xs font-bold text-stone-600 uppercase mb-1">Descripción</label>
