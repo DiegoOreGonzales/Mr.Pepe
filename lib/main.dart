@@ -16,6 +16,7 @@ import 'features/reports/views/reports_view.dart';
 import 'features/digital_menu/views/digital_menu_view.dart';
 import 'features/orders/views/orders_list_view.dart';
 import 'features/tables/views/qr_grid_view.dart';
+import 'features/products/views/products_view.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -78,6 +79,7 @@ final _routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/kitchen', builder: (context, state) => const KitchenView()),
           GoRoute(path: '/reports', builder: (context, state) => const ReportsView()),
           GoRoute(path: '/orders', builder: (context, state) => const OrdersListView()),
+          GoRoute(path: '/productos', builder: (context, state) => const ProductsView()),
           GoRoute(
             path: '/billing',
             builder: (context, state) {

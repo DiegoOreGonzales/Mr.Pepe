@@ -9,7 +9,8 @@ import {
   doc, 
   onSnapshot,
   query,
-  orderBy
+  orderBy,
+  setDoc
 } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
 
@@ -18,43 +19,94 @@ interface Producto {
   nombre: string;
   descripcion: string;
   precio: number;
-  cantidad: number; // Stock / Cantidad disponible
   categoria: string;
   imagen: string;
   isDestacado: boolean;
 }
 
-const CATEGORIES = [
-  { id: "parrillas", label: "Parrillas" },
-  { id: "piqueos", label: "Piqueos" },
-  { id: "bebidas", label: "Bebidas" },
-  { id: "guarniciones", label: "Guarniciones" },
-  { id: "postres", label: "Postres" }
+interface CategoriaDoc {
+  id: string;
+  label: string;
+  icon: string;
+  colors: string[];
+  emoji: string;
+}
+
+const DEFAULT_EMOJIS = [
+  { e: "🔥", i: "local_fire_department", c: ["#E53935", "#FF7043"] },
+  { e: "🍗", i: "lunch_dining", c: ["#F9A825", "#FFCC02"] },
+  { e: "🍖", i: "restaurant", c: ["#E91E63", "#FF6090"] },
+  { e: "🥤", i: "local_cafe", c: ["#1E88E5", "#42A5F5"] },
+  { e: "🍛", i: "dinner_dining", c: ["#2E7D32", "#66BB6A"] },
+  { e: "🎁", i: "inventory_2", c: ["#E64A19", "#FF8A65"] },
+  { e: "🍰", i: "cake", c: ["#8E24AA", "#CE93D8"] },
+  { e: "🥗", i: "eco", c: ["#43A047", "#A5D6A7"] },
 ];
 
 export default function ProductosPage() {
   const [productos, setProductos] = useState<Producto[]>([]);
+  const [categories, setCategories] = useState<CategoriaDoc[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   
   // Modal / Form State
   const [isOpen, setIsOpen] = useState(false);
+  const [isCatModalOpen, setIsCatModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   
   // Form Fields
   const [nombre, setNombre] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [precio, setPrecio] = useState("");
-  const [cantidad, setCantidad] = useState("");
   const [categoria, setCategoria] = useState("parrillas");
-  const [imagen, setImagen] = useState("");
   const [isDestacado, setIsDestacado] = useState(false);
 
-  // Load products in real-time
+  // New Category Form Fields
+  const [newCatLabel, setNewCatLabel] = useState("");
+  const [newCatEmoji, setNewCatEmoji] = useState("🔥");
+  const [newCatIcon, setNewCatIcon] = useState("local_fire_department");
+  const [newCatColors, setNewCatColors] = useState<string[]>(["#E53935", "#FF7043"]);
+
+  // Load categories and products in real-time
   useEffect(() => {
+    // 1. Categories
+    const unsubCats = onSnapshot(collection(db, "categories"), async (snapshot) => {
+      if (snapshot.empty) {
+        // Auto seed
+        const defaults = [
+          { id: "parrillas", label: "Parrillas", icon: "local_fire_department", colors: ["#E53935", "#FF7043"], emoji: "🔥" },
+          { id: "broaster", label: "Broaster", icon: "lunch_dining", colors: ["#F9A825", "#FFCC02"], emoji: "🍗" },
+          { id: "piqueos", label: "Piqueos", icon: "restaurant", colors: ["#E91E63", "#FF6090"], emoji: "🍖" },
+          { id: "bebidas", label: "Bebidas", icon: "local_cafe", colors: ["#1E88E5", "#42A5F5"], emoji: "🥤" },
+          { id: "extras", label: "Extras", icon: "dinner_dining", colors: ["#2E7D32", "#66BB6A"], emoji: "🍛" },
+          { id: "combos", label: "Combos", icon: "inventory_2", colors: ["#E64A19", "#FF8A65"], emoji: "🎁" },
+          { id: "postres", label: "Postres", icon: "cake", colors: ["#8E24AA", "#CE93D8"], emoji: "🍰" },
+          { id: "ensaladas", label: "Ensaladas", icon: "eco", colors: ["#43A047", "#A5D6A7"], emoji: "🥗" }
+        ];
+        for (const cat of defaults) {
+          await setDoc(doc(db, "categories", cat.id), cat);
+        }
+        return;
+      }
+      const loaded: CategoriaDoc[] = [];
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        loaded.push({
+          id: doc.id,
+          label: data.label || "",
+          icon: data.icon || "fastfood",
+          colors: data.colors || ["#424242", "#757575"],
+          emoji: data.emoji || "🍔"
+        });
+      });
+      loaded.sort((a, b) => a.label.localeCompare(b.label));
+      setCategories(loaded);
+    });
+
+    // 2. Products
     const q = query(collection(db, "products"), orderBy("nombre", "asc"));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+    const unsubProds = onSnapshot(q, (snapshot) => {
       const docs: Producto[] = [];
       snapshot.forEach((doc) => {
         const data = doc.data();
@@ -63,7 +115,6 @@ export default function ProductosPage() {
           nombre: data.nombre || "",
           descripcion: data.descripcion || "",
           precio: Number(data.precio) || 0,
-          cantidad: Number(data.cantidad) || 0,
           categoria: data.categoria || "parrillas",
           imagen: data.imagen || "",
           isDestacado: !!data.isDestacado,
@@ -76,7 +127,10 @@ export default function ProductosPage() {
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubCats();
+      unsubProds();
+    };
   }, []);
 
   const openNewModal = () => {
@@ -84,9 +138,7 @@ export default function ProductosPage() {
     setNombre("");
     setDescripcion("");
     setPrecio("");
-    setCantidad("");
-    setCategoria("parrillas");
-    setImagen("");
+    setCategoria(categories[0]?.id || "parrillas");
     setIsDestacado(false);
     setIsOpen(true);
   };
@@ -96,17 +148,15 @@ export default function ProductosPage() {
     setNombre(producto.nombre);
     setDescripcion(producto.descripcion);
     setPrecio(producto.precio.toString());
-    setCantidad(producto.cantidad.toString());
     setCategoria(producto.categoria);
-    setImagen(producto.imagen);
     setIsDestacado(producto.isDestacado);
     setIsOpen(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!nombre || !precio || !cantidad) {
-      alert("Por favor complete los campos obligatorios (Nombre, Precio, Cantidad).");
+    if (!nombre || !precio) {
+      alert("Por favor complete los campos obligatorios (Nombre, Precio).");
       return;
     }
 
@@ -114,9 +164,8 @@ export default function ProductosPage() {
       nombre,
       descripcion,
       precio: parseFloat(precio) || 0,
-      cantidad: parseInt(cantidad) || 0,
-      categoria,
-      imagen: imagen || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=200",
+      categoria: categoria.toLowerCase(),
+      imagen: "",
       isDestacado,
       updatedAt: new Date(),
     };
@@ -134,6 +183,28 @@ export default function ProductosPage() {
     } catch (error) {
       console.error("Error saving product:", error);
       alert("Ocurrió un error al guardar el producto.");
+    }
+  };
+
+  const handleCreateCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const label = newCatLabel.trim();
+    if (!label) return;
+
+    const id = label.toLowerCase().replace(/[^a-z0-9]/g, "_");
+    try {
+      await setDoc(doc(db, "categories", id), {
+        label,
+        emoji: newCatEmoji,
+        icon: newCatIcon,
+        colors: newCatColors
+      });
+      setCategoria(id);
+      setIsCatModalOpen(false);
+      setNewCatLabel("");
+    } catch (error) {
+      console.error("Error creating category:", error);
+      alert("No se pudo crear la categoría.");
     }
   };
 
@@ -199,7 +270,7 @@ export default function ProductosPage() {
           >
             TODOS ({productos.length})
           </button>
-          {CATEGORIES.map((cat) => {
+          {categories.map((cat) => {
             const count = productos.filter((p) => p.categoria === cat.id).length;
             return (
               <button
@@ -211,7 +282,7 @@ export default function ProductosPage() {
                     : "bg-white text-stone-600 hover:bg-stone-50 border border-stone-200/50"
                 }`}
               >
-                {cat.label.toUpperCase()} ({count})
+                {cat.emoji} {cat.label.toUpperCase()} ({count})
               </button>
             );
           })}
@@ -234,29 +305,48 @@ export default function ProductosPage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {filteredProducts.map((p) => {
+            const catDoc = categories.find((c) => c.id === p.categoria) || {
+              emoji: "🍔",
+              icon: "fastfood",
+              colors: ["#757575", "#9e9e9e"],
+              label: p.categoria
+            };
             return (
               <div 
                 key={p.id} 
                 className="bg-white rounded-[14px] border border-stone-100/60 overflow-hidden card-shadow flex flex-col group transition-all duration-300 hover:shadow-lg hover:border-stone-200"
               >
-                {/* Image & Badges */}
-                <div className="h-40 bg-stone-100 relative overflow-hidden">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img 
-                    src={p.imagen} 
-                    alt={p.nombre} 
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
+                {/* Category Icon & Badges */}
+                <div 
+                  className="h-40 relative overflow-hidden flex items-center justify-center"
+                  style={{ 
+                    background: `linear-gradient(135deg, ${catDoc.colors[0]}18, ${catDoc.colors[1]}10)`,
+                    borderTopLeftRadius: '13px',
+                    borderTopRightRadius: '13px',
+                  }}
+                >
+                  <span 
+                    className="material-symbols-outlined animate-none" 
+                    style={{ 
+                      fontSize: '52px', 
+                      color: catDoc.colors[0] + '90',
+                    }}
+                  >
+                    {catDoc.icon}
+                  </span>
                   
                   {/* Category Badge */}
-                  <span className="absolute top-3 left-3 bg-black/70 text-white text-[9px] font-bold tracking-wider px-2 py-0.5 rounded-full uppercase">
-                    {CATEGORIES.find(c => c.id === p.categoria)?.label || p.categoria}
+                  <span 
+                    className="absolute top-3 left-3 text-white text-[9px] font-bold tracking-wider px-2 py-0.5 rounded-full uppercase"
+                    style={{ background: catDoc.colors[0] + 'E6' }}
+                  >
+                    {catDoc.emoji} {catDoc.label}
                   </span>
 
                   {/* Featured Badge */}
                   {p.isDestacado && (
                     <span className="absolute top-3 right-3 bg-[#E94E1B] text-white text-[9px] font-bold tracking-wider px-2 py-0.5 rounded-full uppercase">
-                      Destacado
+                      ⭐ Destacado
                     </span>
                   )}
                 </div>
@@ -297,7 +387,7 @@ export default function ProductosPage() {
         </div>
       )}
 
-      {/* Edit/Create Modal (Slide-over/Dialog) */}
+      {/* Edit/Create Modal */}
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-end bg-black/40 backdrop-blur-sm">
           <div className="bg-white w-full max-w-md h-full flex flex-col p-6 shadow-2xl animate-in slide-in-from-right duration-200">
@@ -332,12 +422,19 @@ export default function ProductosPage() {
                 <label className="block text-xs font-bold text-stone-600 uppercase mb-1">Categoría</label>
                 <select
                   value={categoria}
-                  onChange={(e) => setCategoria(e.target.value)}
+                  onChange={(e) => {
+                    if (e.target.value === "CREATE_NEW") {
+                      setIsCatModalOpen(true);
+                    } else {
+                      setCategoria(e.target.value);
+                    }
+                  }}
                   className="w-full p-2.5 rounded-lg border border-stone-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#E94E1B]/20 focus:border-[#E94E1B]"
                 >
-                  {CATEGORIES.map((cat) => (
-                    <option key={cat.id} value={cat.id}>{cat.label}</option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.id}>{cat.emoji} {cat.label}</option>
                   ))}
+                  <option value="CREATE_NEW" className="text-[#E94E1B] font-bold">＋ Nueva categoría...</option>
                 </select>
               </div>
 
@@ -356,20 +453,6 @@ export default function ProductosPage() {
                 />
               </div>
 
-              {/* Cantidad */}
-              <div>
-                <label className="block text-xs font-bold text-stone-600 uppercase mb-1">Cantidad / Stock *</label>
-                <input
-                  type="number"
-                  min="0"
-                  required
-                  value={cantidad}
-                  onChange={(e) => setCantidad(e.target.value)}
-                  placeholder="100"
-                  className="w-full p-2.5 rounded-lg border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#E94E1B]/20 focus:border-[#E94E1B]"
-                />
-              </div>
-
               {/* Descripcion */}
               <div>
                 <label className="block text-xs font-bold text-stone-600 uppercase mb-1">Descripción</label>
@@ -380,19 +463,6 @@ export default function ProductosPage() {
                   placeholder="Detalla los ingredientes o acompañamientos..."
                   className="w-full p-2.5 rounded-lg border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#E94E1B]/20 focus:border-[#E94E1B]"
                 />
-              </div>
-
-              {/* Imagen */}
-              <div>
-                <label className="block text-xs font-bold text-stone-600 uppercase mb-1">URL de Imagen</label>
-                <input
-                  type="url"
-                  value={imagen}
-                  onChange={(e) => setImagen(e.target.value)}
-                  placeholder="https://images.unsplash.com/..."
-                  className="w-full p-2.5 rounded-lg border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#E94E1B]/20 focus:border-[#E94E1B]"
-                />
-                <p className="text-[10px] text-[#9AA0A6] mt-1">Deja vacío para usar una imagen por defecto.</p>
               </div>
 
               {/* Destacado */}
@@ -423,6 +493,72 @@ export default function ProductosPage() {
                   className="flex-1 py-2.5 bg-[#E94E1B] hover:bg-[#D33D0D] text-white font-semibold rounded-lg transition-all text-sm"
                 >
                   {editingId ? "Guardar Cambios" : "Agregar Producto"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Sub-modal Create Category */}
+      {isCatModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-[14px] p-6 w-full max-w-sm card-shadow animate-in zoom-in-95 duration-200">
+            <h3 className="text-base font-bold text-[#0D0D0D] mb-4">Nueva Categoría</h3>
+            <form onSubmit={handleCreateCategory} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-stone-600 uppercase mb-1">Nombre</label>
+                <input
+                  type="text"
+                  required
+                  value={newCatLabel}
+                  onChange={(e) => setNewCatLabel(e.target.value)}
+                  placeholder="Ej. Pastas"
+                  className="w-full p-2.5 rounded-lg border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#E94E1B]/20 focus:border-[#E94E1B]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-stone-600 uppercase mb-1">Icono / Estilo</label>
+                <div className="grid grid-cols-4 gap-2.5 pt-1">
+                  {DEFAULT_EMOJIS.map((item) => {
+                    const isSel = newCatEmoji === item.e;
+                    return (
+                      <button
+                        key={item.e}
+                        type="button"
+                        onClick={() => {
+                          setNewCatEmoji(item.e);
+                          setNewCatIcon(item.i);
+                          setNewCatColors(item.c);
+                        }}
+                        className={`h-11 rounded-lg flex items-center justify-center text-lg border transition-all ${
+                          isSel ? "border-black bg-stone-50 scale-105" : "border-stone-200/60 hover:bg-stone-50"
+                        }`}
+                        style={{
+                          background: `linear-gradient(135deg, ${item.c[0]}15, ${item.c[1]}08)`
+                        }}
+                      >
+                        {item.e}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsCatModalOpen(false)}
+                  className="flex-1 py-2 border border-stone-200 text-stone-600 font-semibold rounded-lg text-sm hover:bg-stone-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-2 bg-[#E94E1B] text-white font-semibold rounded-lg text-sm hover:bg-[#D33D0D]"
+                >
+                  Crear
                 </button>
               </div>
             </form>

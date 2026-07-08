@@ -161,6 +161,7 @@ class _SectionTitle extends StatelessWidget {
     switch (path) {
       case '/dashboard': return 'Dashboard';
       case '/mesas':     return 'Gestión de Mesas';
+      case '/productos': return 'Productos';
       case '/kitchen':   return 'Vista Cocina';
       case '/orders':    return 'Pedidos';
       case '/reports':   return 'Reportes';
@@ -225,7 +226,7 @@ class _NotifButton extends StatelessWidget {
   }
 }
 
-class _UserAvatar extends StatelessWidget {
+class _UserAvatar extends ConsumerWidget {
   final String displayName;
   final UserModel? user;
   final BuildContext context;
@@ -238,9 +239,9 @@ class _UserAvatar extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext _) {
+  Widget build(BuildContext _, WidgetRef ref) {
     return GestureDetector(
-      onTap: () => _showMenu(context),
+      onTap: () => _showMenu(context, ref),
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: isMobile ? 6 : 12, vertical: 6),
         decoration: BoxDecoration(
@@ -285,7 +286,7 @@ class _UserAvatar extends StatelessWidget {
     );
   }
 
-  void _showMenu(BuildContext ctx) {
+  void _showMenu(BuildContext ctx, WidgetRef ref) {
     showMenu<String>(
       context: ctx,
       position: const RelativeRect.fromLTRB(1000, 64, 28, 0),
@@ -321,13 +322,16 @@ class _UserAvatar extends StatelessWidget {
         ),
       ],
     ).then((value) {
-      if (value == 'logout') ctx.go('/login');
+      if (value == 'logout') {
+        ref.read(authProvider.notifier).signOut();
+        ctx.go('/login');
+      }
     });
   }
 }
 
 // ─── Sidebar ─────────────────────────────────────────────────────────────────
-class _SideNavBar extends StatelessWidget {
+class _SideNavBar extends ConsumerWidget {
   final String activeRoute;
   final bool isDrawer;
   final UserRole? role;
@@ -350,6 +354,7 @@ class _SideNavBar extends StatelessWidget {
     return const [
       _NavItem(Icons.grid_view_rounded, 'Dashboard', '/dashboard'),
       _NavItem(Icons.table_restaurant_rounded, 'Mesas', '/mesas'),
+      _NavItem(Icons.fastfood_rounded, 'Productos', '/productos'),
       _NavItem(Icons.restaurant_rounded, 'Cocina', '/kitchen'),
       _NavItem(Icons.receipt_long_rounded, 'Pedidos', '/orders'),
       _NavItem(Icons.bar_chart_rounded, 'Reportes', '/reports'),
@@ -357,7 +362,7 @@ class _SideNavBar extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       width: isDrawer ? double.infinity : 220,
       height: MediaQuery.of(context).size.height,
@@ -439,6 +444,7 @@ class _SideNavBar extends StatelessWidget {
             child: InkWell(
               onTap: () {
                 if (isDrawer) Navigator.pop(context); // Cerrar drawer
+                ref.read(authProvider.notifier).signOut();
                 context.go('/login');
               },
               borderRadius: BorderRadius.circular(9),

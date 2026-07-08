@@ -41,7 +41,32 @@ class Mesa {
   }
 }
 
-enum Categoria { parrillas, piqueos, bebidas, postres, ensaladas, broaster, extras, combos }
+class CategoryModel {
+  final String id;
+  final String label;
+  final String icon;
+  final List<String> colors;
+  final String emoji;
+
+  CategoryModel({
+    required this.id,
+    required this.label,
+    required this.icon,
+    required this.colors,
+    required this.emoji,
+  });
+
+  factory CategoryModel.fromMap(String id, Map<String, dynamic> map) {
+    final colorsData = map['colors'] as List<dynamic>? ?? ['#424242', '#757575'];
+    return CategoryModel(
+      id: id,
+      label: map['label'] ?? '',
+      icon: map['icon'] ?? 'fastfood',
+      colors: colorsData.map((e) => e.toString()).toList(),
+      emoji: map['emoji'] ?? '🍔',
+    );
+  }
+}
 
 class Producto {
   final String id;
@@ -49,7 +74,7 @@ class Producto {
   final String descripcion;
   final double precio;
   final String imagen;
-  final Categoria categoria;
+  final String categoria; // String id referencing CategoryModel
   final bool isDestacado;
 
   Producto({

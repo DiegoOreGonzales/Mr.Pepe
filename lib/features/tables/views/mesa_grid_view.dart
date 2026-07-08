@@ -368,7 +368,7 @@ class _MesaActionDialog extends StatelessWidget {
                                       descripcion: '',
                                       precio: item.precio,
                                       imagen: '',
-                                      categoria: Categoria.parrillas,
+                                      categoria: 'parrillas',
                                     ),
                                   );
                                   cartItems.add(CartItem(producto: producto, cantidad: item.cantidad));
