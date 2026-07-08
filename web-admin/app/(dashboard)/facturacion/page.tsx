@@ -235,7 +235,7 @@ function PrintTicket({ order }: { order: Order | null }) {
              </div>
           </div>
           <h2 className="text-[20px] font-black tracking-tight text-black"><strong>MR. PEPE</strong></h2>
-          <p className="text-[10px] uppercase font-bold text-black tracking-[0.2em] mb-2"><strong>ROASTER & GRILL</strong></p>
+          <p className="text-[10px] uppercase font-bold text-black tracking-[0.2em] mb-2"><strong>BROASTER Y BRASAS</strong></p>
           
           <div className="space-y-0.5 text-[10px] text-black font-semibold">
             <p><strong>RUC: 10418236103</strong></p>

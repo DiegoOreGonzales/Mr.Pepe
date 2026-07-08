@@ -165,7 +165,7 @@ function PrintTicket({ order }: { order: Order | null }) {
       <div className="print-receipt p-4 text-black bg-white w-[80mm] mx-auto text-[12px] font-mono leading-tight">
         <div className="text-center mb-4">
           <h2 className="text-lg font-black"><strong>MR. PEPE</strong></h2>
-          <p className="text-[10px] uppercase font-bold"><strong>Roaster & Grill</strong></p>
+          <p className="text-[10px] uppercase font-bold"><strong>Broaster y Brasas</strong></p>
           <div className="w-12 h-px bg-black mx-auto my-1" />
           <p className="text-[10px]"><strong>RUC: 10418236103</strong></p>
           <p className="text-[10px]">JR. JUNIN 413 - EL TAMBO - HUANCAYO</p>
