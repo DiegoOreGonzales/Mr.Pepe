@@ -47,29 +47,29 @@ CREATE TABLE IF NOT EXISTS alerts (
 
 -- 5. Semillas de Datos Iniciales (Seeders)
 
--- Crear Usuario Administrador Principal por Defecto: admin@chioschicken.com / admin123456
+-- Crear Usuario Administrador Principal por Defecto: admin@mrpepe.com / admin123456
 INSERT INTO users (nombre, email, password_hash, role)
 VALUES (
-    'Administrador Chios', 
-    'admin@chioschicken.com', 
+    'Administrador Mr Pepe', 
+    'admin@mrpepe.com', 
     '$2b$10$MWV3uMSUdrk6B5p6V7wUV.tKwvxiC5q3nfCdj7t8Lpigug6aOuhNa',
     'admin'
 ) ON CONFLICT (email) DO NOTHING;
 
--- Crear Mesero Genérico por Defecto: mesero@chioschicken.com / mesero123456
+-- Crear Mesero Genérico por Defecto: mesero@mrpepe.com / mesero123456
 INSERT INTO users (nombre, email, password_hash, role)
 VALUES (
     'Mesero Principal', 
-    'mesero@chioschicken.com', 
+    'mesero@mrpepe.com', 
     '$2b$10$bRsf5/BFZH4z.ae4lu2X1ucCM73Lss2saPOb/lsfXVrdoiUfmNtju',
     'mesero'
 ) ON CONFLICT (email) DO NOTHING;
 
--- Crear Cocinero Genérico por Defecto: cocinero@chioschicken.com / cocina123456
+-- Crear Cocinero Genérico por Defecto: cocinero@mrpepe.com / cocina123456
 INSERT INTO users (nombre, email, password_hash, role)
 VALUES (
     'Cocinero Principal', 
-    'cocinero@chioschicken.com', 
+    'cocinero@mrpepe.com', 
     '$2b$10$4M6VoefSaKiuHMXUoOGR9eWjCrgI7dPggJw.6iIDoE/t647ArHFYW',
     'cocina'
 ) ON CONFLICT (email) DO NOTHING;

@@ -60,14 +60,14 @@ function LoginForm() {
             className="mb-8 w-44 h-44 rounded-3xl flex items-center justify-center border border-white/20 p-4 shadow-xl"
             style={{ background: "rgba(255,255,255,0.1)", backdropFilter: "blur(12px)" }}
           >
-            <img src="/logo.png" alt="Chio's Chicken Logo" className="w-full h-full object-contain" />
+            <img src="/logo.png" alt="Mr Pepe Logo" className="w-full h-full object-contain" />
           </div>
 
           <h1
             className="text-white font-extrabold mb-4"
             style={{ fontSize: "clamp(2rem,4vw,3.5rem)", letterSpacing: "-0.03em" }}
           >
-            Chio's Chicken
+            Mr Pepe
           </h1>
 
           <p className="text-white/80 text-lg font-medium max-w-xs leading-snug">

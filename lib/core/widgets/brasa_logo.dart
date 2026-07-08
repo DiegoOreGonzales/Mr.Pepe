@@ -66,7 +66,7 @@ class _BrasaLogoState extends State<BrasaLogo>
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(widget.size * 0.25),
                 child: Image.asset(
-                  'assets/images/cios.png',
+                  'assets/images/mr_pepe_logo-removebg-preview.png',
                   fit: BoxFit.contain,
                   errorBuilder: (context, error, stackTrace) => Center(
                     child: Icon(
@@ -87,7 +87,7 @@ class _BrasaLogoState extends State<BrasaLogo>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "CHIO'S CHICKEN",
+                "Mr Pepe",
                 style: TextStyle(
                   fontFamily: 'Inter',
                   fontSize: widget.size * 0.43,

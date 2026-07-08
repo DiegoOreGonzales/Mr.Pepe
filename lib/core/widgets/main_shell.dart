@@ -165,7 +165,7 @@ class _SectionTitle extends StatelessWidget {
       case '/orders':    return 'Pedidos';
       case '/reports':   return 'Reportes';
       case '/billing':   return 'Facturación';
-      default:           return "Chio's Chicken";
+      default:           return "Mr Pepe";
     }
   }
 
@@ -384,7 +384,7 @@ class _SideNavBar extends StatelessWidget {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(9),
                   child: Image.asset(
-                    'assets/images/cios.png',
+                    'assets/images/mr_pepe_logo-removebg-preview.png',
                     fit: BoxFit.contain,
                     errorBuilder: (_, __, ___) => const Icon(
                       Icons.local_fire_department_rounded,
@@ -396,7 +396,7 @@ class _SideNavBar extends StatelessWidget {
               ),
               const SizedBox(width: 11),
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                const Text("CHIO'S CHICKEN",
+                const Text("Mr Pepe",
                     style: TextStyle(
                         fontFamily: 'Inter',
                         fontSize: 13,

@@ -164,7 +164,7 @@ function PrintTicket({ order }: { order: Order | null }) {
     <div className="print-only hidden">
       <div className="print-receipt p-4 text-black bg-white w-[80mm] mx-auto text-[12px] font-mono leading-tight">
         <div className="text-center mb-4">
-          <h2 className="text-lg font-bold">CHIO'S CHICKEN</h2>
+          <h2 className="text-lg font-bold">MR. PEPE</h2>
           <p className="text-[10px] uppercase font-bold">Roaster & Grill</p>
           <div className="w-12 h-px bg-black mx-auto my-1" />
           <p className="text-[10px]">RUC: 10418236103</p>
@@ -219,7 +219,7 @@ function PrintTicket({ order }: { order: Order | null }) {
 
         <div className="text-center mt-6 text-[9px]">
           <p>¡Gracias por su preferencia!</p>
-          <p>www.chioschicken.com.pe</p>
+          <p>www.mrpepe.com.pe</p>
         </div>
       </div>
     </div>

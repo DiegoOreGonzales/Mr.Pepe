@@ -43,7 +43,7 @@ class SideNavBar extends StatelessWidget {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(10),
                     child: Image.asset(
-                      'assets/images/cios.png',
+                      'assets/images/mr_pepe_logo-removebg-preview.png',
                       fit: BoxFit.contain,
                       errorBuilder: (_, __, ___) => const Icon(
                         Icons.local_fire_department_rounded,
@@ -58,7 +58,7 @@ class SideNavBar extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "CHIO'S CHICKEN",
+                      "Mr Pepe",
                       style: TextStyle(
                         fontFamily: 'Inter',
                         fontSize: 14,

@@ -104,7 +104,7 @@ class MrPepeApp extends ConsumerWidget {
 
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
-      title: "Chio's Chicken",
+      title: "Mr Pepe",
       theme: AppTheme.lightTheme,
       routerConfig: router,
     );

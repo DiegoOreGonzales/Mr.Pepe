@@ -105,7 +105,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(20),
                                     child: Image.asset(
-                                      'assets/images/chios_icon.png',
+                                      'assets/images/mr_pepe_logo-removebg-preview.png',
                                       fit: BoxFit.contain,
                                       errorBuilder: (_, __, ___) => const Icon(
                                         Icons.local_fire_department_rounded,
@@ -117,7 +117,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
                                 ),
                                 const SizedBox(height: 28),
                                 const Text(
-                                  "Chio's Chicken",
+                                  "Mr Pepe",
                                   style: TextStyle(
                                     fontFamily: 'Inter',
                                     fontSize: 38,
@@ -204,7 +204,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
                                       child: ClipRRect(
                                         borderRadius: BorderRadius.circular(16),
                                         child: Image.asset(
-                                          'assets/images/chios_icon.png',
+                                          'assets/images/mr_pepe_logo-removebg-preview.png',
                                           fit: BoxFit.contain,
                                           errorBuilder: (_, __, ___) => const Icon(
                                             Icons.local_fire_department_rounded,
@@ -216,7 +216,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
                                     ),
                                     const SizedBox(height: 12),
                                     const Text(
-                                      "Chio's Chicken",
+                                      "Mr Pepe",
                                       style: TextStyle(
                                         fontFamily: 'Inter',
                                         fontSize: 24,
@@ -276,7 +276,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
                               style: const TextStyle(
                                   fontFamily: 'Inter', fontSize: 14),
                               decoration: const InputDecoration(
-                                hintText: 'admin@chioschicken.com',
+                                hintText: 'admin@mrpepe.com',
                                 prefixIcon: Icon(Icons.email_outlined,
                                     size: 18, color: AppTheme.textMuted),
                               ),
