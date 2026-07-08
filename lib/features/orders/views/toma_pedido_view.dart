@@ -9,16 +9,43 @@ import '../../kitchen/models/order_model.dart';
 import '../../../../core/services/api_service.dart';
 
 final categoryFilterProvider = StateProvider<Categoria>((ref) => Categoria.parrillas);
+final searchQueryProvider = StateProvider<String>((ref) => '');
 
-class TomaPedidoView extends ConsumerWidget {
+class TomaPedidoView extends ConsumerStatefulWidget {
   final Mesa mesa;
 
   const TomaPedidoView({super.key, required this.mesa});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<TomaPedidoView> createState() => _TomaPedidoViewState();
+}
+
+class _TomaPedidoViewState extends ConsumerState<TomaPedidoView> {
+  late final TextEditingController _searchController;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final selectedCategory = ref.watch(categoryFilterProvider);
-    final productos = ref.watch(productProvider).where((p) => p.categoria == selectedCategory).toList();
+    final searchQuery = ref.watch(searchQueryProvider).toLowerCase();
+
+    final productos = ref.watch(productProvider).where((p) {
+      final matchesCategory = p.categoria == selectedCategory;
+      final matchesSearch = searchQuery.isEmpty || p.nombre.toLowerCase().contains(searchQuery);
+      return matchesCategory && matchesSearch;
+    }).toList();
+
     final cart = ref.watch(cartProvider);
     final total = ref.read(cartProvider.notifier).total;
 
@@ -29,13 +56,14 @@ class TomaPedidoView extends ConsumerWidget {
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) {
           ref.read(editingOrderProvider.notifier).state = null;
+          ref.read(searchQueryProvider.notifier).state = '';
         }
       },
       child: Scaffold(
         appBar: AppBar(
           title: Text(editingOrder != null 
-              ? 'Editar Pedido - Mesa #${mesa.numero}' 
-              : 'Mesa #${mesa.numero} - Toma de Pedido'),
+              ? 'Editar Pedido - Mesa #${widget.mesa.numero}' 
+              : 'Mesa #${widget.mesa.numero} - Toma de Pedido'),
           backgroundColor: Colors.white,
           foregroundColor: AppTheme.onBackgroundColor,
           elevation: 0,
@@ -43,6 +71,7 @@ class TomaPedidoView extends ConsumerWidget {
             icon: const Icon(Icons.arrow_back),
             onPressed: () {
               ref.read(editingOrderProvider.notifier).state = null;
+              ref.read(searchQueryProvider.notifier).state = '';
               Navigator.pop(context);
             },
           ),
@@ -67,6 +96,43 @@ class TomaPedidoView extends ConsumerWidget {
               ],
             ),
           ),
+          // Buscador de Productos
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+            child: TextField(
+              controller: _searchController,
+              onChanged: (val) => ref.read(searchQueryProvider.notifier).state = val,
+              style: const TextStyle(fontFamily: 'Inter', fontSize: 14),
+              decoration: InputDecoration(
+                hintText: 'Buscar producto...',
+                prefixIcon: const Icon(Icons.search, color: Colors.grey, size: 20),
+                suffixIcon: ref.watch(searchQueryProvider).isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear, color: Colors.grey, size: 20),
+                        onPressed: () {
+                          _searchController.clear();
+                          ref.read(searchQueryProvider.notifier).state = '';
+                        },
+                      )
+                    : null,
+                contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30),
+                  borderSide: BorderSide(color: Colors.grey.shade300),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30),
+                  borderSide: BorderSide(color: Colors.grey.shade200),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30),
+                  borderSide: const BorderSide(color: AppTheme.primaryColor),
+                ),
+                filled: true,
+                fillColor: Colors.grey.shade50,
+              ),
+            ),
+          ),
           // Lista de Productos
           Expanded(
             child: ListView.builder(
@@ -83,7 +149,7 @@ class TomaPedidoView extends ConsumerWidget {
           StreamBuilder<List<OrderModel>>(
             stream: Stream.periodic(const Duration(seconds: 3))
                 .asyncMap((_) => ref.read(apiServiceProvider).fetchActiveOrders())
-                .map((orders) => orders.where((o) => o.mesaNumero == mesa.numero).toList()),
+                .map((orders) => orders.where((o) => o.mesaNumero == widget.mesa.numero).toList()),
             builder: (context, snapshot) {
               if (!snapshot.hasData || snapshot.data!.isEmpty) return const SizedBox();
               
@@ -210,14 +276,14 @@ class TomaPedidoView extends ConsumerWidget {
                           } else {
                             // 1. Enviar una nueva orden
                             await ref.read(orderServiceProvider).submitOrder(
-                              mesaNumero: mesa.numero,
+                              mesaNumero: widget.mesa.numero,
                               items: cart,
                               total: total,
                             );
 
                             // 2. Marcar la mesa como ocupada
                             await ref.read(tableProvider.notifier).updateTableStatus(
-                              mesa.id, 
+                              widget.mesa.id, 
                               MesaStatus.ocupada,
                               encargado: 'Mesero Admin',
                             );

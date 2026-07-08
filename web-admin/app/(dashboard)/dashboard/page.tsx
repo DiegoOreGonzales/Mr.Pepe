@@ -164,39 +164,39 @@ function PrintTicket({ order }: { order: Order | null }) {
     <div className="print-only hidden">
       <div className="print-receipt p-4 text-black bg-white w-[80mm] mx-auto text-[12px] font-mono leading-tight">
         <div className="text-center mb-4">
-          <h2 className="text-lg font-bold">MR. PEPE</h2>
-          <p className="text-[10px] uppercase font-bold">Roaster & Grill</p>
+          <h2 className="text-lg font-black"><strong>MR. PEPE</strong></h2>
+          <p className="text-[10px] uppercase font-bold"><strong>Roaster & Grill</strong></p>
           <div className="w-12 h-px bg-black mx-auto my-1" />
-          <p className="text-[10px]">RUC: 10418236103</p>
+          <p className="text-[10px]"><strong>RUC: 10418236103</strong></p>
           <p className="text-[10px]">JR. JUNIN 413 - EL TAMBO - HUANCAYO</p>
         </div>
 
         <div className="border-t border-b border-black border-dashed py-2 mb-3">
-          <p className="text-center font-bold">BOLETA DE VENTA</p>
-          <p className="text-center font-bold">B001-000577</p>
+          <p className="text-center font-black"><strong>BOLETA DE VENTA</strong></p>
+          <p className="text-center font-black"><strong>B001-000577</strong></p>
         </div>
 
         <div className="mb-4 space-y-0.5 text-[10px]">
-          <p><span className="font-bold">DNI:</span> {order.clienteDocumento || "-----------"}</p>
-          <p><span className="font-bold">CLIENTE:</span> {order.clienteNombre || "CONSUMIDOR FINAL"}</p>
-          <p><span className="font-bold">FECHA:</span> {new Date().toLocaleDateString()}</p>
-          <p><span className="font-bold">MESA:</span> {order.mesaNumero}</p>
+          <p><strong>DNI:</strong> {order.clienteDocumento || "-----------"}</p>
+          <p><strong>CLIENTE:</strong> {order.clienteNombre || "CONSUMIDOR FINAL"}</p>
+          <p><strong>FECHA:</strong> {new Date().toLocaleDateString()}</p>
+          <p><strong>MESA:</strong> {order.mesaNumero}</p>
         </div>
 
         <table className="w-full text-[10px] mb-4">
           <thead className="border-b border-black">
             <tr>
-              <th className="text-left py-1">CANT</th>
-              <th className="text-left py-1">DESCRIPCIÓN</th>
-              <th className="text-right py-1">TOTAL</th>
+              <th className="text-left py-1"><strong>CANT</strong></th>
+              <th className="text-left py-1"><strong>DESCRIPCIÓN</strong></th>
+              <th className="text-right py-1"><strong>TOTAL</strong></th>
             </tr>
           </thead>
           <tbody>
             {order.items.map((item, i) => (
               <tr key={i}>
-                <td className="py-1">{item.cantidad} x</td>
+                <td className="py-1"><strong>{item.cantidad} x</strong></td>
                 <td className="py-1">{item.nombre}</td>
-                <td className="text-right py-1">S/ {item.precio.toFixed(2)}</td>
+                <td className="text-right py-1"><strong>S/ {item.precio.toFixed(2)}</strong></td>
               </tr>
             ))}
           </tbody>
@@ -204,21 +204,21 @@ function PrintTicket({ order }: { order: Order | null }) {
 
         <div className="border-t border-black pt-2 space-y-1">
           <div className="flex justify-between text-[10px]">
-            <span>OP. GRAVADA</span>
+            <span><strong>OP. GRAVADA</strong></span>
             <span>S/ {(order.total / 1.18).toFixed(2)}</span>
           </div>
           <div className="flex justify-between text-[10px]">
-            <span>IGV (18%)</span>
+            <span><strong>IGV (18%)</strong></span>
             <span>S/ {(order.total - (order.total / 1.18)).toFixed(2)}</span>
           </div>
-          <div className="flex justify-between font-bold text-sm pt-1 border-t border-black border-double">
-            <span>TOTAL A PAGAR</span>
-            <span>S/ {order.total.toFixed(2)}</span>
+          <div className="flex justify-between font-black text-sm pt-1 border-t border-black border-double">
+            <span><strong>TOTAL A PAGAR</strong></span>
+            <span><strong>S/ {order.total.toFixed(2)}</strong></span>
           </div>
         </div>
 
         <div className="text-center mt-6 text-[9px]">
-          <p>¡Gracias por su preferencia!</p>
+          <p><strong>¡Gracias por su preferencia!</strong></p>
           <p>www.mrpepe.com.pe</p>
         </div>
       </div>

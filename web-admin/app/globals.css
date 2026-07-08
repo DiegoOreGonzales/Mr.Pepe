@@ -122,4 +122,10 @@
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
+
+  /* Forzar letras negritas en impresoras térmicas (evitar tramado gris) */
+  strong, b, .font-bold, .font-black, h2, th {
+    font-weight: 900 !important;
+    color: #000000 !important;
+  }
 }

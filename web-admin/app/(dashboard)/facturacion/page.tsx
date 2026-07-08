@@ -214,8 +214,6 @@ function DniLookup() {
   );
 }
 
-// ── Componente de Boleta (DISEÑO PREMIUM IDENTICO AL MOVIL) ──────────────────
-
 function PrintTicket({ order }: { order: Order | null }) {
   if (!order) return null;
   
@@ -228,7 +226,7 @@ function PrintTicket({ order }: { order: Order | null }) {
 
   return (
     <div className="print-only">
-      <div className="print-receipt p-8 text-[#191C1E] bg-white w-[80mm] mx-auto text-[13px] font-sans leading-normal border border-stone-100">
+      <div className="print-receipt p-8 text-black bg-white w-[80mm] mx-auto text-[13px] font-sans leading-normal border border-black/10">
         {/* Cabecera con Logo */}
         <div className="text-center mb-6">
           <div className="flex justify-center mb-3">
@@ -236,55 +234,55 @@ function PrintTicket({ order }: { order: Order | null }) {
                 <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
              </div>
           </div>
-          <h2 className="text-[20px] font-black tracking-tight text-[#0D0D0D]">MR. PEPE</h2>
-          <p className="text-[10px] uppercase font-bold text-[#BF391B] tracking-[0.2em] mb-2">ROASTER & GRILL</p>
+          <h2 className="text-[20px] font-black tracking-tight text-black"><strong>MR. PEPE</strong></h2>
+          <p className="text-[10px] uppercase font-bold text-black tracking-[0.2em] mb-2"><strong>ROASTER & GRILL</strong></p>
           
-          <div className="space-y-0.5 text-[10px] text-stone-500 font-medium">
-            <p>RUC: 10418236103</p>
+          <div className="space-y-0.5 text-[10px] text-black font-semibold">
+            <p><strong>RUC: 10418236103</strong></p>
             <p>JR. JUNIN 413 - EL TAMBO - HUANCAYO</p>
           </div>
         </div>
 
         {/* Tipo de Documento */}
-        <div className="border-t border-stone-100 pt-5 pb-5 mb-4 text-center">
-          <p className="text-[11px] font-black uppercase tracking-widest text-stone-400 mb-1">
-            {order.tipoDocumento === 'factura' ? 'FACTURA ELECTRÓNICA' : 'BOLETA DE VENTA'}
+        <div className="border-t border-black border-dashed pt-5 pb-5 mb-4 text-center">
+          <p className="text-[11px] font-black uppercase tracking-widest text-black mb-1">
+            <strong>{order.tipoDocumento === 'factura' ? 'FACTURA ELECTRÓNICA' : 'BOLETA DE VENTA'}</strong>
           </p>
-          <p className="text-[16px] font-black text-[#0D0D0D]">{ticketNumber}</p>
+          <p className="text-[16px] font-black text-black"><strong>{ticketNumber}</strong></p>
         </div>
 
         {/* Info Cliente */}
-        <div className="mb-6 space-y-1.5 text-[11px]">
+        <div className="mb-6 space-y-1.5 text-[11px] text-black">
           <div className="flex gap-2">
-            <span className="font-bold text-stone-900 w-12">{order.tipoDocumento === 'factura' ? 'RUC:' : 'DNI:'}</span>
-            <span className="text-stone-600">{order.clienteDocumento || "-----------"}</span>
+            <span className="font-bold text-black w-12"><strong>{order.tipoDocumento === 'factura' ? 'RUC:' : 'DNI:'}</strong></span>
+            <span className="text-black">{order.clienteDocumento || "-----------"}</span>
           </div>
           <div className="flex gap-2">
-            <span className="font-bold text-stone-900 w-12">CLIENTE:</span>
-            <span className="text-stone-600 uppercase flex-1">{order.clienteNombre || "CONSUMIDOR FINAL"}</span>
+            <span className="font-bold text-black w-12"><strong>CLIENTE:</strong></span>
+            <span className="text-black uppercase flex-1">{order.clienteNombre || "CONSUMIDOR FINAL"}</span>
           </div>
           <div className="flex gap-2">
-            <span className="font-bold text-stone-900 w-12">FECHA:</span>
-            <span className="text-stone-600">{order.createdAt.toLocaleDateString()} {order.createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+            <span className="font-bold text-black w-12"><strong>FECHA:</strong></span>
+            <span className="text-black">{order.createdAt.toLocaleDateString()} {order.createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
           </div>
         </div>
 
         {/* Tabla de Items */}
-        <table className="w-full text-[11px] mb-6">
+        <table className="w-full text-[11px] mb-6 border-b border-black">
           <thead>
-            <tr className="text-left text-stone-400 border-b border-stone-100">
-              <th className="pb-2 font-bold uppercase tracking-tighter">CANT DESCRIPCIÓN</th>
-              <th className="pb-2 text-right font-bold uppercase tracking-tighter">TOTAL</th>
+            <tr className="text-left text-black border-b border-black">
+              <th className="pb-2 font-bold uppercase tracking-tighter"><strong>CANT DESCRIPCIÓN</strong></th>
+              <th className="pb-2 text-right font-bold uppercase tracking-tighter"><strong>TOTAL</strong></th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-stone-50">
+          <tbody className="divide-y divide-black/10">
             {order.items.map((item, i) => (
               <tr key={i}>
-                <td className="py-3 text-stone-700">
-                  <span className="font-bold text-stone-900">{item.cantidad} x</span> {item.nombre}
+                <td className="py-3 text-black">
+                  <span className="font-bold text-black"><strong>{item.cantidad} x</strong></span> {item.nombre}
                 </td>
-                <td className="py-3 text-right font-bold text-stone-900">
-                  S/ {(item.precio * item.cantidad).toFixed(2)}
+                <td className="py-3 text-right font-bold text-black">
+                  <strong>S/ {(item.precio * item.cantidad).toFixed(2)}</strong>
                 </td>
               </tr>
             ))}
@@ -292,24 +290,24 @@ function PrintTicket({ order }: { order: Order | null }) {
         </table>
 
         {/* Totales */}
-        <div className="border-t border-stone-100 pt-4 space-y-2">
-          <div className="flex justify-between text-[11px] text-stone-500">
-            <span>OP. GRAVADA</span>
-            <span className="font-medium text-stone-900">S/ {subtotal.toFixed(2)}</span>
+        <div className="border-t border-black pt-4 space-y-2 text-black">
+          <div className="flex justify-between text-[11px]">
+            <span><strong>OP. GRAVADA</strong></span>
+            <span className="font-semibold text-black">S/ {subtotal.toFixed(2)}</span>
           </div>
-          <div className="flex justify-between text-[11px] text-stone-500">
-            <span>IGV (18%)</span>
-            <span className="font-medium text-stone-900">S/ {igv.toFixed(2)}</span>
+          <div className="flex justify-between text-[11px]">
+            <span><strong>IGV (18%)</strong></span>
+            <span className="font-semibold text-black">S/ {igv.toFixed(2)}</span>
           </div>
-          <div className="flex justify-between items-center pt-3 border-t border-stone-200 mt-2">
-            <span className="text-[13px] font-black text-[#0D0D0D]">TOTAL A PAGAR</span>
-            <span className="text-[18px] font-black text-[#0D0D0D]">S/ {totalPagar.toFixed(2)}</span>
+          <div className="flex justify-between items-center pt-3 border-t border-black border-double mt-2">
+            <span className="text-[13px] font-black text-black"><strong>TOTAL A PAGAR</strong></span>
+            <span className="text-[18px] font-black text-black"><strong>S/ {totalPagar.toFixed(2)}</strong></span>
           </div>
         </div>
 
         {/* Mensaje de Preferencia */}
         <div className="text-center mt-10 space-y-1">
-          <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">¡Gracias por su preferencia!</p>
+          <p className="text-[10px] font-bold text-black uppercase tracking-widest"><strong>¡Gracias por su preferencia!</strong></p>
           <p className="text-[9px] text-[#BF391B] font-bold underline">www.mrpepe.com.pe</p>
         </div>
       </div>
