@@ -2,6 +2,36 @@
 # Documentation: https://docs.codemagic.io/yaml/building/
 
 workflows:
+  android-apk:
+    name: Mr Pepe - Android APK
+    max_build_duration: 60
+    instance_type: mac_mini_m1 # También se puede usar mac_mini_m1 o linux
+    environment:
+      flutter: stable
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
+          source: true
+    scripts:
+      - name: Get Flutter dependencies
+        script: |
+          flutter pub get
+      - name: Build Android APK
+        script: |
+          flutter build apk --release
+    artifacts:
+      - build/app/outputs/flutter-apk/*.apk
+    publishing:
+      email:
+        recipients:
+          - jfcc95012309@gmail.com
+        notify:
+          success: true
+          failure: true
+
   ios-unsigned:
     name: Mr Pepe - iOS Unsigned IPA
     max_build_duration: 120
