@@ -13,31 +13,18 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 function printOrderTicket(order: Order) {
-  const printWindow = window.open("", "_blank", "width=350,height=700");
+  const printWindow = window.open("", "_blank", "width=320,height=600");
   if (!printWindow) {
     alert("Por favor permita las ventanas emergentes (pop-ups) para poder imprimir.");
     return;
   }
 
-  const ticketNumber = order.voucherNumber || `B${String(order.mesaNumero).padStart(2, "0")}-${Date.now().toString().slice(-6)}`;
-  const subtotal = order.total;
-  const igv = subtotal * 0.18;
-  const totalPagar = subtotal + igv;
-
-  const STATUS_LABELS_MAP: Record<string, string> = {
-    pendiente: "Pendiente",
-    preparando: "En Proceso",
-    listo: "Listo",
-    entregado: "Entregado",
-    pagado: "Pagado"
-  };
-
   const itemsHtml = order.items?.map(item => `
     <tr style="border-bottom: 1px dashed rgba(0,0,0,0.15);">
-      <td style="padding: 6px 0; font-family: monospace; font-size: 13px; font-weight: 800; color: #000;">
+      <td style="padding: 5px 0; font-family: monospace; font-size: 13px; font-weight: 800; color: #000;">
         ${item.cantidad} x ${item.nombre}
       </td>
-      <td style="padding: 6px 0; font-family: monospace; font-size: 13px; font-weight: 800; text-align: right; color: #000;">
+      <td style="padding: 5px 0; font-family: monospace; font-size: 13px; font-weight: 800; text-align: right; color: #000;">
         S/ ${(item.precio * item.cantidad).toFixed(2)}
       </td>
     </tr>
@@ -46,7 +33,7 @@ function printOrderTicket(order: Order) {
   const html = `
     <html>
       <head>
-        <title>Ticket - ${ticketNumber}</title>
+        <title>Imprimir Ticket - Mesa ${order.mesaNumero}</title>
         <style>
           @page { size: 80mm auto; margin: 0; }
           body {
@@ -68,40 +55,26 @@ function printOrderTicket(order: Order) {
           .subtitle { font-size: 12px; font-weight: 900; margin-bottom: 8px; }
           .meta { font-size: 12px; line-height: 1.4; margin-bottom: 8px; }
           .table { width: 100%; border-collapse: collapse; }
-          .totals-table { width: 100%; margin-top: 10px; }
-          .totals-table td { padding: 3px 0; font-size: 12px; font-weight: 900; }
-          .total-row { font-size: 16px; font-weight: 900; }
+          .total { font-size: 16px; font-weight: 900; text-align: right; margin-top: 10px; }
         </style>
       </head>
       <body>
         <div class="text-center">
+          <img src="${window.location.origin}/logo.png" style="max-height: 45px; width: auto; margin-bottom: 6px; object-fit: contain;" alt="Logo" /><br/>
           <div class="title">MR. PEPE</div>
-          <div class="subtitle">BROASTER Y BRASAS</div>
-          <div style="font-size: 11px; font-weight: 900; margin-bottom: 5px;">RUC: 10418236103</div>
-          <div style="font-size: 10px; font-weight: 900;">JR. JUNIN 413 - EL TAMBO - HUANCAYO</div>
-          <div class="divider"></div>
-          
-          <div style="font-size: 13px; font-weight: 900; text-transform: uppercase;">
-            ${order.tipoDocumento === 'factura' ? 'FACTURA ELECTRÓNICA' : 'BOLETA DE VENTA'}
-          </div>
-          <div style="font-size: 16px; font-weight: 900; margin-top: 3px;">
-            ${ticketNumber}
-          </div>
+          <div class="subtitle">Broaster y Brasas</div>
           <div class="divider"></div>
         </div>
-
         <div class="meta">
-          <strong>${order.tipoDocumento === 'factura' ? 'RUC:' : 'DNI:'}</strong> ${order.clienteDocumento || "-----------"}<br/>
-          <strong>CLIENTE:</strong> ${(order.clienteNombre || "CONSUMIDOR FINAL").toUpperCase()}<br/>
+          <strong>MESA:</strong> MESA ${order.mesaNumero}<br/>
           <strong>FECHA:</strong> ${new Date(order.createdAt).toLocaleDateString("es-PE")} ${new Date(order.createdAt).toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" })}<br/>
-          <strong>MESA:</strong> MESA ${order.mesaNumero}
+          <strong>ESTADO:</strong> ${(STATUS_LABELS[order.status] || order.status).toUpperCase()}
         </div>
         <div class="divider"></div>
-
         <table class="table">
           <thead>
             <tr style="border-bottom: 2px solid #000;">
-              <th style="text-align: left; font-size: 12px; font-weight: 900; padding-bottom: 5px;">CANT DESCRIPCIÓN</th>
+              <th style="text-align: left; font-size: 12px; font-weight: 900; padding-bottom: 5px;">PRODUCTO</th>
               <th style="text-align: right; font-size: 12px; font-weight: 900; padding-bottom: 5px;">TOTAL</th>
             </tr>
           </thead>
@@ -109,30 +82,14 @@ function printOrderTicket(order: Order) {
             ${itemsHtml}
           </tbody>
         </table>
-
         <div class="divider"></div>
-
-        <table class="totals-table">
-          <tr>
-            <td>OP. GRAVADA</td>
-            <td style="text-align: right;">S/ ${subtotal.toFixed(2)}</td>
-          </tr>
-          <tr>
-            <td>IGV (18%)</td>
-            <td style="text-align: right;">S/ ${igv.toFixed(2)}</td>
-          </tr>
-          <tr class="total-row" style="border-top: 2px double #000; padding-top: 5px;">
-            <td style="font-size: 14px; font-weight: 900; padding-top: 6px;">TOTAL A PAGAR</td>
-            <td style="text-align: right; font-size: 18px; font-weight: 900; padding-top: 6px;">S/ ${totalPagar.toFixed(2)}</td>
-          </tr>
-        </table>
-
-        <div class="divider" style="margin-top: 20px;"></div>
-        <div class="text-center" style="margin-top: 8px;">
-          <div style="font-size: 11px; font-weight: 900; text-transform: uppercase;">¡Gracias por su preferencia!</div>
-          <div style="font-size: 10px; font-weight: 900; margin-top: 2px;">www.mrpepe.com.pe</div>
+        <div class="total" style="font-size: 18px; font-weight: 900;">
+          TOTAL: S/ ${order.total.toFixed(2)}
         </div>
-
+        <div class="divider" style="margin-top: 15px;"></div>
+        <div class="text-center subtitle" style="margin-top: 8px;">
+          ¡Gracias por su preferencia!
+        </div>
         <script>
           window.onload = function() {
             window.print();
@@ -272,13 +229,15 @@ export default function PedidosPage() {
                         >
                           <span className="material-symbols-outlined text-[18px]">visibility</span>
                         </button>
-                        <button
-                          onClick={() => printOrderTicket(o)}
-                          className="text-[#9AA0A6] hover:text-[#BF391B] transition-colors"
-                          title="Imprimir Ticket"
-                        >
-                          <span className="material-symbols-outlined text-[18px]">print</span>
-                        </button>
+                        {o.status === "pagado" && (
+                          <button
+                            onClick={() => printOrderTicket(o)}
+                            className="text-[#9AA0A6] hover:text-[#BF391B] transition-colors"
+                            title="Imprimir Ticket"
+                          >
+                            <span className="material-symbols-outlined text-[18px]">print</span>
+                          </button>
+                        )}
                       </td>
                     </tr>
                   );

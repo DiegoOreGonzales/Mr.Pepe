@@ -214,143 +214,105 @@ function DniLookup() {
   );
 }
 
-function printThermalTicket(order: Order) {
-  const printWindow = window.open("", "_blank", "width=350,height=700");
-  if (!printWindow) {
-    alert("Por favor permita las ventanas emergentes (pop-ups) para poder imprimir.");
-    return;
-  }
-
-  const ticketNumber = order.voucherNumber || `B${String(order.mesaNumero).padStart(2, "0")}-${Date.now().toString().slice(-6)}`;
+function PrintTicket({ order }: { order: Order | null }) {
+  if (!order) return null;
+  
+  const ticketNumber = order.voucherNumber || "S/N";
   const subtotal = order.total;
   const igv = subtotal * 0.18;
   const totalPagar = subtotal + igv;
 
-  const STATUS_LABELS_MAP: Record<string, string> = {
-    pendiente: "Pendiente",
-    preparando: "En Proceso",
-    listo: "Listo",
-    entregado: "Entregado",
-    pagado: "Pagado"
-  };
-
-  const itemsHtml = order.items?.map(item => `
-    <tr style="border-bottom: 1px dashed rgba(0,0,0,0.15);">
-      <td style="padding: 6px 0; font-family: monospace; font-size: 13px; font-weight: 800; color: #000;">
-        ${item.cantidad} x ${item.nombre}
-      </td>
-      <td style="padding: 6px 0; font-family: monospace; font-size: 13px; font-weight: 800; text-align: right; color: #000;">
-        S/ ${(item.precio * item.cantidad).toFixed(2)}
-      </td>
-    </tr>
-  `).join("") || "";
-
-  const html = `
-    <html>
-      <head>
-        <title>Ticket - ${ticketNumber}</title>
-        <style>
-          @page { size: 80mm auto; margin: 0; }
-          body {
-            font-family: 'Courier New', Courier, monospace;
-            width: 72mm;
-            margin: 0 auto;
-            padding: 15px 5px;
-            color: #000;
-            background: #fff;
-            -webkit-print-color-adjust: exact;
-          }
-          * {
-            color: #000 !important;
-            font-weight: 900 !important;
-          }
-          .text-center { text-align: center; }
-          .divider { border-top: 2px dashed #000; margin: 10px 0; }
-          .title { font-size: 18px; font-weight: 900; margin-bottom: 2px; }
-          .subtitle { font-size: 12px; font-weight: 900; margin-bottom: 8px; }
-          .meta { font-size: 12px; line-height: 1.4; margin-bottom: 8px; }
-          .table { width: 100%; border-collapse: collapse; }
-          .totals-table { width: 100%; margin-top: 10px; }
-          .totals-table td { padding: 3px 0; font-size: 12px; font-weight: 900; }
-          .total-row { font-size: 16px; font-weight: 900; }
-        </style>
-      </head>
-      <body>
-        <div class="text-center">
-          <div class="title">MR. PEPE</div>
-          <div class="subtitle">BROASTER Y BRASAS</div>
-          <div style="font-size: 11px; font-weight: 900; margin-bottom: 5px;">RUC: 10418236103</div>
-          <div style="font-size: 10px; font-weight: 900;">JR. JUNIN 413 - EL TAMBO - HUANCAYO</div>
-          <div class="divider"></div>
+  return (
+    <div className="print-only">
+      <div className="print-receipt p-8 text-black bg-white w-[80mm] mx-auto text-[13px] font-sans leading-normal border border-black/10">
+        {/* Cabecera con Logo */}
+        <div className="text-center mb-6">
+          <div className="flex justify-center mb-3">
+             <div className="w-20 h-20 bg-white flex items-center justify-center p-1">
+                <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
+             </div>
+          </div>
+          <h2 className="text-[20px] font-black tracking-tight text-black"><strong>MR. PEPE</strong></h2>
+          <p className="text-[10px] uppercase font-bold text-black tracking-[0.2em] mb-2"><strong>BROASTER Y BRASAS</strong></p>
           
-          <div style="font-size: 13px; font-weight: 900; text-transform: uppercase;">
-            ${order.tipoDocumento === 'factura' ? 'FACTURA ELECTRÓNICA' : 'BOLETA DE VENTA'}
+          <div className="space-y-0.5 text-[10px] text-black font-semibold">
+            <p><strong>RUC: 10418236103</strong></p>
+            <p>JR. JUNIN 413 - EL TAMBO - HUANCAYO</p>
           </div>
-          <div style="font-size: 16px; font-weight: 900; margin-top: 3px;">
-            ${ticketNumber}
-          </div>
-          <div class="divider"></div>
         </div>
 
-        <div class="meta">
-          <strong>${order.tipoDocumento === 'factura' ? 'RUC:' : 'DNI:'}</strong> ${order.clienteDocumento || "-----------"}<br/>
-          <strong>CLIENTE:</strong> ${(order.clienteNombre || "CONSUMIDOR FINAL").toUpperCase()}<br/>
-          <strong>FECHA:</strong> ${new Date(order.createdAt).toLocaleDateString("es-PE")} ${new Date(order.createdAt).toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" })}<br/>
-          <strong>MESA:</strong> MESA ${order.mesaNumero}
+        {/* Tipo de Documento */}
+        <div className="border-t border-black border-dashed pt-5 pb-5 mb-4 text-center">
+          <p className="text-[11px] font-black uppercase tracking-widest text-black mb-1">
+            <strong>{order.tipoDocumento === 'factura' ? 'FACTURA ELECTRÓNICA' : 'BOLETA DE VENTA'}</strong>
+          </p>
+          <p className="text-[16px] font-black text-black"><strong>{ticketNumber}</strong></p>
         </div>
-        <div class="divider"></div>
 
-        <table class="table">
+        {/* Info Cliente */}
+        <div className="mb-6 space-y-1.5 text-[11px] text-black">
+          <div className="flex gap-2">
+            <span className="font-bold text-black w-12"><strong>{order.tipoDocumento === 'factura' ? 'RUC:' : 'DNI:'}</strong></span>
+            <span className="text-black">{order.clienteDocumento || "-----------"}</span>
+          </div>
+          <div className="flex gap-2">
+            <span className="font-bold text-black w-12"><strong>CLIENTE:</strong></span>
+            <span className="text-black uppercase flex-1">{order.clienteNombre || "CONSUMIDOR FINAL"}</span>
+          </div>
+          <div className="flex gap-2">
+            <span className="font-bold text-black w-12"><strong>FECHA:</strong></span>
+            <span className="text-black">
+              {new Date(order.createdAt).toLocaleDateString()} {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </span>
+          </div>
+        </div>
+
+        {/* Tabla de Items */}
+        <table className="w-full text-[11px] mb-6 border-b border-black">
           <thead>
-            <tr style="border-bottom: 2px solid #000;">
-              <th style="text-align: left; font-size: 12px; font-weight: 900; padding-bottom: 5px;">CANT DESCRIPCIÓN</th>
-              <th style="text-align: right; font-size: 12px; font-weight: 900; padding-bottom: 5px;">TOTAL</th>
+            <tr className="text-left text-black border-b border-black">
+              <th className="pb-2 font-bold uppercase tracking-tighter"><strong>CANT DESCRIPCIÓN</strong></th>
+              <th className="pb-2 text-right font-bold uppercase tracking-tighter"><strong>TOTAL</strong></th>
             </tr>
           </thead>
-          <tbody>
-            ${itemsHtml}
+          <tbody className="divide-y divide-black/10">
+            {order.items.map((item, i) => (
+              <tr key={i}>
+                <td className="py-3 text-black">
+                  <span className="font-bold text-black"><strong>{item.cantidad} x</strong></span> {item.nombre}
+                </td>
+                <td className="py-3 text-right font-bold text-black">
+                  <strong>S/ {(item.precio * item.cantidad).toFixed(2)}</strong>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
 
-        <div class="divider"></div>
-
-        <table class="totals-table">
-          <tr>
-            <td>OP. GRAVADA</td>
-            <td style="text-align: right;">S/ ${subtotal.toFixed(2)}</td>
-          </tr>
-          <tr>
-            <td>IGV (18%)</td>
-            <td style="text-align: right;">S/ ${igv.toFixed(2)}</td>
-          </tr>
-          <tr class="total-row" style="border-top: 2px double #000; padding-top: 5px;">
-            <td style="font-size: 14px; font-weight: 900; padding-top: 6px;">TOTAL A PAGAR</td>
-            <td style="text-align: right; font-size: 18px; font-weight: 900; padding-top: 6px;">S/ ${totalPagar.toFixed(2)}</td>
-          </tr>
-        </table>
-
-        <div class="divider" style="margin-top: 20px;"></div>
-        <div class="text-center" style="margin-top: 8px;">
-          <div style="font-size: 11px; font-weight: 900; text-transform: uppercase;">¡Gracias por su preferencia!</div>
-          <div style="font-size: 10px; font-weight: 900; margin-top: 2px;">www.mrpepe.com.pe</div>
+        {/* Totales */}
+        <div className="border-t border-black pt-4 space-y-2 text-black">
+          <div className="flex justify-between text-[11px]">
+            <span><strong>OP. GRAVADA</strong></span>
+            <span className="font-semibold text-black">S/ {subtotal.toFixed(2)}</span>
+          </div>
+          <div className="flex justify-between text-[11px]">
+            <span><strong>IGV (18%)</strong></span>
+            <span className="font-semibold text-black">S/ {igv.toFixed(2)}</span>
+          </div>
+          <div className="flex justify-between items-center pt-3 border-t border-black border-double mt-2">
+            <span className="text-[13px] font-black text-black"><strong>TOTAL A PAGAR</strong></span>
+            <span className="text-[18px] font-black text-black"><strong>S/ {totalPagar.toFixed(2)}</strong></span>
+          </div>
         </div>
 
-        <script>
-          window.onload = function() {
-            window.print();
-            setTimeout(function() { window.close(); }, 500);
-          };
-        </script>
-      </body>
-    </html>
-  `;
-
-  printWindow.document.write(html);
-  printWindow.document.close();
-}
-
-function PrintTicket({ order }: { order: Order | null }) {
-  return null;
+        {/* Mensaje de Preferencia */}
+        <div className="text-center mt-10 space-y-1">
+          <p className="text-[10px] font-bold text-black uppercase tracking-widest"><strong>¡Gracias por su preferencia!</strong></p>
+          <p className="text-[9px] text-[#BF391B] font-bold underline">www.mrpepe.com.pe</p>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function FacturacionPage() {
@@ -367,7 +329,10 @@ export default function FacturacionPage() {
   const [editTotal, setEditTotal] = useState("");
 
   const handlePrint = (order: Order) => {
-    printThermalTicket(order);
+    setSelectedOrder(order);
+    setTimeout(() => {
+      window.print();
+    }, 400);
   };
 
   const openEditModal = (o: Order) => {
