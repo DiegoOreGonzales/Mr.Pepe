@@ -4,6 +4,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../orders/providers/order_provider.dart';
 import '../../tables/models/mesa_model.dart';
 import '../../../core/services/api_service.dart';
+import '../../../core/widgets/category_icon.dart';
 
 class DigitalMenuView extends ConsumerWidget {
   final int mesaNumero;
@@ -87,10 +88,7 @@ class DigitalMenuView extends ConsumerWidget {
               ),
               child: Row(
                 children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: Image.network(p.imagen, width: 80, height: 80, fit: BoxFit.cover),
-                  ),
+                  CategoryIcon(categoryId: p.categoria, size: 80),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(

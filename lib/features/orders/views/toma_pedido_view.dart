@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/category_icon.dart';
 import '../providers/order_provider.dart';
 import '../../tables/models/mesa_model.dart';
 import '../../../../core/services/order_service.dart';
@@ -8,7 +9,7 @@ import '../../tables/providers/table_provider.dart';
 import '../../kitchen/models/order_model.dart';
 import '../../../../core/services/api_service.dart';
 
-final categoryFilterProvider = StateProvider<Categoria>((ref) => Categoria.parrillas);
+final categoryFilterProvider = StateProvider<String>((ref) => 'parrillas');
 final searchQueryProvider = StateProvider<String>((ref) => '');
 
 class TomaPedidoView extends ConsumerStatefulWidget {
@@ -41,7 +42,7 @@ class _TomaPedidoViewState extends ConsumerState<TomaPedidoView> {
     final searchQuery = ref.watch(searchQueryProvider).toLowerCase();
 
     final productos = ref.watch(productProvider).where((p) {
-      final matchesCategory = p.categoria == selectedCategory;
+      final matchesCategory = p.effectiveCategory == selectedCategory;
       final matchesSearch = searchQuery.isEmpty || p.nombre.toLowerCase().contains(searchQuery);
       return matchesSearch && (searchQuery.isNotEmpty || matchesCategory);
     }).toList();
@@ -82,18 +83,31 @@ class _TomaPedidoViewState extends ConsumerState<TomaPedidoView> {
           Container(
             height: 60,
             padding: const EdgeInsets.symmetric(vertical: 10),
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              children: [
-                _buildCategoryToken(ref, 'Parrillas', Categoria.parrillas),
-                _buildCategoryToken(ref, 'Broaster', Categoria.broaster),
-                _buildCategoryToken(ref, 'Alitas / Piqueos', Categoria.piqueos),
-                _buildCategoryToken(ref, 'Combos', Categoria.combos),
-                _buildCategoryToken(ref, 'Extras', Categoria.extras),
-                _buildCategoryToken(ref, 'Bebidas', Categoria.bebidas),
-                _buildCategoryToken(ref, 'Postres', Categoria.postres),
-              ],
+            child: Consumer(
+              builder: (context, ref, _) {
+                final categories = ref.watch(categoryProvider);
+                if (categories.isEmpty) {
+                  return const SizedBox();
+                }
+
+                // Auto-select first category if selected is invalid
+                final selected = ref.read(categoryFilterProvider);
+                if (!categories.any((c) => c.id == selected) && categories.isNotEmpty) {
+                  Future.microtask(() {
+                    ref.read(categoryFilterProvider.notifier).state = categories.first.id;
+                  });
+                }
+
+                return ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  itemCount: categories.length,
+                  itemBuilder: (context, index) {
+                    final cat = categories[index];
+                    return _buildCategoryToken(ref, '${cat.emoji} ${cat.label}', cat.id);
+                  },
+                );
+              },
             ),
           ),
           // Buscador de Productos
@@ -319,12 +333,12 @@ class _TomaPedidoViewState extends ConsumerState<TomaPedidoView> {
     );
   }
 
-  Widget _buildCategoryToken(WidgetRef ref, String label, Categoria category) {
+  Widget _buildCategoryToken(WidgetRef ref, String label, String categoryId) {
     final selectedCategory = ref.watch(categoryFilterProvider);
-    final bool isSelected = selectedCategory == category;
+    final bool isSelected = selectedCategory == categoryId;
     
     return InkWell(
-      onTap: () => ref.read(categoryFilterProvider.notifier).state = category,
+      onTap: () => ref.read(categoryFilterProvider.notifier).state = categoryId,
       borderRadius: BorderRadius.circular(30),
       child: Container(
         margin: const EdgeInsets.only(right: 10),
@@ -364,15 +378,7 @@ class _TomaPedidoViewState extends ConsumerState<TomaPedidoView> {
         children: [
           Stack(
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.network(
-                  producto.imagen,
-                  width: 80,
-                  height: 80,
-                  fit: BoxFit.cover,
-                ),
-              ),
+              CategoryIcon(categoryId: producto.categoria, size: 80),
               if (quantity > 0)
                 Positioned(
                   top: 0,

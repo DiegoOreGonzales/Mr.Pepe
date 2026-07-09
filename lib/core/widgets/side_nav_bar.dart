@@ -10,6 +10,7 @@ class SideNavBar extends StatelessWidget {
   static const List<_NavItem> _items = [
     _NavItem(Icons.grid_view_rounded, 'Dashboard', '/dashboard'),
     _NavItem(Icons.table_restaurant_rounded, 'Mesas', '/mesas'),
+    _NavItem(Icons.fastfood_rounded, 'Productos', '/productos'),
     _NavItem(Icons.restaurant_rounded, 'Cocina', '/kitchen'),
     _NavItem(Icons.receipt_long_rounded, 'Pedidos', '/orders'),
     _NavItem(Icons.bar_chart_rounded, 'Reportes', '/reports'),

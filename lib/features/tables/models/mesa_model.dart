@@ -41,7 +41,32 @@ class Mesa {
   }
 }
 
-enum Categoria { parrillas, piqueos, bebidas, postres, ensaladas, broaster, extras, combos }
+class CategoryModel {
+  final String id;
+  final String label;
+  final String icon;
+  final List<String> colors;
+  final String emoji;
+
+  CategoryModel({
+    required this.id,
+    required this.label,
+    required this.icon,
+    required this.colors,
+    required this.emoji,
+  });
+
+  factory CategoryModel.fromMap(String id, Map<String, dynamic> map) {
+    final colorsData = map['colors'] as List<dynamic>? ?? ['#424242', '#757575'];
+    return CategoryModel(
+      id: id,
+      label: map['label'] ?? '',
+      icon: map['icon'] ?? 'fastfood',
+      colors: colorsData.map((e) => e.toString()).toList(),
+      emoji: map['emoji'] ?? '🍔',
+    );
+  }
+}
 
 class Producto {
   final String id;
@@ -49,7 +74,7 @@ class Producto {
   final String descripcion;
   final double precio;
   final String imagen;
-  final Categoria categoria;
+  final String categoria; // String id referencing CategoryModel
   final bool isDestacado;
 
   Producto({
@@ -61,4 +86,31 @@ class Producto {
     required this.categoria,
     this.isDestacado = false,
   });
+
+  String get effectiveCategory {
+    final nameLower = nombre.toLowerCase();
+    
+    if (nameLower.contains("brasa") || nameLower.contains("pollo a la brasa")) return "parrillas";
+    if (nameLower.contains("broaster")) return "broaster";
+    if (nameLower.contains("alitas") || nameLower.contains("piqueo") || nameLower.contains("tequeño")) return "piqueos";
+    if (
+      nameLower.contains("pepsi") || nameLower.contains("cola") || nameLower.contains("chicha") || 
+      nameLower.contains("maracuya") || nameLower.contains("limonada") || nameLower.contains("agua") || 
+      nameLower.contains("mate") || nameLower.contains("jugo") || nameLower.contains("bebida")
+    ) {
+      return "bebidas";
+    }
+    if (nameLower.contains("flan") || nameLower.contains("marquesa") || nameLower.contains("gelatina") || nameLower.contains("postre")) return "postres";
+    if (nameLower.contains("ensalada")) return "ensaladas";
+    if (nameLower.contains("combo")) return "combos";
+    if (
+      nameLower.contains("guarnicion") || nameLower.contains("porcion") || nameLower.contains("papas") || 
+      nameLower.contains("arroz") || nameLower.contains("chaufa") || nameLower.contains("lomo") || 
+      nameLower.contains("tallarin")
+    ) {
+      return "extras";
+    }
+    
+    return categoria.toLowerCase();
+  }
 }

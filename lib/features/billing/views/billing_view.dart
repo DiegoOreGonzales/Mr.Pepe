@@ -241,7 +241,7 @@ class _BillingViewState extends ConsumerState<BillingView> {
           ...items.map((item) {
             final allProducts = ref.read(productProvider);
             final product = allProducts.firstWhere((p) => p.id == item.productId, 
-              orElse: () => Producto(id: '', nombre: '', descripcion: '', precio: 0, imagen: '', categoria: Categoria.parrillas));
+              orElse: () => Producto(id: '', nombre: '', descripcion: '', precio: 0, imagen: '', categoria: 'parrillas'));
 
             return Padding(
               padding: const EdgeInsets.symmetric(vertical: 12),
