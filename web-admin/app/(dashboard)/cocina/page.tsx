@@ -40,6 +40,7 @@ function OrderCard({ order }: { order: Order }) {
   }, [order.createdAt]);
 
   const handleAction = async () => {
+    if (actionLoading) return;
     let nextStatus = "";
     if (order.status === "pendiente") nextStatus = "preparando";
     else if (order.status === "preparando") nextStatus = "listo";
@@ -48,10 +49,15 @@ function OrderCard({ order }: { order: Order }) {
     if (!nextStatus) return;
 
     setActionLoading(true);
-    const success = await updateOrderStatus(order.id, nextStatus);
-    setActionLoading(false);
-    if (!success) {
-      alert("Error al actualizar el estado del pedido.");
+    try {
+      const success = await updateOrderStatus(order.id, nextStatus);
+      if (!success) {
+        alert("Error al actualizar el estado del pedido.");
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setActionLoading(false);
     }
   };
 

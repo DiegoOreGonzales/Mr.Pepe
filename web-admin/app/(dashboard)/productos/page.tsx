@@ -54,6 +54,7 @@ export default function ProductosPage() {
   const [isOpen, setIsOpen] = useState(false);
   const [isCatModalOpen, setIsCatModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   
   // Form Fields
   const [nombre, setNombre] = useState("");
@@ -160,6 +161,9 @@ export default function ProductosPage() {
       return;
     }
 
+    if (submitting) return;
+    setSubmitting(true);
+
     const productData = {
       nombre,
       descripcion,
@@ -183,6 +187,8 @@ export default function ProductosPage() {
     } catch (error) {
       console.error("Error saving product:", error);
       alert("Ocurrió un error al guardar el producto.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -490,9 +496,10 @@ export default function ProductosPage() {
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 bg-[#E94E1B] hover:bg-[#D33D0D] text-white font-semibold rounded-lg transition-all text-sm"
+                  disabled={submitting}
+                  className="flex-1 py-2.5 bg-[#E94E1B] hover:bg-[#D33D0D] disabled:bg-stone-300 text-white font-semibold rounded-lg transition-all text-sm"
                 >
-                  {editingId ? "Guardar Cambios" : "Agregar Producto"}
+                  {submitting ? "Guardando..." : (editingId ? "Guardar Cambios" : "Agregar Producto")}
                 </button>
               </div>
             </form>

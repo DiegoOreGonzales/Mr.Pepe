@@ -298,7 +298,7 @@ export default function ReportesPage() {
                       </head>
                       <body>
                         <div class="header">
-                          <img class="logo" src="/logo.png" alt="Mr Pepe Logo" />
+                          <img class="logo" src="${window.location.origin}/logo.png" alt="Mr Pepe Logo" />
                           <h1 class="title">MR. PEPE</h1>
                           <p class="subtitle">Broaster y Brasas</p>
                           <div class="meta-info">

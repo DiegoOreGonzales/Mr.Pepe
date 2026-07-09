@@ -80,6 +80,7 @@ export default function TableOrderModal({ mesaNumero, onClose, onSuccess }: Tabl
   const [voucherNumber, setVoucherNumber] = useState("");
 
   const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const showToast = (type: "success" | "error", message: string) => {
     setToast({ type, message });
@@ -217,6 +218,9 @@ export default function TableOrderModal({ mesaNumero, onClose, onSuccess }: Tabl
       return;
     }
 
+    if (submitting) return;
+    setSubmitting(true);
+
     try {
       if (activeOrder && isAddingItems) {
         // Adding products to existing active order
@@ -277,6 +281,8 @@ export default function TableOrderModal({ mesaNumero, onClose, onSuccess }: Tabl
     } catch (e) {
       console.error(e);
       showToast("error", "Error de conexión");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -289,6 +295,9 @@ export default function TableOrderModal({ mesaNumero, onClose, onSuccess }: Tabl
       alert("Por favor complete los datos del cliente");
       return;
     }
+
+    if (submitting) return;
+    setSubmitting(true);
 
     const generatedVoucher = voucherNumber || `${tipoDocumento === "factura" ? "F" : "B"}${String(mesaNumero).padStart(2, "0")}-${Date.now().toString().slice(-6)}`;
 
@@ -319,12 +328,17 @@ export default function TableOrderModal({ mesaNumero, onClose, onSuccess }: Tabl
     } catch (e) {
       console.error(e);
       showToast("error", "Error al conectar con el servidor");
+    } finally {
+      setSubmitting(false);
     }
   };
 
   // Release table manually without payment (Reset status)
   const handleFreeTableManually = async () => {
     if (!confirm("¿Está seguro de que desea liberar esta mesa? El pedido activo será cancelado/eliminado.")) return;
+
+    if (submitting) return;
+    setSubmitting(true);
 
     try {
       if (activeOrder) {
@@ -351,6 +365,8 @@ export default function TableOrderModal({ mesaNumero, onClose, onSuccess }: Tabl
     } catch (e) {
       console.error(e);
       showToast("error", "Error al liberar mesa");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -537,10 +553,11 @@ export default function TableOrderModal({ mesaNumero, onClose, onSuccess }: Tabl
               </button>
               <button
                 type="submit"
-                className="flex-1 py-3 bg-[#1A8952] hover:bg-[#156E41] text-white font-bold rounded-xl transition-all text-sm flex items-center justify-center gap-1.5 shadow-md shadow-green-100"
+                disabled={submitting}
+                className="flex-1 py-3 bg-[#1A8952] hover:bg-[#156E41] disabled:bg-stone-300 text-white font-bold rounded-xl transition-all text-sm flex items-center justify-center gap-1.5 shadow-md shadow-green-100"
               >
                 <span className="material-symbols-outlined text-[18px]">payments</span>
-                Confirmar y Cobrar Cuenta
+                {submitting ? "Procesando..." : "Confirmar y Cobrar Cuenta"}
               </button>
             </div>
           </form>
@@ -648,7 +665,8 @@ export default function TableOrderModal({ mesaNumero, onClose, onSuccess }: Tabl
                     </button>
                     <button
                       onClick={handleFreeTableManually}
-                      className="py-2.5 px-3 border border-red-200 text-red-600 hover:bg-red-50 font-bold rounded-xl text-xs transition-all flex items-center justify-center"
+                      disabled={submitting}
+                      className="py-2.5 px-3 border border-red-200 text-red-600 hover:bg-red-50 disabled:bg-stone-100 disabled:text-stone-400 font-bold rounded-xl text-xs transition-all flex items-center justify-center"
                       title="Liberar Mesa"
                     >
                       <span className="material-symbols-outlined text-[16px]">delete_sweep</span>
@@ -657,7 +675,8 @@ export default function TableOrderModal({ mesaNumero, onClose, onSuccess }: Tabl
                   
                   <button
                     onClick={() => setIsBilling(true)}
-                    className="w-full py-3 bg-[#BF391B] hover:bg-[#8C2510] text-white font-extrabold rounded-xl text-xs tracking-wider uppercase transition-all shadow-md flex items-center justify-center gap-2"
+                    disabled={submitting}
+                    className="w-full py-3 bg-[#BF391B] hover:bg-[#8C2510] disabled:bg-stone-300 text-white font-extrabold rounded-xl text-xs tracking-wider uppercase transition-all shadow-md flex items-center justify-center gap-2"
                   >
                     <span className="material-symbols-outlined text-[18px]">receipt_long</span>
                     Pre-facturar / Cobrar Cuenta
@@ -735,11 +754,11 @@ export default function TableOrderModal({ mesaNumero, onClose, onSuccess }: Tabl
 
                   <button
                     onClick={handleSubmitOrder}
-                    disabled={cart.length === 0}
+                    disabled={cart.length === 0 || submitting}
                     className="w-full py-3 bg-[#BF391B] hover:bg-[#8C2510] disabled:bg-stone-200 disabled:text-stone-400 text-white font-extrabold rounded-xl text-xs tracking-wider uppercase transition-all shadow-md shadow-orange-100 flex items-center justify-center gap-1.5"
                   >
                     <span className="material-symbols-outlined text-[16px]">send</span>
-                    {isAddingItems ? "Confirmar Adición" : "Enviar Pedido a Cocina"}
+                    {submitting ? "Enviando..." : (isAddingItems ? "Confirmar Adición" : "Enviar Pedido a Cocina")}
                   </button>
                 </div>
               </div>

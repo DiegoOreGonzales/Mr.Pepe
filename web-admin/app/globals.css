@@ -86,15 +86,34 @@
   animation: pendingPulse 2s ease-in-out infinite;
 }
 
-/* Print styles para impresión de boletas */
+/* Print styles para reportes y boletas */
 @media print {
-  body * {
-    visibility: hidden !important;
+  /* Ocultar barra lateral y cabeceras de navegación */
+  .no-print, 
+  .no-print *, 
+  aside, 
+  header, 
+  nav, 
+  [class*="Sidebar"], 
+  [class*="TopBar"] {
+    display: none !important;
   }
-  .print-only, .print-only * {
-    visibility: visible !important;
+
+  /* Ajustar contenedor principal para que ocupe todo el ancho */
+  main {
+    margin-left: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
   }
+
+  /* Si la página tiene un contenedor print-only activo, ocultamos el contenido principal */
+  body:has(.print-only) main {
+    display: none !important;
+  }
+
+  /* Estilos específicos para la boleta/ticket de impresión */
   .print-only {
+    display: block !important;
     position: absolute !important;
     left: 0 !important;
     top: 0 !important;
@@ -102,13 +121,12 @@
     margin: 0 !important;
     padding: 0 !important;
   }
+
   .print-receipt {
     width: 80mm !important;
     margin: 0 auto !important;
     border: none !important;
-  }
-  .no-print {
-    display: none !important;
+    color: #000000 !important;
   }
 
   body { 
@@ -123,9 +141,15 @@
     print-color-adjust: exact !important;
   }
 
-  /* Forzar letras negritas en impresoras térmicas (evitar tramado gris) */
-  strong, b, .font-bold, .font-black, h2, th {
-    font-weight: 900 !important;
+  /* Letras muy gruesas en impresoras térmicas para evitar tramado gris difuso */
+  strong, b, .font-bold, .font-black, h2, th, td {
+    font-weight: 800 !important;
     color: #000000 !important;
+  }
+
+  /* Asegurar que el texto del ticket sea nítido y oscuro */
+  .print-receipt * {
+    color: #000000 !important;
+    font-weight: bold !important;
   }
 }

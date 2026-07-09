@@ -62,9 +62,144 @@ function KpiCard({
   );
 }
 
+function printThermalTicket(order: Order) {
+  const printWindow = window.open("", "_blank", "width=350,height=700");
+  if (!printWindow) {
+    alert("Por favor permita las ventanas emergentes (pop-ups) para poder imprimir.");
+    return;
+  }
+
+  const ticketNumber = order.voucherNumber || `B${String(order.mesaNumero).padStart(2, "0")}-${Date.now().toString().slice(-6)}`;
+  const subtotal = order.total;
+  const igv = subtotal * 0.18;
+  const totalPagar = subtotal + igv;
+
+  const STATUS_LABELS_MAP: Record<string, string> = {
+    pendiente: "Pendiente",
+    preparando: "En Proceso",
+    listo: "Listo",
+    entregado: "Entregado",
+    pagado: "Pagado"
+  };
+
+  const itemsHtml = order.items?.map(item => `
+    <tr style="border-bottom: 1px dashed rgba(0,0,0,0.15);">
+      <td style="padding: 6px 0; font-family: monospace; font-size: 13px; font-weight: 800; color: #000;">
+        ${item.cantidad} x ${item.nombre}
+      </td>
+      <td style="padding: 6px 0; font-family: monospace; font-size: 13px; font-weight: 800; text-align: right; color: #000;">
+        S/ ${(item.precio * item.cantidad).toFixed(2)}
+      </td>
+    </tr>
+  `).join("") || "";
+
+  const html = `
+    <html>
+      <head>
+        <title>Ticket - ${ticketNumber}</title>
+        <style>
+          @page { size: 80mm auto; margin: 0; }
+          body {
+            font-family: 'Courier New', Courier, monospace;
+            width: 72mm;
+            margin: 0 auto;
+            padding: 15px 5px;
+            color: #000;
+            background: #fff;
+            -webkit-print-color-adjust: exact;
+          }
+          * {
+            color: #000 !important;
+            font-weight: 900 !important;
+          }
+          .text-center { text-align: center; }
+          .divider { border-top: 2px dashed #000; margin: 10px 0; }
+          .title { font-size: 18px; font-weight: 900; margin-bottom: 2px; }
+          .subtitle { font-size: 12px; font-weight: 900; margin-bottom: 8px; }
+          .meta { font-size: 12px; line-height: 1.4; margin-bottom: 8px; }
+          .table { width: 100%; border-collapse: collapse; }
+          .totals-table { width: 100%; margin-top: 10px; }
+          .totals-table td { padding: 3px 0; font-size: 12px; font-weight: 900; }
+          .total-row { font-size: 16px; font-weight: 900; }
+        </style>
+      </head>
+      <body>
+        <div class="text-center">
+          <div class="title">MR. PEPE</div>
+          <div class="subtitle">BROASTER Y BRASAS</div>
+          <div style="font-size: 11px; font-weight: 900; margin-bottom: 5px;">RUC: 10418236103</div>
+          <div style="font-size: 10px; font-weight: 900;">JR. JUNIN 413 - EL TAMBO - HUANCAYO</div>
+          <div class="divider"></div>
+          
+          <div style="font-size: 13px; font-weight: 900; text-transform: uppercase;">
+            ${order.tipoDocumento === 'factura' ? 'FACTURA ELECTRÓNICA' : 'BOLETA DE VENTA'}
+          </div>
+          <div style="font-size: 16px; font-weight: 900; margin-top: 3px;">
+            ${ticketNumber}
+          </div>
+          <div class="divider"></div>
+        </div>
+
+        <div class="meta">
+          <strong>${order.tipoDocumento === 'factura' ? 'RUC:' : 'DNI:'}</strong> ${order.clienteDocumento || "-----------"}<br/>
+          <strong>CLIENTE:</strong> ${(order.clienteNombre || "CONSUMIDOR FINAL").toUpperCase()}<br/>
+          <strong>FECHA:</strong> ${new Date(order.createdAt).toLocaleDateString("es-PE")} ${new Date(order.createdAt).toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" })}<br/>
+          <strong>MESA:</strong> MESA ${order.mesaNumero}
+        </div>
+        <div class="divider"></div>
+
+        <table class="table">
+          <thead>
+            <tr style="border-bottom: 2px solid #000;">
+              <th style="text-align: left; font-size: 12px; font-weight: 900; padding-bottom: 5px;">CANT DESCRIPCIÓN</th>
+              <th style="text-align: right; font-size: 12px; font-weight: 900; padding-bottom: 5px;">TOTAL</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${itemsHtml}
+          </tbody>
+        </table>
+
+        <div class="divider"></div>
+
+        <table class="totals-table">
+          <tr>
+            <td>OP. GRAVADA</td>
+            <td style="text-align: right;">S/ ${subtotal.toFixed(2)}</td>
+          </tr>
+          <tr>
+            <td>IGV (18%)</td>
+            <td style="text-align: right;">S/ ${igv.toFixed(2)}</td>
+          </tr>
+          <tr class="total-row" style="border-top: 2px double #000; padding-top: 5px;">
+            <td style="font-size: 14px; font-weight: 900; padding-top: 6px;">TOTAL A PAGAR</td>
+            <td style="text-align: right; font-size: 18px; font-weight: 900; padding-top: 6px;">S/ ${totalPagar.toFixed(2)}</td>
+          </tr>
+        </table>
+
+        <div class="divider" style="margin-top: 20px;"></div>
+        <div class="text-center" style="margin-top: 8px;">
+          <div style="font-size: 11px; font-weight: 900; text-transform: uppercase;">¡Gracias por su preferencia!</div>
+          <div style="font-size: 10px; font-weight: 900; margin-top: 2px;">www.mrpepe.com.pe</div>
+        </div>
+
+        <script>
+          window.onload = function() {
+            window.print();
+            setTimeout(function() { window.close(); }, 500);
+          };
+        </script>
+      </body>
+    </html>
+  `;
+
+  printWindow.document.write(html);
+  printWindow.document.close();
+}
+
 // ── Order Row ─────────────────────────────────────────────────────────────────
 
-function OrderRow({ order, onAttend }: { order: Order; onAttend: (mesaNumero: number) => void }) {
+function OrderRow({ order, onAttend, onPrint }: { order: Order; onAttend: (mesaNumero: number) => void; onPrint: (order: Order) => void }) {
   const mins    = minutesSince(order.createdAt);
   const styles  = STATUS_STYLES[order.status] ?? STATUS_STYLES.entregado;
   const isPulse = order.status === "preparando";
@@ -104,7 +239,7 @@ function OrderRow({ order, onAttend }: { order: Order; onAttend: (mesaNumero: nu
           <span className="material-symbols-outlined text-[20px]">restaurant</span>
         </button>
         <button
-          onClick={() => window.print()}
+          onClick={() => onPrint(order)}
           className="text-[#9AA0A6] hover:text-[#BF391B] transition-colors"
           title="Imprimir orden"
         >
@@ -343,7 +478,7 @@ export default function DashboardPage() {
                     </td>
                   </tr>
                 ) : (
-                  orders.map((o: Order) => <OrderRow key={o.id} order={o} onAttend={(mesaNum) => setSelectedMesa(mesaNum)} />)
+                  orders.map((o: Order) => <OrderRow key={o.id} order={o} onAttend={(mesaNum) => setSelectedMesa(mesaNum)} onPrint={printThermalTicket} />)
                 )}
               </tbody>
             </table>
