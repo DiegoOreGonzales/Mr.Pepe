@@ -109,7 +109,7 @@ export function useActiveOrders() {
     }
 
     fetchActive();
-    const interval = setInterval(fetchActive, 3000);
+    const interval = setInterval(fetchActive, 1200);
     return () => clearInterval(interval);
   }, []);
 

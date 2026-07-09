@@ -324,11 +324,11 @@ export default function TableOrderModal({ mesaNumero, onClose, onSuccess }: Tabl
         }, 1500);
       } else {
         showToast("error", json.error || "Error al procesar pago");
+        setSubmitting(false);
       }
     } catch (e) {
       console.error(e);
       showToast("error", "Error al conectar con el servidor");
-    } finally {
       setSubmitting(false);
     }
   };
