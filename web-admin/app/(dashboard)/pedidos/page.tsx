@@ -4,16 +4,98 @@ import { useReportOrders, Order } from "@/lib/firebase/hooks";
 
 const STATUS_STYLES: Record<string, { bg: string; text: string }> = {
   pendiente: { bg: "bg-orange-50",  text: "text-orange-600"  },
-  enProceso: { bg: "bg-red-50",     text: "text-red-600"     },
+  preparando: { bg: "bg-red-50",     text: "text-red-600"     },
   listo:     { bg: "bg-green-50",   text: "text-green-600"   },
   entregado: { bg: "bg-stone-100",  text: "text-stone-500"   },
 };
 const STATUS_LABELS: Record<string, string> = {
-  pendiente: "Pendiente", enProceso: "En Proceso", listo: "Listo", entregado: "Entregado",
+  pendiente: "Pendiente", preparando: "En Proceso", listo: "Listo", entregado: "Entregado",
 };
+
+function printOrderTicket(order: Order) {
+  const printWindow = window.open("", "_blank", "width=300,height=600");
+  if (!printWindow) {
+    alert("Por favor permita las ventanas emergentes (pop-ups) para poder imprimir.");
+    return;
+  }
+
+  const itemsHtml = order.items?.map(item => `
+    <tr>
+      <td style="padding: 4px 0; font-family: monospace; font-size: 12px;">${item.cantidad}x ${item.nombre}</td>
+      <td style="padding: 4px 0; font-family: monospace; font-size: 12px; text-align: right;">S/ ${(item.precio * item.cantidad).toFixed(2)}</td>
+    </tr>
+  `).join("") || "";
+
+  const html = `
+    <html>
+      <head>
+        <title>Imprimir Ticket - Mesa ${order.mesaNumero}</title>
+        <style>
+          @page { size: 80mm auto; margin: 0; }
+          body {
+            font-family: 'Courier New', Courier, monospace;
+            width: 72mm;
+            margin: 0 auto;
+            padding: 10px;
+            color: #000;
+          }
+          .text-center { text-align: center; }
+          .divider { border-top: 1px dashed #000; margin: 8px 0; }
+          .title { font-size: 16px; font-weight: bold; margin-bottom: 2px; }
+          .subtitle { font-size: 10px; margin-bottom: 8px; }
+          .meta { font-size: 11px; margin-bottom: 8px; }
+          .table { width: 100%; border-collapse: collapse; }
+          .total { font-size: 14px; font-weight: bold; text-align: right; margin-top: 10px; }
+        </style>
+      </head>
+      <body>
+        <div class="text-center">
+          <div class="title">MR. PEPE</div>
+          <div class="subtitle">Broaster y Brasas</div>
+          <div class="divider"></div>
+        </div>
+        <div class="meta">
+          <strong>MESA:</strong> M${order.mesaNumero}<br/>
+          <strong>FECHA:</strong> ${order.createdAt.toLocaleString("es-PE")}<br/>
+          <strong>ESTADO:</strong> ${(STATUS_LABELS[order.status] || order.status).toUpperCase()}
+        </div>
+        <div class="divider"></div>
+        <table class="table">
+          <thead>
+            <tr>
+              <th style="text-align: left; font-size: 11px;">PRODUCTO</th>
+              <th style="text-align: right; font-size: 11px;">TOTAL</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${itemsHtml}
+          </tbody>
+        </table>
+        <div class="divider"></div>
+        <div class="total">
+          TOTAL: S/ ${order.total.toFixed(2)}
+        </div>
+        <div class="divider" style="margin-top: 15px;"></div>
+        <div class="text-center subtitle" style="margin-top: 8px;">
+          ¡Gracias por su preferencia!
+        </div>
+        <script>
+          window.onload = function() {
+            window.print();
+            setTimeout(function() { window.close(); }, 500);
+          };
+        </script>
+      </body>
+    </html>
+  `;
+
+  printWindow.document.write(html);
+  printWindow.document.close();
+}
 
 export default function PedidosPage() {
   const [search, setSearch] = useState("");
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const { orders, loading } = useReportOrders("hoy");
 
   const filtered = orders.filter((o: Order) =>
@@ -27,7 +109,7 @@ export default function PedidosPage() {
       `Mesa ${o.mesaNumero}`,
       o.items?.map(item => `${item.cantidad}x ${item.nombre}`).join(" | ") || "Sin items",
       o.total.toFixed(2),
-      o.status.toUpperCase(),
+      (STATUS_LABELS[o.status] || o.status).toUpperCase(),
       o.createdAt.toLocaleString("es-PE")
     ]);
 
@@ -84,7 +166,7 @@ export default function PedidosPage() {
           <table className="w-full text-left">
             <thead className="bg-[#F8F9FA]">
               <tr>
-                {["Mesa","Items","Total","Estado","Hora","Acción"].map((h, i) => (
+                {["Mesa","Items","Total","Estado","Hora","Acciones"].map((h, i) => (
                   <th key={h} className={`px-5 py-4 text-[10px] font-bold text-[#9AA0A6] uppercase tracking-widest ${i === 5 ? "text-right" : ""}`}>
                     {h}
                   </th>
@@ -127,8 +209,19 @@ export default function PedidosPage() {
                       <td className="px-5 py-3.5 text-sm text-[#9AA0A6]">
                         {o.createdAt.toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" })}
                       </td>
-                      <td className="px-5 py-3.5 text-right">
-                        <button onClick={() => window.print()} className="text-[#9AA0A6] hover:text-[#BF391B] transition-colors">
+                      <td className="px-5 py-3.5 text-right flex justify-end gap-2.5">
+                        <button
+                          onClick={() => setSelectedOrder(o)}
+                          className="text-[#9AA0A6] hover:text-[#0D0D0D] transition-colors"
+                          title="Ver Detalle"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">visibility</span>
+                        </button>
+                        <button
+                          onClick={() => printOrderTicket(o)}
+                          className="text-[#9AA0A6] hover:text-[#BF391B] transition-colors"
+                          title="Imprimir Ticket"
+                        >
                           <span className="material-symbols-outlined text-[18px]">print</span>
                         </button>
                       </td>
@@ -140,6 +233,68 @@ export default function PedidosPage() {
           </table>
         </div>
       </div>
+
+      {/* Detalle de Pedido Modal */}
+      {selectedOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl border border-stone-100 flex flex-col gap-4 animate-in fade-in duration-200">
+            <div className="flex items-center justify-between border-b border-stone-100 pb-3">
+              <div className="flex items-center gap-2">
+                <span className="w-8 h-8 rounded-lg bg-[#BF391B] text-white text-[10px] font-extrabold flex items-center justify-center">
+                  M{selectedOrder.mesaNumero}
+                </span>
+                <div>
+                  <h3 className="text-sm font-extrabold text-[#0D0D0D]">Detalle de Pedido</h3>
+                  <p className="text-[10px] text-stone-400 font-semibold uppercase">{selectedOrder.createdAt.toLocaleString("es-PE")}</p>
+                </div>
+              </div>
+              <button onClick={() => setSelectedOrder(null)} className="text-stone-400 hover:text-stone-600 material-symbols-outlined">
+                close
+              </button>
+            </div>
+
+            <div className="divide-y divide-stone-100/60 max-h-60 overflow-y-auto pr-1">
+              {selectedOrder.items?.map((item, idx) => (
+                <div key={idx} className="py-2.5 flex justify-between text-xs">
+                  <span>
+                    <strong className="text-[#0D0D0D]">{item.cantidad}x</strong> {item.nombre}
+                  </span>
+                  <span className="font-bold text-stone-700">S/ {(item.precio * item.cantidad).toFixed(2)}</span>
+                </div>
+              ))}
+              {(!selectedOrder.items || selectedOrder.items.length === 0) && (
+                <p className="py-6 text-center text-stone-400 text-xs italic">Sin items en el pedido</p>
+              )}
+            </div>
+
+            <div className="border-t border-stone-100 pt-3 flex justify-between items-baseline">
+              <span className="text-xs font-bold text-stone-500">Monto Total:</span>
+              <span className="text-lg font-black text-[#BF391B]">S/ {selectedOrder.total.toFixed(2)}</span>
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setSelectedOrder(null)}
+                className="flex-1 py-2.5 border border-stone-200 text-stone-600 font-bold rounded-xl hover:bg-stone-50 transition-all text-xs"
+              >
+                Cerrar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  printOrderTicket(selectedOrder);
+                  setSelectedOrder(null);
+                }}
+                className="flex-1 py-2.5 bg-[#BF391B] hover:bg-[#8C2510] text-white font-bold rounded-xl transition-all text-xs flex items-center justify-center gap-1.5 shadow-sm"
+              >
+                <span className="material-symbols-outlined text-[16px]">print</span>
+                Imprimir Ticket
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
