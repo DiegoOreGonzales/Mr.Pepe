@@ -570,7 +570,7 @@ export default function TableOrderModal({ mesaNumero, onClose, onSuccess }: Tabl
                 className="flex-1 py-3 bg-[#1A8952] hover:bg-[#156E41] disabled:bg-stone-300 text-white font-bold rounded-xl transition-all text-sm flex items-center justify-center gap-1.5 shadow-md shadow-green-100"
               >
                 <span className="material-symbols-outlined text-[18px]">payments</span>
-                {submitting ? "Procesando..." : "Confirmar y Cobrar Cuenta"}
+                {submitting ? "Procesando pago..." : "Confirmar y Cobrar Cuenta"}
               </button>
             </div>
           </form>

@@ -28,7 +28,7 @@ async function updateOrderStatus(orderId: string, newStatus: string) {
   }
 }
 
-function OrderCard({ order }: { order: Order }) {
+function OrderCard({ order, onStatusChange }: { order: Order; onStatusChange: (id: string, nextStatus: string) => void }) {
   const [mins, setMins] = useState(minutesSince(order.createdAt));
   const [actionLoading, setActionLoading] = useState(false);
 
@@ -48,14 +48,22 @@ function OrderCard({ order }: { order: Order }) {
 
     if (!nextStatus) return;
 
+    // Optimistic UI update
+    const previousStatus = order.status;
+    onStatusChange(order.id, nextStatus);
+
     setActionLoading(true);
     try {
       const success = await updateOrderStatus(order.id, nextStatus);
       if (!success) {
+        // Rollback on failure
+        onStatusChange(order.id, previousStatus);
         alert("Error al actualizar el estado del pedido.");
       }
     } catch (e) {
       console.error(e);
+      // Rollback on failure
+      onStatusChange(order.id, previousStatus);
     } finally {
       setActionLoading(false);
     }
@@ -143,10 +151,27 @@ function OrderCard({ order }: { order: Order }) {
 
 export default function CocinaPage() {
   const { orders, loading } = useActiveOrders();
+  const [localOrders, setLocalOrders] = useState<Order[]>([]);
 
-  const pending   = orders.filter((o) => o.status === "pendiente");
-  const inProcess = orders.filter((o) => o.status === "preparando");
-  const ready     = orders.filter((o) => o.status === "listo");
+  useEffect(() => {
+    if (orders.length > 0 || !loading) {
+      setLocalOrders(orders);
+    }
+  }, [orders, loading]);
+
+  const handleStatusChange = (orderId: string, newStatus: string) => {
+    setLocalOrders((prev) => {
+      // If status is entregado, remove from display, else update status
+      if (newStatus === "entregado") {
+        return prev.filter((o) => o.id !== orderId);
+      }
+      return prev.map((o) => (o.id === orderId ? { ...o, status: newStatus as any } : o));
+    });
+  };
+
+  const pending   = localOrders.filter((o) => o.status === "pendiente");
+  const inProcess = localOrders.filter((o) => o.status === "preparando");
+  const ready     = localOrders.filter((o) => o.status === "listo");
 
   return (
     <div className="space-y-6">
@@ -166,7 +191,7 @@ export default function CocinaPage() {
         </a>
       </div>
 
-      {loading ? (
+      {loading && localOrders.length === 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="bg-white rounded-2xl p-6 border border-stone-100 animate-pulse h-96" />
@@ -182,7 +207,7 @@ export default function CocinaPage() {
             </div>
             <div className="flex-1 overflow-y-auto space-y-3 pr-1 scrollbar-thin">
               {pending.map((o) => (
-                <OrderCard key={o.id} order={o} />
+                <OrderCard key={o.id} order={o} onStatusChange={handleStatusChange} />
               ))}
               {pending.length === 0 && (
                 <div className="text-center py-12 text-stone-400 text-xs">Sin pedidos pendientes</div>
@@ -198,7 +223,7 @@ export default function CocinaPage() {
             </div>
             <div className="flex-1 overflow-y-auto space-y-3 pr-1 scrollbar-thin">
               {inProcess.map((o) => (
-                <OrderCard key={o.id} order={o} />
+                <OrderCard key={o.id} order={o} onStatusChange={handleStatusChange} />
               ))}
               {inProcess.length === 0 && (
                 <div className="text-center py-12 text-stone-400 text-xs">Sin pedidos en proceso</div>
@@ -214,7 +239,7 @@ export default function CocinaPage() {
             </div>
             <div className="flex-1 overflow-y-auto space-y-3 pr-1 scrollbar-thin">
               {ready.map((o) => (
-                <OrderCard key={o.id} order={o} />
+                <OrderCard key={o.id} order={o} onStatusChange={handleStatusChange} />
               ))}
               {ready.length === 0 && (
                 <div className="text-center py-12 text-stone-400 text-xs">Sin pedidos listos</div>
