@@ -15,24 +15,8 @@ function timerColor(mins: number): string {
   return "#BF391B";
 }
 
-async function updateOrderStatus(orderId: string, newStatus: string) {
-  try {
-    const res = await fetch("/api/orders", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: orderId, status: newStatus })
-    });
-    const json = await res.json();
-    return json.success;
-  } catch (e) {
-    console.error("Error updating order status:", e);
-    return false;
-  }
-}
-
 function OrderCard({ order }: { order: Order }) {
   const [mins, setMins] = useState(minutesSince(order.createdAt));
-  const [actionLoading, setActionLoading] = useState(false);
 
   useEffect(() => {
     var t = setInterval(function() { 
@@ -41,40 +25,11 @@ function OrderCard({ order }: { order: Order }) {
     return function() { clearInterval(t); };
   }, [order.createdAt]);
 
-  const handleAction = async () => {
-    let nextStatus = "";
-    if (order.status === "pendiente") nextStatus = "preparando";
-    else if (order.status === "preparando") nextStatus = "listo";
-    else if (order.status === "listo") nextStatus = "entregado";
-
-    if (!nextStatus) return;
-
-    setActionLoading(true);
-    const success = await updateOrderStatus(order.id, nextStatus);
-    setActionLoading(false);
-    if (!success) {
-      alert("Error al actualizar el estado del pedido.");
-    }
-  };
-
   var color = timerColor(mins);
-
-  let btnLabel = "";
-  let btnColor = "";
-  if (order.status === "pendiente") {
-    btnLabel = "Empezar Cocina";
-    btnColor = "bg-[#F59E0B] hover:bg-[#D97706]";
-  } else if (order.status === "preparando") {
-    btnLabel = "Marcar como Listo";
-    btnColor = "bg-[#E54D2A] hover:bg-[#C93B1C]";
-  } else if (order.status === "listo") {
-    btnLabel = "Marcar Entregado";
-    btnColor = "bg-[#1A8952] hover:bg-[#136A3F]";
-  }
 
   return (
     <div
-      className="rounded-2xl p-4 border flex flex-col gap-3 transition-all duration-200 hover:scale-[1.01]"
+      className="rounded-2xl p-4 border flex flex-col gap-3"
       style={{ background: "#1A1A1A", borderColor: "rgba(228,231,236,0.08)" }}
     >
       <div className="flex items-center justify-between">
@@ -95,7 +50,7 @@ function OrderCard({ order }: { order: Order }) {
         </div>
       </div>
 
-      <div className="space-y-1.5 flex-1">
+      <div className="space-y-1.5">
         {order.items && order.items.length > 0 ? (
           order.items.map(function(item, i) {
             return (
@@ -119,25 +74,6 @@ function OrderCard({ order }: { order: Order }) {
         <span className="text-stone-500 text-[10px] font-semibold uppercase tracking-wider">Total</span>
         <span className="text-white font-extrabold text-sm">S/ {order.total.toFixed(2)}</span>
       </div>
-
-      {btnLabel && (
-        <button
-          onClick={handleAction}
-          disabled={actionLoading}
-          className={`w-full py-2.5 rounded-xl text-white text-[11px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 ${btnColor}`}
-        >
-          {actionLoading ? (
-            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-          ) : (
-            <>
-              <span className="material-symbols-outlined text-[15px]">
-                {order.status === "pendiente" ? "play_arrow" : order.status === "preparando" ? "done" : "sports_motorsports"}
-              </span>
-              {btnLabel}
-            </>
-          )}
-        </button>
-      )}
     </div>
   );
 }

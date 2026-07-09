@@ -354,33 +354,6 @@ export default function TableOrderModal({ mesaNumero, onClose, onSuccess }: Tabl
     }
   };
 
-  const handleUpdateStatus = async (newStatus: string) => {
-    if (!activeOrder) return;
-
-    try {
-      const res = await fetch("/api/orders", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: activeOrder.id,
-          status: newStatus,
-        }),
-      });
-
-      const json = await res.json();
-      if (json.success) {
-        showToast("success", `Estado actualizado a: ${newStatus.toUpperCase()}`);
-        fetchActiveOrder();
-        if (onSuccess) onSuccess();
-      } else {
-        showToast("error", json.error || "Error al actualizar estado");
-      }
-    } catch (e) {
-      console.error(e);
-      showToast("error", "Error de conexión");
-    }
-  };
-
   // Filter products by search and category
   const filteredProducts = products.filter((p) => {
     const effectiveCategory = getEffectiveCategory(p.nombre, p.categoria);
@@ -660,36 +633,6 @@ export default function TableOrderModal({ mesaNumero, onClose, onSuccess }: Tabl
                           <span className="font-bold text-stone-800">S/ {(item.precio * item.cantidad).toFixed(2)}</span>
                         </div>
                       ))}
-                    </div>
-                  </div>
-
-                  {/* Cambio de Estado */}
-                  <div className="space-y-2 pt-2">
-                    <h5 className="text-[10px] font-black text-stone-400 uppercase tracking-widest">Cambiar Estado del Pedido</h5>
-                    <div className="grid grid-cols-4 gap-2">
-                      {[
-                        { id: "pendiente", label: "Pendiente", icon: "pending" },
-                        { id: "preparando", label: "En Proceso", icon: "local_fire_department" },
-                        { id: "listo", label: "Listo", icon: "check_circle" },
-                        { id: "entregado", label: "Entregado", icon: "sports_motorsports" }
-                      ].map((st) => {
-                        const isActive = activeOrder.status === st.id;
-                        return (
-                          <button
-                            key={st.id}
-                            type="button"
-                            onClick={() => handleUpdateStatus(st.id)}
-                            className={`p-2.5 rounded-xl border flex flex-col items-center justify-center text-center transition-all ${
-                              isActive
-                                ? "bg-black text-white border-black shadow-sm"
-                                : "bg-white text-stone-600 border-stone-200 hover:bg-stone-50"
-                            }`}
-                          >
-                            <span className="material-symbols-outlined text-[18px] mb-1">{st.icon}</span>
-                            <span className="text-[9px] font-bold uppercase tracking-wider">{st.label}</span>
-                          </button>
-                        );
-                      })}
                     </div>
                   </div>
                 </div>
