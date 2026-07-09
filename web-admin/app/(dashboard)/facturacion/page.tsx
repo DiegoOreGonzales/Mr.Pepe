@@ -404,7 +404,9 @@ export default function FacturacionPage() {
   return (
     <div className="space-y-6">
       {/* Consulta DNI - RENIEC */}
-      <DniLookup />
+      <div className="no-print">
+        <DniLookup />
+      </div>
 
       {/* Buscador */}
       <div className="flex items-center gap-4 no-print">

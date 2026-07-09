@@ -490,6 +490,19 @@ export default function TableOrderModal({ mesaNumero, onClose, onSuccess }: Tabl
                   </button>
                 </div>
 
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTipoDocumento("boleta");
+                    setDocumento("00000000");
+                    setClienteNombre("Consumidor Final");
+                  }}
+                  className="w-full py-2 mb-2 text-xs font-bold rounded-xl border border-dashed border-[#BF391B] text-[#BF391B] bg-[#BF391B]/5 hover:bg-[#BF391B]/10 transition-all flex items-center justify-center gap-1.5"
+                >
+                  <span className="material-symbols-outlined text-[16px]">person</span>
+                  Usar Cliente General (Consumidor Final)
+                </button>
+
                 <div className="space-y-3">
                   <div>
                     <label className="block text-[10px] font-bold text-stone-500 uppercase tracking-widest mb-1.5">

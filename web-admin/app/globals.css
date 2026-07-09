@@ -108,6 +108,9 @@
 
   /* Si la página tiene un contenedor print-only activo, ocultamos el contenido principal */
   body:has(.print-only) main {
+    display: block !important;
+  }
+  body:has(.print-only) main > div > *:not(.print-only) {
     display: none !important;
   }
 
