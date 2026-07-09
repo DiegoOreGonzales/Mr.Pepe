@@ -22,6 +22,7 @@ export interface Order {
   createdAt: Date;
   printed?: boolean;
   voucherNumber?: string;
+  updatedAt?: Date;
 }
 
 export interface Mesa {
