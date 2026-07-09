@@ -99,11 +99,22 @@
     display: none !important;
   }
 
-  /* Ajustar contenedor principal para que ocupe todo el ancho */
+  /* Ajustar contenedor principal para que ocupe todo el ancho y no se corte por overflow/height */
+  html,
+  body,
+  main,
+  div[class*="min-h-screen"] {
+    height: auto !important;
+    min-height: auto !important;
+    overflow: visible !important;
+    position: static !important;
+  }
+
   main {
     margin-left: 0 !important;
     padding: 0 !important;
     width: 100% !important;
+    display: block !important;
   }
 
   /* Si la página tiene un contenedor print-only activo, ocultamos el contenido principal */
