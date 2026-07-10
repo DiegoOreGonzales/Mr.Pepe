@@ -291,7 +291,7 @@ export default function TableOrderModal({ mesaNumero, onClose, onSuccess }: Tabl
     e.preventDefault();
     if (!activeOrder) return;
 
-    if (!documento || !clienteNombre) {
+    if (tipoDocumento === "factura" && (!documento || !clienteNombre)) {
       alert("Por favor complete los datos del cliente");
       return;
     }
@@ -308,8 +308,8 @@ export default function TableOrderModal({ mesaNumero, onClose, onSuccess }: Tabl
         body: JSON.stringify({
           id: activeOrder.id,
           status: "pagado",
-          clienteNombre,
-          clienteDocumento: documento,
+          clienteNombre: clienteNombre || "Consumidor Final",
+          clienteDocumento: documento || "00000000",
           tipoDocumento,
           voucherNumber: generatedVoucher,
         }),
@@ -511,7 +511,7 @@ export default function TableOrderModal({ mesaNumero, onClose, onSuccess }: Tabl
                     <div className="relative">
                       <input
                         type="text"
-                        required
+                        required={tipoDocumento === "factura"}
                         value={documento}
                         onChange={(e) => handleDocumentoChange(e.target.value)}
                         placeholder={tipoDocumento === "factura" ? "Ej: 10418236103" : "Ej: 70123456"}
@@ -532,7 +532,7 @@ export default function TableOrderModal({ mesaNumero, onClose, onSuccess }: Tabl
                     </label>
                     <input
                       type="text"
-                      required
+                      required={tipoDocumento === "factura"}
                       value={clienteNombre}
                       onChange={(e) => setClienteNombre(e.target.value)}
                       placeholder="Nombre del cliente o empresa"

@@ -39,8 +39,10 @@ class PrintService {
     String? ruc,
   }) {
     final buffer = StringBuffer();
-    buffer.writeln('      EL BRASERO POLLERÍA      ');
-    buffer.writeln('      RUC: 20601234567         ');
+    buffer.writeln('          MR. PEPE             ');
+    buffer.writeln('    ROCIO ELENA DE LA CRUZ BALDEON ');
+    buffer.writeln('      RUC: 10418236103         ');
+    buffer.writeln('      CEL: 984335339           ');
     buffer.writeln('      AV. PRINCIPAL 123        ');
     buffer.writeln('-------------------------------');
     buffer.writeln('FECHA: ${DateTime.now().toLocal()}');

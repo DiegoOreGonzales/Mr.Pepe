@@ -281,9 +281,9 @@ function printBillingTicket(order: Order) {
           <p class="font-bold uppercase" style="font-size: 10px; letter-spacing: 0.2em; margin: 0 0 8px 0;">BROASTER Y BRASAS</p>
           
           <div style="font-size: 10px; line-height: 1.2;">
-            <p style="margin: 0;" class="font-bold">10463912446</p>
-            <p style="margin: 0;" class="font-bold">SANCHEZ GALARZA NITCIO JOEL</p>
-            <p style="margin: 0;" class="font-bold">991829708/984335339</p>
+            <p style="margin: 0;" class="font-bold">ROCIO ELENA DE LA CRUZ BALDEON</p>
+            <p style="margin: 0;" class="font-bold">RUC: 10418236103</p>
+            <p style="margin: 0;" class="font-bold">CEL: 984335339</p>
             <p style="margin: 0;">Jr. Junín 413 con Av. 13 de Noviembre - El Tambo - Huancayo</p>
           </div>
         </div>
@@ -377,18 +377,8 @@ function printBillingTicket(order: Order) {
           ATENDIDO: ADMINISTRADOR
         </div>
 
-        <div class="flex justify-center" style="margin-bottom: 24px;">
-          <div style="width: 96px; height: 96px; border: 1px solid rgba(0,0,0,0.2); background: #fafaf9; display: flex; align-items: center; justify-content: center;">
-            <span style="font-size: 40px; color: rgba(0,0,0,0.2);">QR</span>
-          </div>
-        </div>
-
-        <div class="text-center" style="display: flex; flex-direction: column; gap: 4px;">
-          <p class="text-9" style="margin: 0;">NO SE ACEPTAN DEVOLUCIONES SOLO CAMBIO</p>
-          <p class="text-9" style="margin: 0;">GRACIAS POR SU PREFERENCIA</p>
-          <p class="text-9" style="margin: 12px 0 0 0;">skynik_152@hotmail.com</p>
-          <p class="text-9" style="margin: 0;">REPRESENTACION IMPRESA DE LA FACTURA ELECTRONICA</p>
-          <p class="text-9" style="margin: 0;">Para consultar este comprobante ingrese a cpe.logisysit.com</p>
+        <div class="text-center" style="margin-top: 16px; margin-bottom: 24px;">
+          <p class="text-11 font-bold" style="margin: 0;">¡GRACIAS POR SU PREFERENCIA!</p>
         </div>
 
         <script>
@@ -399,7 +389,7 @@ function printBillingTicket(order: Order) {
         </script>
       </body>
     </html>
-  \`;
+  `;
 
   printWindow.document.write(html);
   printWindow.document.close();
@@ -421,6 +411,15 @@ export default function FacturacionPage() {
   const [editTipo, setEditTipo] = useState<"boleta" | "factura">("boleta");
   const [editVoucher, setEditVoucher] = useState("");
   const [editTotal, setEditTotal] = useState("");
+
+  const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const showToast = useCallback((type: "success" | "error", message: string) => {
+    setToast({ type, message });
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => setToast(null), 3000);
+  }, []);
 
   const handlePrint = (order: Order) => {
     printBillingTicket(order);
@@ -456,13 +455,13 @@ export default function FacturacionPage() {
       const json = await res.json();
       if (json.success) {
         setEditingOrder(null);
-        alert("Comprobante editado correctamente");
+        showToast("success", "Comprobante editado correctamente");
       } else {
-        alert("Error al editar: " + json.error);
+        showToast("error", "Error al editar: " + json.error);
       }
     } catch (e) {
       console.error(e);
-      alert("Error de conexión al editar");
+      showToast("error", "Error de conexión al editar");
     }
   };
 
@@ -475,13 +474,13 @@ export default function FacturacionPage() {
       });
       const json = await res.json();
       if (json.success) {
-        alert("Comprobante eliminado con éxito");
+        showToast("success", "Comprobante eliminado con éxito");
       } else {
-        alert("Error al eliminar: " + json.error);
+        showToast("error", "Error al eliminar: " + json.error);
       }
     } catch (e) {
       console.error(e);
-      alert("Error de conexión al eliminar");
+      showToast("error", "Error de conexión al eliminar");
     }
   };
 
@@ -493,7 +492,20 @@ export default function FacturacionPage() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
+      {/* Toast Notification */}
+      {toast && (
+        <div
+          className={`fixed top-6 right-6 z-[100] flex items-center gap-3 px-5 py-3 rounded-xl shadow-2xl text-sm font-bold animate-fade-in ${
+            toast.type === "success" ? "bg-[#1A8952] text-white" : "bg-[#BF391B] text-white"
+          }`}
+        >
+          <span className="material-symbols-outlined text-[20px]">
+            {toast.type === "success" ? "verified" : "error"}
+          </span>
+          {toast.message}
+        </div>
+      )}
       {/* Consulta DNI - RENIEC */}
       <div className="no-print">
         <DniLookup />

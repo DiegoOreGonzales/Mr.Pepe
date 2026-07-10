@@ -19,7 +19,7 @@ export const db   = getFirestore(app);
 
 // Autenticación silenciosa en el cliente para evitar errores de permisos en Firestore
 if (typeof window !== "undefined") {
-  signInWithEmailAndPassword(auth, "admin@elbrasero.com", "admin123456")
+  signInWithEmailAndPassword(auth, "admin@chioschicken.com", "admin123456")
     .then(() => console.log("🔥 Firebase Auth synchronized successfully"))
     .catch((err) => console.error("❌ Firebase Auth synchronization failed:", err));
 }

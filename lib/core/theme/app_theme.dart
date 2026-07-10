@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  // ── Paleta de Colores — El Brasero ──────────────────────────────────────
+  // ── Paleta de Colores — MR. PEPE ──────────────────────────────────────
   static const Color primaryColor     = Color(0xFFBF391B); // Rojo brasero
   static const Color primaryDark      = Color(0xFF8C2510); // Variante oscura
   static const Color primaryLight     = Color(0xFFE54D2A); // Variante clara

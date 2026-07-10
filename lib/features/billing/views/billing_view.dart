@@ -715,21 +715,7 @@ class _BillingViewState extends ConsumerState<BillingView> {
                 const Text('ATENDIDO: ADMINISTRADOR', style: TextStyle(fontSize: 11)),
                 
                 const SizedBox(height: 24),
-                // QR Placeholder
-                Container(
-                  width: 100,
-                  height: 100,
-                  color: Colors.black12,
-                  child: const Center(child: Icon(Icons.qr_code, size: 60)),
-                ),
-                const SizedBox(height: 24),
-                
-                const Text('NO SE ACEPTAN DEVOLUCIONES SOLO CAMBIO', style: TextStyle(fontSize: 9), textAlign: TextAlign.center),
-                const Text('GRACIAS POR SU PREFERENCIA', style: TextStyle(fontSize: 9), textAlign: TextAlign.center),
-                const SizedBox(height: 12),
-                const Text('skynik_152@hotmail.com', style: TextStyle(fontSize: 9), textAlign: TextAlign.center),
-                const Text('REPRESENTACION IMPRESA DE LA FACTURA ELECTRONICA', style: TextStyle(fontSize: 9), textAlign: TextAlign.center),
-                const Text('Para consultar este comprobante ingrese a cpe.logisysit.com', style: TextStyle(fontSize: 9), textAlign: TextAlign.center),
+                const Text('¡GRACIAS POR SU PREFERENCIA!', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
                 
                 const SizedBox(height: 32),
                 SizedBox(

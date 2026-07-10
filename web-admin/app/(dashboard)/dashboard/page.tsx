@@ -269,7 +269,9 @@ function PrintTicket({ order }: { order: Order | null }) {
           <h2 className="text-lg font-black"><strong>MR. PEPE</strong></h2>
           <p className="text-[10px] uppercase font-bold"><strong>Broaster y Brasas</strong></p>
           <div className="w-12 h-px bg-black mx-auto my-1" />
+          <p className="text-[10px]"><strong>ROCIO ELENA DE LA CRUZ BALDEON</strong></p>
           <p className="text-[10px]"><strong>RUC: 10418236103</strong></p>
+          <p className="text-[10px]"><strong>CEL: 984335339</strong></p>
           <p className="text-[10px]">JR. JUNIN 413 - EL TAMBO - HUANCAYO</p>
         </div>
 
