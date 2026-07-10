@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../providers/auth_provider.dart';
-import '../../../core/services/seed_service.dart';
-import '../../../core/services/firebase_service.dart';
 import '../../../core/services/api_service.dart';
 import '../../kitchen/views/kitchen_view.dart';
 
@@ -18,7 +16,6 @@ class _LoginViewState extends ConsumerState<LoginView> {
   final _emailController    = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword     = true;
-  final _formKey            = GlobalKey<FormState>();
 
   @override
   void dispose() {
@@ -367,6 +364,16 @@ class _LoginViewState extends ConsumerState<LoginView> {
                                             fontSize: 12,
                                             color: AppTheme.primaryColor),
                                       ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    IconButton(
+                                      constraints: const BoxConstraints(),
+                                      padding: EdgeInsets.zero,
+                                      icon: const Icon(Icons.close,
+                                          color: AppTheme.primaryColor, size: 16),
+                                      onPressed: () => ref
+                                          .read(authProvider.notifier)
+                                          .clearError(),
                                     ),
                                   ],
                                 ),

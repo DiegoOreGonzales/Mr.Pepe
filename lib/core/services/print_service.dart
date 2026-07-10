@@ -55,8 +55,8 @@ class PrintService {
       buffer.writeln('$name $qty $price');
     }
     buffer.writeln('-------------------------------');
-    buffer.writeln('SUBTOTAL:         S/ ${subtotal.toStringAsFixed(2)}');
-    buffer.writeln('IGV (18%):        S/ ${igv.toStringAsFixed(2)}');
+    buffer.writeln('OP. GRAVADA:      S/ ${subtotal.toStringAsFixed(2)}');
+    buffer.writeln('IGV (10%):        S/ ${igv.toStringAsFixed(2)}');
     buffer.writeln('TOTAL:            S/ ${total.toStringAsFixed(2)}');
     buffer.writeln('-------------------------------');
     buffer.writeln('      ¡GRACIAS POR SU COMPRA!  ');

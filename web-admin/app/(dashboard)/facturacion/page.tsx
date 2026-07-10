@@ -1,6 +1,7 @@
 "use client";
 import { useState, useRef, useCallback } from "react";
 import { useBillingOrders, Order } from "@/lib/firebase/hooks";
+import { numberToWords } from "@/lib/numberToWords";
 
 // ── API RENIEC - Consulta DNI (via /api/reniec proxy) ─────────────────────────
 
@@ -222,19 +223,21 @@ function printBillingTicket(order: Order) {
   }
 
   const ticketNumber = order.voucherNumber || "S/N";
-  const subtotal = order.total;
-  const igv = subtotal * 0.18;
-  const totalPagar = subtotal + igv;
+  const totalPagar = order.total;
+  const subtotal = totalPagar / 1.10;
+  const igv = totalPagar - subtotal;
+  const amountInWords = numberToWords(totalPagar);
 
   const itemsHtml = order.items?.map(item => `
-    <tr style="border-bottom: 1px dashed rgba(0,0,0,0.15);">
-      <td style="padding: 6px 0; font-family: monospace; font-size: 13px; font-weight: 800; color: #000;">
-        ${item.cantidad} x ${item.nombre}
-      </td>
-      <td style="padding: 6px 0; font-family: monospace; font-size: 13px; font-weight: 800; text-align: right; color: #000;">
-        S/ ${(item.precio * item.cantidad).toFixed(2)}
-      </td>
-    </tr>
+    <div style="font-size: 11px; color: #000; margin-bottom: 12px;">
+      <p style="margin: 0 0 4px 0; text-transform: uppercase;">${item.nombre}</p>
+      <div style="display: flex;">
+        <span style="flex: 1;">${item.cantidad.toFixed(2)}</span>
+        <span style="width: 40px; text-align: center;">UN</span>
+        <span style="width: 80px; text-align: right;">${item.precio.toFixed(2)}</span>
+        <span style="width: 64px; text-align: right;">${(item.precio * item.cantidad).toFixed(2)}</span>
+      </div>
+    </div>
   `).join("") || "";
 
   const html = `
@@ -244,7 +247,7 @@ function printBillingTicket(order: Order) {
         <style>
           @page { size: 80mm auto; margin: 0; }
           body {
-            font-family: 'Courier New', Courier, monospace;
+            font-family: 'Courier New', Courier, monospace, sans-serif;
             width: 72mm;
             margin: 0 auto;
             padding: 15px 5px;
@@ -254,80 +257,138 @@ function printBillingTicket(order: Order) {
           }
           * {
             color: #000 !important;
-            font-weight: 900 !important;
           }
           .text-center { text-align: center; }
-          .divider { border-top: 2px dashed #000; margin: 10px 0; }
-          .title { font-size: 20px; font-weight: 900; margin-bottom: 2px; }
-          .subtitle { font-size: 11px; font-weight: 900; margin-bottom: 8px; text-transform: uppercase; }
-          .meta { font-size: 12px; line-height: 1.4; margin-bottom: 8px; }
-          .table { width: 100%; border-collapse: collapse; }
-          .totals-table { width: 100%; margin-top: 10px; }
-          .totals-table td { padding: 3px 0; font-size: 12px; font-weight: 900; }
-          .total-row { font-size: 16px; font-weight: 900; }
+          .font-bold { font-weight: bold; }
+          .font-black { font-weight: 900; }
+          .flex { display: flex; }
+          .justify-between { justify-content: space-between; }
+          .text-13 { font-size: 13px; }
+          .text-11 { font-size: 11px; }
+          .text-9 { font-size: 9px; }
+          .uppercase { text-transform: uppercase; }
+          .border-dashed { border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 8px 0; margin-bottom: 8px; }
         </style>
       </head>
       <body>
-        <div class="text-center">
-          <div style="display: flex; justify-content: center; margin-bottom: 8px;">
-            <img src="${window.location.origin}/logo.png" style="max-height: 60px; width: auto; object-fit: contain;" alt="Logo" />
+        <div class="text-center" style="margin-bottom: 24px;">
+          <div style="display: flex; justify-content: center; margin-bottom: 12px;">
+            <div style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; padding: 4px;">
+              <img src="${window.location.origin}/logo.png" style="width: 100%; height: 100%; object-fit: contain;" alt="Logo" />
+            </div>
           </div>
-          <div class="title">MR. PEPE</div>
-          <div class="subtitle">BROASTER Y BRASAS</div>
-          <div style="font-size: 11px; font-weight: 900; margin-bottom: 5px;">RUC: 10418236103</div>
-          <div style="font-size: 10px; font-weight: 900;">JR. JUNIN 413 - EL TAMBO - HUANCAYO</div>
-          <div class="divider"></div>
+          <h2 class="font-black" style="font-size: 20px; letter-spacing: -0.5px; margin: 0;">MR. PEPE</h2>
+          <p class="font-bold uppercase" style="font-size: 10px; letter-spacing: 0.2em; margin: 0 0 8px 0;">BROASTER Y BRASAS</p>
           
-          <div style="font-size: 13px; font-weight: 900; text-transform: uppercase;">
-            ${order.tipoDocumento === 'factura' ? 'FACTURA ELECTRÓNICA' : 'BOLETA DE VENTA'}
+          <div style="font-size: 10px; line-height: 1.2;">
+            <p style="margin: 0;" class="font-bold">10463912446</p>
+            <p style="margin: 0;" class="font-bold">SANCHEZ GALARZA NITCIO JOEL</p>
+            <p style="margin: 0;" class="font-bold">991829708/984335339</p>
+            <p style="margin: 0;">Jr. Junín 413 con Av. 13 de Noviembre - El Tambo - Huancayo</p>
           </div>
-          <div style="font-size: 16px; font-weight: 900; margin-top: 3px;">
-            ${ticketNumber}
-          </div>
-          <div class="divider"></div>
         </div>
 
-        <div class="meta">
-          <strong>${order.tipoDocumento === 'factura' ? 'RUC:' : 'DNI:'}</strong> ${order.clienteDocumento || "-----------"}<br/>
-          <strong>CLIENTE:</strong> ${(order.clienteNombre || "CONSUMIDOR FINAL").toUpperCase()}<br/>
-          <strong>FECHA:</strong> ${new Date(order.createdAt).toLocaleDateString("es-PE")} ${new Date(order.createdAt).toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" })}<br/>
-          <strong>MESA:</strong> MESA ${order.mesaNumero}
+        <div style="margin-bottom: 16px;">
+          <div class="flex justify-between font-black uppercase text-13" style="align-items: center; letter-spacing: 1px;">
+            <span>${order.tipoDocumento === 'factura' ? 'Factura Electronica' : 'Boleta Electronica'}</span>
+            <span>${ticketNumber}</span>
+          </div>
+          <div class="text-11" style="margin-top: 4px;">
+            ${new Date(order.createdAt).toLocaleDateString()} ${new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          </div>
         </div>
-        <div class="divider"></div>
 
-        <table class="table">
-          <thead>
-            <tr style="border-bottom: 2px solid #000;">
-              <th style="text-align: left; font-size: 12px; font-weight: 900; padding-bottom: 5px;">CANT DESCRIPCIÓN</th>
-              <th style="text-align: right; font-size: 12px; font-weight: 900; padding-bottom: 5px;">TOTAL</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${itemsHtml}
-          </tbody>
-        </table>
+        <div class="text-11" style="margin-bottom: 16px; display: flex; flex-direction: column; gap: 6px;">
+          <div class="flex" style="gap: 8px;">
+            <span style="width: 80px;">COMPRADOR</span>
+            <span>${order.clienteDocumento || "00000000"}</span>
+          </div>
+          <div class="font-bold uppercase">${order.clienteNombre || "CONSUMIDOR FINAL"}</div>
+        </div>
 
-        <div class="divider"></div>
+        <div class="text-11" style="margin-bottom: 16px; display: flex; flex-direction: column; gap: 4px;">
+          <div class="flex" style="gap: 8px;">
+            <span class="font-bold" style="width: 96px;">Metodo de pago:</span>
+            <span>Efectivo</span>
+          </div>
+          <div class="flex" style="gap: 8px;">
+            <span class="font-bold" style="width: 96px;">Forma de pago:</span>
+            <span>Contado</span>
+          </div>
+          <div class="flex" style="gap: 8px;">
+            <span class="font-bold" style="width: 96px;">F.Vencimiento:</span>
+            <span>${new Date(order.createdAt).toLocaleDateString()}</span>
+          </div>
+        </div>
 
-        <table class="totals-table">
-          <tr>
-            <td>OP. GRAVADA</td>
-            <td style="text-align: right;">S/ ${subtotal.toFixed(2)}</td>
-          </tr>
-          <tr>
-            <td>IGV (18%)</td>
-            <td style="text-align: right;">S/ ${igv.toFixed(2)}</td>
-          </tr>
-          <tr class="total-row" style="border-top: 2px double #000; padding-top: 5px;">
-            <td style="font-size: 14px; font-weight: 900; padding-top: 6px;">TOTAL A PAGAR</td>
-            <td style="text-align: right; font-size: 18px; font-weight: 900; padding-top: 6px;">S/ ${totalPagar.toFixed(2)}</td>
-          </tr>
-        </table>
+        <div class="border-dashed">
+          <p class="text-11 font-bold" style="margin: 0 0 8px 0;">Descripción</p>
+          <div class="flex text-11 font-bold" style="margin-bottom: 4px;">
+            <span style="flex: 1;">Cantidad</span>
+            <span style="width: 40px; text-align: center;">UM</span>
+            <span style="width: 80px; text-align: right;">P. Unitario</span>
+            <span style="width: 64px; text-align: right;">Total</span>
+          </div>
+        </div>
 
-        <div class="divider" style="margin-top: 20px;"></div>
-        <div class="text-center" style="margin-top: 8px;">
-          <div style="font-size: 11px; font-weight: 900; text-transform: uppercase;">¡Gracias por su preferencia!</div>
-          <div style="font-size: 10px; font-weight: 900; margin-top: 2px;">www.mrpepe.com.pe</div>
+        <div style="border-bottom: 1px dashed #000; padding-bottom: 8px; margin-bottom: 16px;">
+          ${itemsHtml}
+        </div>
+
+        <div class="text-11" style="padding-left: 40px; display: flex; flex-direction: column; gap: 4px; margin-bottom: 16px;">
+          <div class="flex justify-between font-bold text-13">
+            <span>IMPORTE</span>
+            <span>S/ ${totalPagar.toFixed(2)}</span>
+          </div>
+          <div class="flex justify-between font-bold text-13">
+            <span>DESCUENTO</span>
+            <span>S/ 0.00</span>
+          </div>
+          <div class="flex justify-between font-bold text-13">
+            <span>OP. GRATUITAS</span>
+            <span>S/ 0.00</span>
+          </div>
+          <div class="flex justify-between font-bold text-13">
+            <span>ICBPER</span>
+            <span>S/ 0.00</span>
+          </div>
+          <div class="flex justify-between font-bold text-13">
+            <span>IMPORTE TOTAL</span>
+            <span>S/ ${totalPagar.toFixed(2)}</span>
+          </div>
+        </div>
+
+        <div class="text-center text-11" style="margin-bottom: 16px;">
+          ${amountInWords}
+        </div>
+
+        <div class="text-11" style="padding: 0 40px; display: flex; flex-direction: column; gap: 4px; margin-bottom: 24px;">
+          <div class="flex justify-between">
+            <span>V.Venta:</span>
+            <span>${subtotal.toFixed(2)}</span>
+          </div>
+          <div class="flex justify-between">
+            <span>IGV 10 %</span>
+            <span>${igv.toFixed(2)}</span>
+          </div>
+        </div>
+
+        <div class="text-11" style="margin-bottom: 24px;">
+          ATENDIDO: ADMINISTRADOR
+        </div>
+
+        <div class="flex justify-center" style="margin-bottom: 24px;">
+          <div style="width: 96px; height: 96px; border: 1px solid rgba(0,0,0,0.2); background: #fafaf9; display: flex; align-items: center; justify-content: center;">
+            <span style="font-size: 40px; color: rgba(0,0,0,0.2);">QR</span>
+          </div>
+        </div>
+
+        <div class="text-center" style="display: flex; flex-direction: column; gap: 4px;">
+          <p class="text-9" style="margin: 0;">NO SE ACEPTAN DEVOLUCIONES SOLO CAMBIO</p>
+          <p class="text-9" style="margin: 0;">GRACIAS POR SU PREFERENCIA</p>
+          <p class="text-9" style="margin: 12px 0 0 0;">skynik_152@hotmail.com</p>
+          <p class="text-9" style="margin: 0;">REPRESENTACION IMPRESA DE LA FACTURA ELECTRONICA</p>
+          <p class="text-9" style="margin: 0;">Para consultar este comprobante ingrese a cpe.logisysit.com</p>
         </div>
 
         <script>
@@ -338,7 +399,7 @@ function printBillingTicket(order: Order) {
         </script>
       </body>
     </html>
-  `;
+  \`;
 
   printWindow.document.write(html);
   printWindow.document.close();

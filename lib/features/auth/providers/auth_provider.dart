@@ -36,4 +36,8 @@ class AuthNotifier extends StateNotifier<AsyncValue<UserModel?>> {
     _apiService.logout();
     state = const AsyncValue.data(null);
   }
+
+  void clearError() {
+    state = const AsyncValue.data(null);
+  }
 }

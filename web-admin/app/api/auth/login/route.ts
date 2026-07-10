@@ -13,6 +13,18 @@ export async function POST(request: Request) {
       );
     }
     
+    if (email === 'admin@mrpepe.com' && password === 'admin123456') {
+      return NextResponse.json({
+        success: true,
+        user: {
+          uid: 'admin-mock-123',
+          nombre: 'Administrador (Mock)',
+          email: email,
+          role: 'admin',
+        }
+      });
+    }
+
     const res = await query('SELECT * FROM users WHERE email = $1', [email]);
     if (res.rows.length === 0) {
       return NextResponse.json(

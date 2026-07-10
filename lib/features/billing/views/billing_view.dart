@@ -11,6 +11,7 @@ import '../../../core/widgets/brasa_logo.dart';
 
 import '../../../core/services/sunat_service.dart';
 import '../../../core/services/api_service.dart';
+import '../../../core/utils/number_to_words.dart';
 
 class BillingView extends ConsumerStatefulWidget {
   final Mesa mesa;
@@ -168,9 +169,9 @@ class _BillingViewState extends ConsumerState<BillingView> {
             );
           }
           final allItems = orders.expand((o) => o.items).toList();
-          final double subtotal = allItems.fold(0, (sum, item) => sum + (item.precio * item.cantidad));
-          final double igv = subtotal * 0.18;
-          final double total = subtotal + igv;
+          final double total = allItems.fold(0, (sum, item) => sum + (item.precio * item.cantidad));
+          final double subtotal = total / 1.10;
+          final double igv = total - subtotal;
 
           final double screenWidth = MediaQuery.of(context).size.width;
           final bool isMobile = screenWidth < 750;
@@ -279,9 +280,9 @@ class _BillingViewState extends ConsumerState<BillingView> {
             );
           }),
           const Divider(height: 48),
-          _buildAmountRow('Subtotal', subtotal),
+          _buildAmountRow('Op. Gravada', subtotal),
           const SizedBox(height: 8),
-          _buildAmountRow('IGV (18%)', igv),
+          _buildAmountRow('IGV (10%)', igv),
           const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -566,11 +567,15 @@ class _BillingViewState extends ConsumerState<BillingView> {
 
   void _showReceiptDialog(List<OrderModel> orders, double total, String voucherNumber) {
     final allItems = orders.expand((o) => o.items).toList();
-    final String tipoDoc = _isFactura ? 'FACTURA ELECTRÓNICA' : 'BOLETA DE VENTA';
+    final String tipoDoc = _isFactura ? 'Factura Electronica' : 'Boleta Electronica';
     final String cliente = _isFactura 
-      ? (_razonSocial ?? 'RUC: ${_rucController.text}') 
+      ? (_razonSocial ?? '') 
       : (_clienteNombre ?? 'CONSUMIDOR FINAL');
-    final String docId = _isFactura ? _rucController.text : (_dniController.text.isEmpty ? '-' : _dniController.text);
+    final String docId = _isFactura ? _rucController.text : (_dniController.text.isEmpty ? '00000000' : _dniController.text);
+    final String dateTime = "${DateTime.now().day.toString().padLeft(2, '0')}/${DateTime.now().month.toString().padLeft(2, '0')}/${DateTime.now().year} ${TimeOfDay.now().format(context)}";
+    final double vVenta = total / 1.10;
+    final double igv = total - vVenta;
+    final String amountInWords = numberToWords(total);
 
     showDialog(
       context: context,
@@ -584,67 +589,148 @@ class _BillingViewState extends ConsumerState<BillingView> {
           decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4)),
           child: SingleChildScrollView(
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                BrasaLogo(size: 40),
+                BrasaLogo(size: 80),
                 const SizedBox(height: 8),
-                const Text('RUC: 10418236103', style: TextStyle(fontSize: 12)),
-                const Text('JR. JUNIN 413 - EL TAMBO - HUANCAYO', style: TextStyle(fontSize: 10)),
-                const Divider(height: 32),
-                Text(tipoDoc, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                Text(voucherNumber, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                const SizedBox(height: 16),
-                
-                // Client Info Section
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Text(_isFactura ? 'RUC: ' : 'DNI: ', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
-                        Text(docId, style: const TextStyle(fontSize: 11)),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('CLIENTE: ', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
-                        Expanded(child: Text(cliente, style: const TextStyle(fontSize: 11), maxLines: 2, overflow: TextOverflow.ellipsis)),
-                      ],
-                    ),
-                  ],
-                ),
+                const Text('10463912446', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                const Text('SANCHEZ GALARZA NITCIO JOEL', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                const Text('991829708/984335339', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                const Text('Jr. Junín 413 con Av. 13 de Noviembre - El Tambo - Huancayo', textAlign: TextAlign.center, style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
                 
                 const SizedBox(height: 16),
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('CANT  DESCRIPCIÓN', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
-                    Text('TOTAL', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
-                  ],
-                ),
-                const Divider(),
-                ...allItems.map((item) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 2),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('${item.cantidad} x ${item.nombre}', style: const TextStyle(fontSize: 11)),
-                      Text('S/ ${(item.precio * item.cantidad).toStringAsFixed(2)}', style: const TextStyle(fontSize: 11)),
-                    ],
-                  ),
-                )),
-                const Divider(),
-                _buildReceiptRow('OP. GRAVADA', 'S/ ${(total / 1.18).toStringAsFixed(2)}'),
-                _buildReceiptRow('IGV (18%)', 'S/ ${(total - (total / 1.18)).toStringAsFixed(2)}'),
-                const SizedBox(height: 8),
+                
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('TOTAL A PAGAR', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                    Text('S/ ${total.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    Text(tipoDoc, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                    Text(voucherNumber, style: const TextStyle(fontSize: 13)),
                   ],
                 ),
+                const SizedBox(height: 4),
+                Align(alignment: Alignment.centerLeft, child: Text(dateTime, style: const TextStyle(fontSize: 12))),
+                
+                const SizedBox(height: 12),
+                
+                Row(
+                  children: [
+                    const SizedBox(width: 80, child: Text('COMPRADOR', style: TextStyle(fontSize: 11))),
+                    Text(docId, style: const TextStyle(fontSize: 11)),
+                  ],
+                ),
+                Align(alignment: Alignment.centerLeft, child: Text(cliente, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold))),
+                if (_isFactura && _direccion != null)
+                  Align(alignment: Alignment.centerLeft, child: Text(_direccion!, style: const TextStyle(fontSize: 11))),
+                
+                const SizedBox(height: 12),
+                
+                Row(
+                  children: [
+                    const SizedBox(width: 120, child: Text('Metodo de pago:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold))),
+                    Text(_paymentMethod, style: const TextStyle(fontSize: 11)),
+                  ],
+                ),
+                const Row(
+                  children: [
+                    SizedBox(width: 120, child: Text('Forma de pago:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold))),
+                    Text('Contado', style: TextStyle(fontSize: 11)),
+                  ],
+                ),
+                Row(
+                  children: [
+                    const SizedBox(width: 120, child: Text('F.Vencimiento:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold))),
+                    Text(dateTime.split(' ')[0], style: const TextStyle(fontSize: 11)),
+                  ],
+                ),
+                
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 4),
+                  child: Text('------------------------------------------------', style: TextStyle(fontSize: 11), maxLines: 1),
+                ),
+                const Align(alignment: Alignment.centerLeft, child: Text('Descripción', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold))),
+                const Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Cantidad', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                    Text('UM', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                    Text('P. Unitario', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                    Text('Total', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 4),
+                  child: Text('------------------------------------------------', style: TextStyle(fontSize: 11), maxLines: 1),
+                ),
+                ...allItems.map((item) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 2),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(item.nombre.toUpperCase(), style: const TextStyle(fontSize: 11)),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(item.cantidad.toStringAsFixed(2), style: const TextStyle(fontSize: 11)),
+                          const Text('UN', style: TextStyle(fontSize: 11)),
+                          Text(item.precio.toStringAsFixed(2), style: const TextStyle(fontSize: 11)),
+                          Text((item.precio * item.cantidad).toStringAsFixed(2), style: const TextStyle(fontSize: 11)),
+                        ],
+                      ),
+                    ],
+                  ),
+                )),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 4),
+                  child: Text('------------------------------------------------', style: TextStyle(fontSize: 11), maxLines: 1),
+                ),
+                
+                Padding(
+                  padding: const EdgeInsets.only(left: 40),
+                  child: Column(
+                    children: [
+                      _buildReceiptRowBold('IMPORTE', 'S/ ${total.toStringAsFixed(2)}'),
+                      _buildReceiptRowBold('DESCUENTO', 'S/ 0.00'),
+                      _buildReceiptRowBold('OP. GRATUITAS', 'S/ 0.00'),
+                      _buildReceiptRowBold('ICBPER', 'S/ 0.00'),
+                      _buildReceiptRowBold('IMPORTE TOTAL', 'S/ ${total.toStringAsFixed(2)}'),
+                    ],
+                  ),
+                ),
+                
+                const SizedBox(height: 12),
+                Text(amountInWords, style: const TextStyle(fontSize: 11)),
+                const SizedBox(height: 16),
+                
+                Padding(
+                  padding: const EdgeInsets.only(left: 40, right: 60),
+                  child: Column(
+                    children: [
+                      _buildReceiptRow('V.Venta:', vVenta.toStringAsFixed(2)),
+                      _buildReceiptRow('IGV 10 %', igv.toStringAsFixed(2)),
+                    ],
+                  ),
+                ),
+                
+                const SizedBox(height: 16),
+                const Text('ATENDIDO: ADMINISTRADOR', style: TextStyle(fontSize: 11)),
+                
+                const SizedBox(height: 24),
+                // QR Placeholder
+                Container(
+                  width: 100,
+                  height: 100,
+                  color: Colors.black12,
+                  child: const Center(child: Icon(Icons.qr_code, size: 60)),
+                ),
+                const SizedBox(height: 24),
+                
+                const Text('NO SE ACEPTAN DEVOLUCIONES SOLO CAMBIO', style: TextStyle(fontSize: 9), textAlign: TextAlign.center),
+                const Text('GRACIAS POR SU PREFERENCIA', style: TextStyle(fontSize: 9), textAlign: TextAlign.center),
+                const SizedBox(height: 12),
+                const Text('skynik_152@hotmail.com', style: TextStyle(fontSize: 9), textAlign: TextAlign.center),
+                const Text('REPRESENTACION IMPRESA DE LA FACTURA ELECTRONICA', style: TextStyle(fontSize: 9), textAlign: TextAlign.center),
+                const Text('Para consultar este comprobante ingrese a cpe.logisysit.com', style: TextStyle(fontSize: 9), textAlign: TextAlign.center),
+                
                 const SizedBox(height: 32),
                 SizedBox(
                   width: double.infinity,
@@ -678,8 +764,18 @@ class _BillingViewState extends ConsumerState<BillingView> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: const TextStyle(fontSize: 10)),
-        Text(value, style: const TextStyle(fontSize: 10)),
+        Text(label, style: const TextStyle(fontSize: 11)),
+        Text(value, style: const TextStyle(fontSize: 11)),
+      ],
+    );
+  }
+
+  Widget _buildReceiptRowBold(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+        Text(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
       ],
     );
   }

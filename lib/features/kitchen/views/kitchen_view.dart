@@ -38,7 +38,7 @@ class KitchenView extends ConsumerWidget {
             ],
           ),
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, __) {
+          error: (e, _) {
             if (e.toString().contains('index')) {
               return Center(
                 child: Padding(
