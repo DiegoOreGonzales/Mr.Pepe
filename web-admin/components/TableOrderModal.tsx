@@ -576,10 +576,10 @@ export default function TableOrderModal({ mesaNumero, onClose, onSuccess }: Tabl
           </form>
         ) : (
           /* DEFAULT MENU / ORDER DETAILS VIEW */
-          <div className="flex-1 flex overflow-hidden">
+          <div className="flex-1 flex flex-col md:flex-row overflow-y-auto md:overflow-hidden">
             {/* Left Column: Menu Selector (if Free or Adding) */}
             {(!activeOrder || isAddingItems) ? (
-              <div className="flex-1 flex flex-col p-5 border-r border-stone-100 overflow-hidden">
+              <div className="flex-1 flex flex-col p-5 border-b md:border-b-0 md:border-r border-stone-100 overflow-visible md:overflow-hidden">
                 {/* Search products */}
                 <div className="relative mb-4">
                   <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 text-[18px]">
@@ -640,7 +640,7 @@ export default function TableOrderModal({ mesaNumero, onClose, onSuccess }: Tabl
               </div>
             ) : (
               /* Occupied table details column */
-              <div className="flex-1 p-6 flex flex-col justify-between bg-stone-50 border-r border-stone-100 overflow-y-auto">
+              <div className="flex-1 p-6 flex flex-col justify-between bg-stone-50 border-b md:border-b-0 md:border-r border-stone-100 overflow-y-auto">
                 <div className="space-y-5">
                   <div className="flex items-center gap-3 p-4 bg-[#BF391B]/5 border border-[#BF391B]/15 rounded-2xl">
                     <span className="material-symbols-outlined text-[#BF391B] text-[22px]">restaurant</span>
@@ -700,7 +700,7 @@ export default function TableOrderModal({ mesaNumero, onClose, onSuccess }: Tabl
 
             {/* Right Column: Cart summary */}
             {(!activeOrder || isAddingItems) && (
-              <div className="w-80 p-5 flex flex-col justify-between bg-stone-50/50">
+              <div className="w-full md:w-80 p-5 flex flex-col justify-between bg-stone-50/50">
                 <div className="flex-1 flex flex-col overflow-hidden">
                   <div className="flex items-center justify-between pb-3 border-b border-stone-100 mb-3">
                     <h3 className="text-xs font-black text-stone-500 uppercase tracking-widest">

@@ -198,14 +198,14 @@ export default function CocinaPage() {
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 h-[calc(100vh-200px)] overflow-hidden">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:h-[calc(100vh-200px)] md:overflow-hidden overflow-visible h-auto">
           {/* Column 1: Pendientes */}
-          <div className="flex flex-col h-full bg-[#F8F9FA] rounded-2xl p-4 border border-stone-200/50">
+          <div className="flex flex-col md:h-full h-auto min-h-[320px] bg-[#F8F9FA] rounded-2xl p-4 border border-stone-200/50">
             <div className="flex items-center justify-between mb-4 px-3 py-1.5 rounded-lg bg-amber-500/10 text-amber-700">
               <span className="text-xs font-black uppercase tracking-wider">Pendientes</span>
               <span className="text-xs font-black">{pending.length}</span>
             </div>
-            <div className="flex-1 overflow-y-auto space-y-3 pr-1 scrollbar-thin">
+            <div className="flex-1 md:overflow-y-auto overflow-visible space-y-3 pr-1 scrollbar-thin">
               {pending.map((o) => (
                 <OrderCard key={o.id} order={o} onStatusChange={handleStatusChange} />
               ))}
@@ -216,12 +216,12 @@ export default function CocinaPage() {
           </div>
 
           {/* Column 2: En Proceso */}
-          <div className="flex flex-col h-full bg-[#F8F9FA] rounded-2xl p-4 border border-stone-200/50">
+          <div className="flex flex-col md:h-full h-auto min-h-[320px] bg-[#F8F9FA] rounded-2xl p-4 border border-stone-200/50">
             <div className="flex items-center justify-between mb-4 px-3 py-1.5 rounded-lg bg-orange-600/10 text-orange-700">
               <span className="text-xs font-black uppercase tracking-wider">En Proceso</span>
               <span className="text-xs font-black">{inProcess.length}</span>
             </div>
-            <div className="flex-1 overflow-y-auto space-y-3 pr-1 scrollbar-thin">
+            <div className="flex-1 md:overflow-y-auto overflow-visible space-y-3 pr-1 scrollbar-thin">
               {inProcess.map((o) => (
                 <OrderCard key={o.id} order={o} onStatusChange={handleStatusChange} />
               ))}
@@ -232,12 +232,12 @@ export default function CocinaPage() {
           </div>
 
           {/* Column 3: Listos */}
-          <div className="flex flex-col h-full bg-[#F8F9FA] rounded-2xl p-4 border border-stone-200/50">
+          <div className="flex flex-col md:h-full h-auto min-h-[320px] bg-[#F8F9FA] rounded-2xl p-4 border border-stone-200/50">
             <div className="flex items-center justify-between mb-4 px-3 py-1.5 rounded-lg bg-green-600/10 text-green-700">
               <span className="text-xs font-black uppercase tracking-wider">Listos</span>
               <span className="text-xs font-black">{ready.length}</span>
             </div>
-            <div className="flex-1 overflow-y-auto space-y-3 pr-1 scrollbar-thin">
+            <div className="flex-1 md:overflow-y-auto overflow-visible space-y-3 pr-1 scrollbar-thin">
               {ready.map((o) => (
                 <OrderCard key={o.id} order={o} onStatusChange={handleStatusChange} />
               ))}

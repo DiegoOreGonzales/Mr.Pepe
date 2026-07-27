@@ -32,13 +32,13 @@ export default function MesasPage() {
 
       {/* Grid */}
       {loading ? (
-        <div className="grid grid-cols-5 sm:grid-cols-8 gap-3">
+        <div className="grid grid-cols-3 xs:grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3">
           {Array.from({ length: 40 }).map((_, i) => (
             <div key={i} className="h-20 bg-white rounded-[14px] animate-pulse" />
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-5 sm:grid-cols-8 gap-3">
+        <div className="grid grid-cols-3 xs:grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3">
           {grid.map((mesa, i) => {
             const num    = i + 1;
             const status = mesa?.status ?? "libre";

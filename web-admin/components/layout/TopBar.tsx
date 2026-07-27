@@ -22,7 +22,7 @@ function getTodayLabel() {
   return `${days[now.getDay()]}, ${now.getDate()} de ${months[now.getMonth()]} de ${now.getFullYear()}`;
 }
 
-export default function TopBar() {
+export default function TopBar({ onToggleMenu }: { onToggleMenu?: () => void }) {
   const pathname = usePathname();
   const page     = pageTitles[pathname] ?? { title: "Mr Pepe", subtitle: "" };
   
@@ -43,22 +43,29 @@ export default function TopBar() {
 
   return (
     <header
-      className="fixed top-0 right-0 h-16 flex items-center justify-between px-8 z-40"
+      className="fixed top-0 right-0 h-16 flex items-center justify-between px-4 sm:px-8 z-40 w-full lg:w-[calc(100%-240px)] transition-all"
       style={{
-        width: "calc(100% - 240px)",
         background: "rgba(255,255,255,0.85)",
         backdropFilter: "blur(12px)",
         borderBottom: "1px solid rgba(228,231,236,0.4)",
       }}
     >
-      {/* Title */}
-      <div>
-        <h2 className="text-[20px] font-extrabold text-[#0D0D0D] leading-tight tracking-tight">
-          {page.title}
-        </h2>
-        <p className="text-[11px] font-bold uppercase tracking-widest text-[#9AA0A6]">
-          {pathname === "/dashboard" ? getTodayLabel() : page.subtitle}
-        </p>
+      {/* Title & Hamburger */}
+      <div className="flex items-center gap-3">
+        <button
+          onClick={onToggleMenu}
+          className="lg:hidden w-10 h-10 rounded-xl flex items-center justify-center text-stone-700 hover:bg-stone-100/80 transition-all"
+        >
+          <span className="material-symbols-outlined text-[24px]">menu</span>
+        </button>
+        <div>
+          <h2 className="text-base sm:text-[20px] font-extrabold text-[#0D0D0D] leading-tight tracking-tight">
+            {page.title}
+          </h2>
+          <p className="text-[9px] sm:text-[11px] font-bold uppercase tracking-widest text-[#9AA0A6] truncate max-w-[140px] sm:max-w-none">
+            {pathname === "/dashboard" ? getTodayLabel() : page.subtitle}
+          </p>
+        </div>
       </div>
 
       {/* Actions */}

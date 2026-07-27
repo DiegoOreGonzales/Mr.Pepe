@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/firebase/auth-context";
 import { AuthProvider } from "@/lib/firebase/auth-context";
@@ -10,6 +10,7 @@ import TopBar from "@/components/layout/TopBar";
 function DashboardShell({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -42,11 +43,11 @@ function DashboardShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-[#F0F2F5]">
       <div className="no-print">
-        <Sidebar />
-        <TopBar />
+        <Sidebar isOpen={isMobileOpen} onClose={() => setIsMobileOpen(false)} />
+        <TopBar onToggleMenu={() => setIsMobileOpen(true)} />
       </div>
-      <main className="ml-[240px] pt-16 min-h-screen print:ml-0 print:pt-0">
-        <div className="p-7 animate-fade-in print:p-0">{children}</div>
+      <main className="lg:ml-[240px] ml-0 pt-16 min-h-screen print:ml-0 print:pt-0">
+        <div className="p-4 sm:p-7 animate-fade-in print:p-0">{children}</div>
       </main>
     </div>
   );
