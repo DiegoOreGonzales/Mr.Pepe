@@ -5,13 +5,13 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/firebase/auth-context";
 
 const navItems = [
-  { href: "/dashboard",    icon: "dashboard",    label: "Dashboard"    },
-  { href: "/mesas",        icon: "restaurant",   label: "Mesas"        },
-  { href: "/cocina",       icon: "kitchen",      label: "Cocina"       },
-  { href: "/pedidos",      icon: "receipt_long", label: "Pedidos"      },
-  { href: "/facturacion",  icon: "receipt",      label: "Facturación"  },
-  { href: "/reportes",     icon: "analytics",    label: "Reportes"     },
-  { href: "/productos",    icon: "inventory_2",  label: "Productos"    },
+  { href: "/dashboard",    icon: "dashboard",    label: "Dashboard",   roles: ["admin"] },
+  { href: "/mesas",        icon: "restaurant",   label: "Mesas",       roles: ["admin", "mesero"] },
+  { href: "/cocina",       icon: "kitchen",      label: "Cocina",      roles: ["admin", "cocina"] },
+  { href: "/pedidos",      icon: "receipt_long", label: "Pedidos",     roles: ["admin", "mesero", "cocina"] },
+  { href: "/facturacion",  icon: "receipt",      label: "Facturación", roles: ["admin", "mesero"] },
+  { href: "/reportes",     icon: "analytics",    label: "Reportes",    roles: ["admin"] },
+  { href: "/productos",    icon: "inventory_2",  label: "Productos",   roles: ["admin"] },
 ];
 
 export default function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: () => void }) {
@@ -23,6 +23,9 @@ export default function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose
     await logout();
     router.push("/login");
   };
+
+  const userRole = user?.role || "admin";
+  const allowedItems = navItems.filter((item) => item.roles.includes(userRole));
 
   return (
     <>
@@ -69,7 +72,7 @@ export default function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose
 
         {/* Navigation */}
         <nav className="flex-1 flex flex-col space-y-0.5 px-2">
-          {navItems.map((item) => {
+          {allowedItems.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
             return (
               <Link
@@ -96,17 +99,19 @@ export default function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose
         </nav>
 
         {/* Kitchen Display shortcut */}
-        <div className="px-4 mb-4">
-          <Link
-            href="/kitchen-display"
-            target="_blank"
-            onClick={onClose}
-            className="w-full flex items-center gap-2 px-4 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all duration-200 border border-[#BF391B]/30 text-[#E54D2A] hover:bg-[#BF391B]/10"
-          >
-            <span className="material-symbols-outlined text-base">tv</span>
-            Kitchen Display (TV)
-          </Link>
-        </div>
+        {(userRole === "admin" || userRole === "cocina") && (
+          <div className="px-4 mb-4">
+            <Link
+              href="/kitchen-display"
+              target="_blank"
+              onClick={onClose}
+              className="w-full flex items-center gap-2 px-4 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all duration-200 border border-[#BF391B]/30 text-[#E54D2A] hover:bg-[#BF391B]/10"
+            >
+              <span className="material-symbols-outlined text-base">tv</span>
+              Kitchen Display (TV)
+            </Link>
+          </div>
+        )}
 
         {/* User + logout */}
         <div className="px-4 border-t border-stone-800 pt-5">
@@ -116,10 +121,10 @@ export default function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose
             </div>
             <div className="min-w-0">
               <p className="text-stone-200 text-xs font-bold truncate">
-                {user?.email?.split("@")[0] ?? "Admin"}
+                {user?.nombre ?? user?.email?.split("@")[0] ?? "Admin"}
               </p>
               <p className="text-stone-500 text-[10px] uppercase font-semibold">
-                Administrador
+                {userRole === "admin" ? "Administrador" : userRole === "mesero" ? "Mesero" : userRole === "cocina" ? "Cocinero" : "Usuario"}
               </p>
             </div>
           </div>

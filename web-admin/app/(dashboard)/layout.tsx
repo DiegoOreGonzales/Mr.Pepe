@@ -1,22 +1,47 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/lib/firebase/auth-context";
 import { AuthProvider } from "@/lib/firebase/auth-context";
 import Sidebar from "@/components/layout/Sidebar";
 import TopBar from "@/components/layout/TopBar";
 
+const ROUTE_PERMISSIONS = [
+  { path: "/dashboard",   roles: ["admin"] },
+  { path: "/mesas",       roles: ["admin", "mesero"] },
+  { path: "/cocina",      roles: ["admin", "cocina"] },
+  { path: "/pedidos",     roles: ["admin", "mesero", "cocina"] },
+  { path: "/facturacion", roles: ["admin", "mesero"] },
+  { path: "/reportes",    roles: ["admin"] },
+  { path: "/productos",   roles: ["admin"] },
+];
+
 function DashboardShell({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   useEffect(() => {
-    if (!loading && !user) {
-      router.replace("/login");
+    if (!loading) {
+      if (!user) {
+        router.replace("/login");
+      } else {
+        const userRole = user.role || "admin";
+        const matchedRoute = ROUTE_PERMISSIONS.find(
+          (route) => pathname === route.path || pathname.startsWith(route.path + "/")
+        );
+        if (matchedRoute && !matchedRoute.roles.includes(userRole)) {
+          if (userRole === "cocina") {
+            router.replace("/cocina");
+          } else {
+            router.replace("/mesas");
+          }
+        }
+      }
     }
-  }, [user, loading, router]);
+  }, [user, loading, router, pathname]);
 
   if (loading) {
     return (
