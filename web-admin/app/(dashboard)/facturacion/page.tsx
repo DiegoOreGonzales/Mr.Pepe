@@ -497,7 +497,7 @@ export default function FacturacionPage() {
       o.voucherNumber || "S/N",
       (o.tipoDocumento || "boleta").toUpperCase(),
       o.clienteNombre || "Consumidor Final",
-      o.clienteDocumento || "00000000",
+      o.clienteDocumento ? `="${o.clienteDocumento}"` : "00000000",
       `Mesa ${o.mesaNumero}`,
       o.total.toFixed(2),
       o.createdAt.toLocaleString("es-PE")
@@ -513,7 +513,8 @@ export default function FacturacionPage() {
       ...rows
     ].map(e => e.map(val => `"${String(val).replace(/"/g, '""')}"`).join(";")).join("\n");
 
-    const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+    const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+    const blob = new Blob([bom, csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);

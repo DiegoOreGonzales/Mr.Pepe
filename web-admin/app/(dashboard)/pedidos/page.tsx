@@ -119,7 +119,7 @@ export default function PedidosPage() {
       o.id,
       `Mesa ${o.mesaNumero}`,
       o.clienteNombre || "Consumidor Final",
-      o.clienteDocumento || "00000000",
+      o.clienteDocumento ? `="${o.clienteDocumento}"` : "00000000",
       o.items?.map(item => `${item.cantidad}x ${item.nombre}`).join(" | ") || "Sin items",
       o.total.toFixed(2),
       (STATUS_LABELS[o.status] || o.status).toUpperCase(),
@@ -131,13 +131,14 @@ export default function PedidosPage() {
       ["sep=;"], // Forzar delimitador punto y coma para Excel
       ["MR. PEPE - BROASTER Y BRASAS"],
       ["REPORTE GENERAL DE PEDIDOS DE HOY"],
-      [`Fecha de exportación: ${new Date().toLocaleString("es-PE")}`],
+      [`Fecha de exportacion: ${new Date().toLocaleString("es-PE")}`],
       [], 
       headers,
       ...rows
     ].map(e => e.map(val => `"${String(val).replace(/"/g, '""')}"`).join(";")).join("\n");
 
-    const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+    const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+    const blob = new Blob([bom, csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
