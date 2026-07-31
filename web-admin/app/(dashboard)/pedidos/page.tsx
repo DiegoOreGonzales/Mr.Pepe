@@ -114,10 +114,12 @@ export default function PedidosPage() {
   );
 
   const handleExportCSV = () => {
-    const headers = ["ID Pedido", "Mesa", "Items / Productos", "Total (S/)", "Estado", "Fecha y Hora"];
+    const headers = ["ID Pedido", "Mesa", "Cliente", "DNI / RUC", "Items / Productos", "Total (S/)", "Estado", "Fecha y Hora"];
     const rows = filtered.map((o: Order) => [
       o.id,
       `Mesa ${o.mesaNumero}`,
+      o.clienteNombre || "Consumidor Final",
+      o.clienteDocumento || "00000000",
       o.items?.map(item => `${item.cantidad}x ${item.nombre}`).join(" | ") || "Sin items",
       o.total.toFixed(2),
       (STATUS_LABELS[o.status] || o.status).toUpperCase(),

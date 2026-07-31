@@ -491,6 +491,38 @@ export default function FacturacionPage() {
     o.voucherNumber?.includes(search)
   );
 
+  const handleExportCSV = () => {
+    const headers = ["N° Comprobante", "Tipo Doc", "Cliente", "DNI / RUC", "Mesa", "Total (S/)", "Fecha y Hora"];
+    const rows = filtered.map((o) => [
+      o.voucherNumber || "S/N",
+      (o.tipoDocumento || "boleta").toUpperCase(),
+      o.clienteNombre || "Consumidor Final",
+      o.clienteDocumento || "00000000",
+      `Mesa ${o.mesaNumero}`,
+      o.total.toFixed(2),
+      o.createdAt.toLocaleString("es-PE")
+    ]);
+
+    const csvContent = [
+      ["sep=;"], // Forzar punto y coma en Excel
+      ["MR. PEPE - FACTURACION Y BOLETAS"],
+      ["REPORTE DE COMPROBANTES EMITIDOS"],
+      [`Fecha de exportacion: ${new Date().toLocaleString("es-PE")}`],
+      [], 
+      headers,
+      ...rows
+    ].map(e => e.map(val => `"${String(val).replace(/"/g, '""')}"`).join(";")).join("\n");
+
+    const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `comprobantes_mrpepe_${new Date().toISOString().slice(0,10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="space-y-6 relative">
       {/* Toast Notification */}
@@ -512,8 +544,8 @@ export default function FacturacionPage() {
       </div>
 
       {/* Buscador */}
-      <div className="flex items-center gap-4 no-print">
-        <div className="relative flex-1 max-w-md">
+      <div className="flex items-center gap-4 no-print flex-wrap">
+        <div className="relative flex-1 min-w-[280px] max-w-md">
           <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#9AA0A6] text-[20px]">search</span>
           <input
             type="text"
@@ -523,10 +555,19 @@ export default function FacturacionPage() {
             className="w-full pl-10 pr-4 py-3 rounded-xl border border-stone-100 outline-none focus:border-[#BF391B] transition-all bg-white card-shadow text-sm"
           />
         </div>
-        <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg border border-stone-100 text-xs font-bold text-stone-500">
+        <div className="flex items-center gap-2 px-4 py-2.5 bg-white rounded-lg border border-stone-100 text-xs font-bold text-stone-500 card-shadow">
           <span className="w-2 h-2 rounded-full bg-[#1A8952] animate-pulse" />
           {filtered.length} COMPROBANTES
         </div>
+        
+        {/* Export CSV Button */}
+        <button
+          onClick={handleExportCSV}
+          className="flex items-center gap-1.5 px-4 py-2.5 bg-[#1A8952] hover:bg-[#156E41] text-white font-bold text-xs rounded-xl transition-all shadow-md shadow-green-100"
+        >
+          <span className="material-symbols-outlined text-[16px]">download</span>
+          Exportar CSV
+        </button>
       </div>
 
       {/* Tabla */}
