@@ -573,7 +573,7 @@ class _BillingViewState extends ConsumerState<BillingView> {
       : (_clienteNombre ?? 'CONSUMIDOR FINAL');
     final String docId = _isFactura ? _rucController.text : (_dniController.text.isEmpty ? '00000000' : _dniController.text);
     final String dateTime = "${DateTime.now().day.toString().padLeft(2, '0')}/${DateTime.now().month.toString().padLeft(2, '0')}/${DateTime.now().year} ${TimeOfDay.now().format(context)}";
-    final double vVenta = total / 1.10;
+    final double vVenta = total / 1.18;
     final double igv = total - vVenta;
     final String amountInWords = numberToWords(total);
 
@@ -584,18 +584,19 @@ class _BillingViewState extends ConsumerState<BillingView> {
         contentPadding: EdgeInsets.zero,
         backgroundColor: Colors.transparent,
         content: Container(
-          width: 400,
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(4)),
+          width: 340,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 BrasaLogo(size: 80),
                 const SizedBox(height: 8),
-                const Text('10463912446', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                const Text('SANCHEZ GALARZA NITCIO JOEL', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                const Text('991829708/984335339', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                const Text('MISTER PEPE II', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                const Text('10418236103', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                const Text('DE LA CRUZ BALDEON ROCIO ELENA', textAlign: TextAlign.center, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                const Text('CEL: 984335339', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
                 const Text('Jr. Junín 413 con Av. 13 de Noviembre - El Tambo - Huancayo', textAlign: TextAlign.center, style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
                 
                 const SizedBox(height: 16),
@@ -705,8 +706,8 @@ class _BillingViewState extends ConsumerState<BillingView> {
                   padding: const EdgeInsets.only(left: 40, right: 60),
                   child: Column(
                     children: [
-                      _buildReceiptRow('V.Venta:', vVenta.toStringAsFixed(2)),
-                      _buildReceiptRow('IGV 10 %', igv.toStringAsFixed(2)),
+                      _buildReceiptRow('Op. Gravada:', vVenta.toStringAsFixed(2)),
+                      _buildReceiptRow('I.G.V. 18%:', igv.toStringAsFixed(2)),
                     ],
                   ),
                 ),
