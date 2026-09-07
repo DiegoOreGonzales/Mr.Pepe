@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
+import { getNextCorrelative } from '@/lib/sunat/correlatives';
+import { processElectronicInvoice } from '@/lib/sunat/sunat-engine';
 
 export async function GET(request: Request) {
   try {
@@ -41,6 +43,11 @@ export async function GET(request: Request) {
       clienteDocumento: row.cliente_documento,
       tipoDocumento: row.tipo_documento,
       voucherNumber: row.voucher_number,
+      sunatStatus: row.sunat_status || 'PENDIENTE',
+      sunatHash: row.sunat_hash,
+      sunatQr: row.sunat_qr,
+      sunatCdrCode: row.sunat_cdr_code,
+      sunatCdrDesc: row.sunat_cdr_desc,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
     }));
@@ -115,17 +122,54 @@ export async function PUT(request: Request) {
     if (status) {
       // Si se trata de un cobro (checkout), actualizamos los datos y liberamos la mesa
       if (status === 'pagado') {
-        // 1. Obtener la orden para saber la mesa
-        const orderSearch = await query('SELECT mesa_numero FROM orders WHERE id = $1', [id]);
+        // 1. Obtener la orden para saber la mesa y los datos del pedido
+        const orderSearch = await query('SELECT * FROM orders WHERE id = $1', [id]);
         if (orderSearch.rows.length > 0) {
-          const mesaNumero = orderSearch.rows[0].mesa_numero;
+          const currentOrder = orderSearch.rows[0];
+          const mesaNumero = currentOrder.mesa_numero;
+          const currentType = tipoDocumento === 'factura' ? 'factura' : 'boleta';
+
+          // Asignar correlativo consecutivo oficial SUNAT si no viene con formato formal B001-XXXXXXXX o F001-XXXXXXXX
+          let finalVoucher = voucherNumber;
+          if (!finalVoucher || !finalVoucher.match(/^[BF]\d{3}-\d{8}$/)) {
+            finalVoucher = await getNextCorrelative(currentType);
+          }
+
+          // Desglose tributario y generación de QR y Hash oficial de SUNAT
+          const orderItems = items !== undefined 
+            ? items 
+            : (Array.isArray(currentOrder.items) ? currentOrder.items : JSON.parse(currentOrder.items || '[]'));
+          const orderTotal = total !== undefined ? Number(total) : parseFloat(currentOrder.total);
+
+          const sunatResult = await processElectronicInvoice({
+            voucherNumber: finalVoucher,
+            tipoDocumento: currentType,
+            clienteNombre: clienteNombre || 'Consumidor Final',
+            clienteDocumento: clienteDocumento || '00000000',
+            items: orderItems,
+            total: orderTotal,
+          });
           
-          // 2. Actualizar orden a pagado con comprobante
+          // 2. Actualizar orden a pagado con comprobante y datos SUNAT
           await query(
             `UPDATE orders 
-             SET status = $1, cliente_nombre = $2, cliente_documento = $3, tipo_documento = $4, voucher_number = $5, updated_at = CURRENT_TIMESTAMP 
-             WHERE id = $6`,
-            [status, clienteNombre || null, clienteDocumento || null, tipoDocumento || null, voucherNumber || null, id]
+             SET status = $1, cliente_nombre = $2, cliente_documento = $3, tipo_documento = $4, voucher_number = $5,
+                 sunat_status = $6, sunat_hash = $7, sunat_qr = $8, sunat_cdr_code = $9, sunat_cdr_desc = $10,
+                 updated_at = CURRENT_TIMESTAMP 
+             WHERE id = $11`,
+            [
+              status, 
+              clienteNombre || null, 
+              clienteDocumento || null, 
+              currentType, 
+              finalVoucher,
+              sunatResult.status,
+              sunatResult.hash,
+              sunatResult.qrString,
+              sunatResult.cdrCode || null,
+              sunatResult.cdrDesc || null,
+              id
+            ]
           );
           
           // 3. Liberar Mesa
@@ -134,6 +178,13 @@ export async function PUT(request: Request) {
             "UPDATE tables SET status = 'libre', encargado = NULL, start_time = NULL WHERE id = $1",
             [tableId]
           );
+
+          return NextResponse.json({ 
+            success: true, 
+            message: 'Cobro procesado y comprobante generado con éxito',
+            voucherNumber: finalVoucher,
+            sunat: sunatResult
+          });
         } else {
           return NextResponse.json({ success: false, error: 'Orden no encontrada' }, { status: 404 });
         }

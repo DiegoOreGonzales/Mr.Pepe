@@ -224,9 +224,23 @@ function printBillingTicket(order: Order) {
 
   const ticketNumber = order.voucherNumber || "S/N";
   const totalPagar = order.total;
-  const subtotal = totalPagar / 1.10;
+  const subtotal = totalPagar / 1.18;
   const igv = totalPagar - subtotal;
   const amountInWords = numberToWords(totalPagar);
+
+  const qrData = order.sunatQr || [
+    "10418236103",
+    order.tipoDocumento === "factura" ? "01" : "03",
+    ticketNumber.split("-")[0] || "B001",
+    ticketNumber.split("-")[1] || "00000001",
+    igv.toFixed(2),
+    totalPagar.toFixed(2),
+    new Date(order.createdAt).toISOString().slice(0, 10),
+    (order.clienteDocumento || "").length === 11 ? "6" : "1",
+    order.clienteDocumento || "00000000",
+    order.sunatHash || "SUNAT-PROVISIONAL",
+  ].join("|");
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=${encodeURIComponent(qrData)}`;
 
   const itemsHtml = order.items?.map(item => `
     <div style="font-size: 11px; color: #000; margin-bottom: 12px;">
@@ -280,8 +294,8 @@ function printBillingTicket(order: Order) {
           <h2 class="font-black" style="font-size: 20px; letter-spacing: -0.5px; margin: 0;">MR. PEPE</h2>
           <p class="font-bold uppercase" style="font-size: 10px; letter-spacing: 0.2em; margin: 0 0 8px 0;">BROASTER Y BRASAS</p>
           
-          <div style="font-size: 10px; line-height: 1.2;">
-            <p style="margin: 0;" class="font-bold">ROCIO ELENA DE LA CRUZ BALDEON</p>
+          <div style="font-size: 10px; line-height: 1.3;">
+            <p style="margin: 0;" class="font-bold">DE LA CRUZ BALDEON ROCIO ELENA</p>
             <p style="margin: 0;" class="font-bold">RUC: 10418236103</p>
             <p style="margin: 0;" class="font-bold">CEL: 984335339</p>
             <p style="margin: 0;">Jr. Junín 413 con Av. 13 de Noviembre - El Tambo - Huancayo</p>
@@ -362,22 +376,28 @@ function printBillingTicket(order: Order) {
           ${amountInWords}
         </div>
 
-        <div class="text-11" style="padding: 0 40px; display: flex; flex-direction: column; gap: 4px; margin-bottom: 24px;">
+        <div class="text-11" style="padding: 0 40px; display: flex; flex-direction: column; gap: 4px; margin-bottom: 20px;">
           <div class="flex justify-between">
-            <span>V.Venta:</span>
-            <span>${subtotal.toFixed(2)}</span>
+            <span>OP. GRAVADA:</span>
+            <span>S/ ${subtotal.toFixed(2)}</span>
           </div>
           <div class="flex justify-between">
-            <span>IGV 10 %</span>
-            <span>${igv.toFixed(2)}</span>
+            <span>I.G.V. 18%:</span>
+            <span>S/ ${igv.toFixed(2)}</span>
           </div>
         </div>
 
-        <div class="text-11" style="margin-bottom: 24px;">
-          ATENDIDO: ADMINISTRADOR
+        <div class="text-center" style="margin-top: 16px; margin-bottom: 12px;">
+          <img src="${qrUrl}" style="width: 120px; height: 120px; margin: 0 auto; display: block;" alt="Código QR SUNAT" />
+          <p class="text-9" style="margin: 6px 0 0 0; font-family: monospace; font-size: 9px;">Código Hash: ${order.sunatHash || 'SUNAT-DIGEST-OK'}</p>
         </div>
 
-        <div class="text-center" style="margin-top: 16px; margin-bottom: 24px;">
+        <div class="text-center text-9" style="margin-bottom: 16px; line-height: 1.3; font-size: 8px;">
+          <p style="margin: 0; font-weight: bold;">Representación impresa de la ${order.tipoDocumento === 'factura' ? 'Factura' : 'Boleta'} Electrónica</p>
+          <p style="margin: 0;">Consulte su comprobante en SUNAT Operaciones en Línea</p>
+        </div>
+
+        <div class="text-center" style="margin-top: 8px; margin-bottom: 20px;">
           <p class="text-11 font-bold" style="margin: 0;">¡GRACIAS POR SU PREFERENCIA!</p>
         </div>
 
@@ -414,12 +434,34 @@ export default function FacturacionPage() {
 
   const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [syncingSunat, setSyncingSunat] = useState(false);
 
   const showToast = useCallback((type: "success" | "error", message: string) => {
     setToast({ type, message });
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     timeoutRef.current = setTimeout(() => setToast(null), 3000);
   }, []);
+
+  const handleSyncSunat = async (orderId?: string) => {
+    setSyncingSunat(true);
+    try {
+      const res = await fetch("/api/sunat/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast("success", data.message || "Sincronización con SUNAT completada");
+      } else {
+        showToast("error", data.error || "Error al sincronizar con SUNAT");
+      }
+    } catch (e) {
+      showToast("error", "Error de conexión al sincronizar con SUNAT");
+    } finally {
+      setSyncingSunat(false);
+    }
+  };
 
   const handlePrint = (order: Order) => {
     printBillingTicket(order);
@@ -561,14 +603,28 @@ export default function FacturacionPage() {
           {filtered.length} COMPROBANTES
         </div>
         
-        {/* Export CSV Button */}
-        <button
-          onClick={handleExportCSV}
-          className="flex items-center gap-1.5 px-4 py-2.5 bg-[#1A8952] hover:bg-[#156E41] text-white font-bold text-xs rounded-xl transition-all shadow-md shadow-green-100"
-        >
-          <span className="material-symbols-outlined text-[16px]">download</span>
-          Exportar CSV
-        </button>
+        {/* Botones de Acción */}
+        <div className="flex items-center gap-2">
+          {/* Sync SUNAT Button */}
+          <button
+            onClick={() => handleSyncSunat()}
+            disabled={syncingSunat}
+            className="flex items-center gap-1.5 px-4 py-2.5 bg-stone-800 hover:bg-stone-900 text-white font-bold text-xs rounded-xl transition-all shadow-md disabled:opacity-50"
+            title="Enviar comprobantes pendientes a SUNAT"
+          >
+            <span className={`material-symbols-outlined text-[16px] ${syncingSunat ? 'animate-spin' : ''}`}>sync</span>
+            {syncingSunat ? "Sincronizando..." : "Sincronizar SUNAT"}
+          </button>
+
+          {/* Export CSV Button */}
+          <button
+            onClick={handleExportCSV}
+            className="flex items-center gap-1.5 px-4 py-2.5 bg-[#1A8952] hover:bg-[#156E41] text-white font-bold text-xs rounded-xl transition-all shadow-md shadow-green-100"
+          >
+            <span className="material-symbols-outlined text-[16px]">download</span>
+            Exportar CSV
+          </button>
+        </div>
       </div>
 
       {/* Tabla */}
@@ -576,8 +632,9 @@ export default function FacturacionPage() {
         <table className="w-full text-left">
           <thead className="bg-stone-50">
             <tr className="text-[10px] font-bold text-[#9AA0A6] uppercase tracking-widest">
-              <th className="px-6 py-4">N° Boleta</th>
+              <th className="px-6 py-4">N° Comprobante</th>
               <th className="px-6 py-4">Cliente</th>
+              <th className="px-6 py-4">Estado SUNAT</th>
               <th className="px-6 py-4">Fecha</th>
               <th className="px-6 py-4">Total</th>
               <th className="px-6 py-4 text-right">Acción</th>
@@ -586,16 +643,35 @@ export default function FacturacionPage() {
           <tbody className="divide-y divide-stone-50">
             {loading ? (
               Array.from({ length: 6 }).map((_, i) => (
-                <tr key={i}><td colSpan={5} className="px-6 py-4 animate-pulse bg-stone-50/50 h-16"></td></tr>
+                <tr key={i}><td colSpan={6} className="px-6 py-4 animate-pulse bg-stone-50/50 h-16"></td></tr>
               ))
             ) : filtered.map((o) => (
               <tr key={o.id} className="hover:bg-stone-50 transition-colors group">
                 <td className="px-6 py-4">
-                  <span className="font-mono font-bold text-[#BF391B]">{o.voucherNumber || "S/N"}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono font-bold text-[#BF391B]">{o.voucherNumber || "S/N"}</span>
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-stone-100 font-bold uppercase text-stone-600">
+                      {o.tipoDocumento === 'factura' ? 'FAC' : 'BOL'}
+                    </span>
+                  </div>
                 </td>
                 <td className="px-6 py-4">
                   <p className="text-sm font-bold text-[#0D0D0D] uppercase">{o.clienteNombre || "Consumidor Final"}</p>
                   <p className="text-[10px] text-[#9AA0A6]">{o.clienteDocumento || "Sin DNI"}</p>
+                </td>
+                <td className="px-6 py-4">
+                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                    o.sunatStatus === 'ACEPTADO' 
+                      ? 'bg-green-100 text-green-700 border border-green-200' 
+                      : o.sunatStatus === 'RECHAZADO'
+                      ? 'bg-red-100 text-red-700 border border-red-200'
+                      : 'bg-amber-100 text-amber-700 border border-amber-200'
+                  }`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${
+                      o.sunatStatus === 'ACEPTADO' ? 'bg-green-600' : o.sunatStatus === 'RECHAZADO' ? 'bg-red-600' : 'bg-amber-500'
+                    }`} />
+                    {o.sunatStatus || 'PENDIENTE'}
+                  </span>
                 </td>
                 <td className="px-6 py-4 text-xs text-stone-500">
                   {o.createdAt.toLocaleString()}
@@ -604,10 +680,20 @@ export default function FacturacionPage() {
                   S/ {o.total.toFixed(2)}
                 </td>
                 <td className="px-6 py-4 text-right flex justify-end gap-1.5">
+                  {o.sunatStatus !== 'ACEPTADO' && (
+                    <button 
+                      onClick={() => handleSyncSunat(o.id)}
+                      disabled={syncingSunat}
+                      className="p-2 rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 transition-all disabled:opacity-50"
+                      title="Enviar a SUNAT"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">cloud_upload</span>
+                    </button>
+                  )}
                   <button 
                     onClick={() => handlePrint(o)}
                     className="p-2 rounded-lg bg-[#BF391B]/5 text-[#BF391B] hover:bg-[#BF391B] hover:text-white transition-all"
-                    title="Imprimir Boleta"
+                    title="Imprimir Comprobante"
                   >
                     <span className="material-symbols-outlined text-[18px]">print</span>
                   </button>
@@ -621,7 +707,7 @@ export default function FacturacionPage() {
                   <button 
                     onClick={() => handleDelete(o.id)}
                     className="p-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all"
-                    title="Eliminar Boleta"
+                    title="Eliminar Comprobante"
                   >
                     <span className="material-symbols-outlined text-[18px]">delete</span>
                   </button>

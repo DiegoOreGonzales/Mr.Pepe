@@ -299,7 +299,7 @@ export default function TableOrderModal({ mesaNumero, onClose, onSuccess }: Tabl
     if (submitting) return;
     setSubmitting(true);
 
-    const generatedVoucher = voucherNumber || `${tipoDocumento === "factura" ? "F" : "B"}${String(mesaNumero).padStart(2, "0")}-${Date.now().toString().slice(-6)}`;
+    const generatedVoucher = voucherNumber || undefined;
 
     try {
       const res = await fetch("/api/orders", {
@@ -465,13 +465,13 @@ export default function TableOrderModal({ mesaNumero, onClose, onSuccess }: Tabl
                       setDocumento("");
                       setClienteNombre("");
                     }}
-                    className={`flex-1 py-2 text-xs font-bold rounded-xl border transition-all ${
+                    className={`flex-1 py-2.5 text-xs font-bold rounded-xl border transition-all ${
                       tipoDocumento === "boleta"
-                        ? "bg-black text-white border-black"
+                        ? "bg-[#0D0D0D] text-white border-[#0D0D0D] shadow-sm"
                         : "bg-white text-stone-600 border-stone-200 hover:bg-stone-50"
                     }`}
                   >
-                    Boleta (DNI)
+                    Boleta Electrónica (B001)
                   </button>
                   <button
                     type="button"
@@ -480,13 +480,13 @@ export default function TableOrderModal({ mesaNumero, onClose, onSuccess }: Tabl
                       setDocumento("");
                       setClienteNombre("");
                     }}
-                    className={`flex-1 py-2 text-xs font-bold rounded-xl border transition-all ${
+                    className={`flex-1 py-2.5 text-xs font-bold rounded-xl border transition-all ${
                       tipoDocumento === "factura"
-                        ? "bg-black text-white border-black"
+                        ? "bg-[#0D0D0D] text-white border-[#0D0D0D] shadow-sm"
                         : "bg-white text-stone-600 border-stone-200 hover:bg-stone-50"
                     }`}
                   >
-                    Factura (RUC)
+                    Factura Electrónica (F001)
                   </button>
                 </div>
 

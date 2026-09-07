@@ -32,9 +32,21 @@ CREATE TABLE IF NOT EXISTS orders (
     cliente_documento VARCHAR(50),
     tipo_documento VARCHAR(50),
     voucher_number VARCHAR(50),
+    sunat_status VARCHAR(50) DEFAULT 'PENDIENTE',
+    sunat_hash VARCHAR(100),
+    sunat_qr TEXT,
+    sunat_cdr_code VARCHAR(10),
+    sunat_cdr_desc TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Asegurar columnas SUNAT si la tabla ya existía
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS sunat_status VARCHAR(50) DEFAULT 'PENDIENTE';
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS sunat_hash VARCHAR(100);
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS sunat_qr TEXT;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS sunat_cdr_code VARCHAR(10);
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS sunat_cdr_desc TEXT;
 
 -- 4. Tabla de Alertas (Notificación de Llamados de Cliente)
 CREATE TABLE IF NOT EXISTS alerts (
