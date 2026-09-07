@@ -291,7 +291,7 @@ function printBillingTicket(order: Order) {
               <img src="${window.location.origin}/logo.png" style="width: 100%; height: 100%; object-fit: contain;" alt="Logo" />
             </div>
           </div>
-          <h2 class="font-black" style="font-size: 20px; letter-spacing: -0.5px; margin: 0;">MR. PEPE</h2>
+          <h2 class="font-black" style="font-size: 20px; letter-spacing: -0.5px; margin: 0;">MISTER PEPE II</h2>
           <p class="font-bold uppercase" style="font-size: 10px; letter-spacing: 0.2em; margin: 0 0 8px 0;">BROASTER Y BRASAS</p>
           
           <div style="font-size: 10px; line-height: 1.3;">

@@ -1,14 +1,14 @@
 // Configuración Centralizada de Facturación Electrónica SUNAT - Mr. Pepe
 export const SUNAT_CONFIG = {
-  // Datos del Emisor / Contribuyente (Formulario 7140)
+  // Datos del Emisor / Contribuyente Oficial (Ficha RUC SUNAT)
   ruc: process.env.SUNAT_RUC || "10418236103",
   razonSocial: process.env.SUNAT_RAZON_SOCIAL || "DE LA CRUZ BALDEON ROCIO ELENA",
-  nombreComercial: process.env.SUNAT_NOMBRE_COMERCIAL || "MR. PEPE",
-  direccion: process.env.SUNAT_DIRECCION || "LIMA - PERU",
-  departamento: process.env.SUNAT_DEPARTAMENTO || "LIMA",
-  provincia: process.env.SUNAT_PROVINCIA || "LIMA",
-  distrito: process.env.SUNAT_DISTRITO || "LIMA",
-  ubigeo: process.env.SUNAT_UBIGEO || "150101",
+  nombreComercial: process.env.SUNAT_NOMBRE_COMERCIAL || "MISTER PEPE II",
+  direccion: process.env.SUNAT_DIRECCION || "Jr. Junín 413 con Av. 13 de Noviembre - El Tambo - Huancayo",
+  departamento: process.env.SUNAT_DEPARTAMENTO || "JUNIN",
+  provincia: process.env.SUNAT_PROVINCIA || "HUANCAYO",
+  distrito: process.env.SUNAT_DISTRITO || "EL TAMBO",
+  ubigeo: process.env.SUNAT_UBIGEO || "120114",
 
   // Certificado Digital Tributario (CDT)
   certPin: process.env.SUNAT_CERT_PIN || "RocioDeLaCruz3101",
