@@ -7,30 +7,54 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const statusParam = searchParams.get('status');
-    const limitParam = searchParams.get('limit') || '50';
+    const limitParam = searchParams.get('limit') || '500';
     const mesaParam = searchParams.get('mesa');
     const unpaidParam = searchParams.get('unpaid');
-    
+    const startDateParam = searchParams.get('startDate');
+    const endDateParam = searchParams.get('endDate');
+
     let res;
     if (mesaParam && unpaidParam === 'true') {
       res = await query(
         "SELECT * FROM orders WHERE mesa_numero = $1 AND status != 'pagado' ORDER BY created_at ASC",
         [parseInt(mesaParam)]
       );
-    } else if (statusParam === 'active') {
-      res = await query(
-        "SELECT * FROM orders WHERE status IN ('pendiente', 'preparando', 'listo') ORDER BY created_at ASC"
-      );
-    } else if (statusParam === 'billing') {
-      res = await query(
-        "SELECT * FROM orders WHERE status IN ('pagado', 'entregado') ORDER BY created_at DESC LIMIT $1",
-        [parseInt(limitParam)]
-      );
     } else {
-      res = await query(
-        "SELECT * FROM orders ORDER BY created_at DESC LIMIT $1",
-        [parseInt(limitParam)]
-      );
+      const conditions: string[] = [];
+      const params: any[] = [];
+      let paramIndex = 1;
+
+      if (statusParam === 'active') {
+        conditions.push(`status IN ('pendiente', 'preparando', 'listo')`);
+      } else if (statusParam === 'billing') {
+        conditions.push(`status IN ('pagado', 'entregado')`);
+      } else if (statusParam && statusParam !== 'all') {
+        conditions.push(`status = $${paramIndex++}`);
+        params.push(statusParam);
+      }
+
+      if (startDateParam) {
+        const d = new Date(startDateParam);
+        if (!isNaN(d.getTime())) {
+          conditions.push(`created_at >= $${paramIndex++}`);
+          params.push(d);
+        }
+      }
+
+      if (endDateParam) {
+        const d = new Date(endDateParam);
+        if (!isNaN(d.getTime())) {
+          conditions.push(`created_at <= $${paramIndex++}`);
+          params.push(d);
+        }
+      }
+
+      const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+      const limitVal = parseInt(limitParam) || 500;
+      params.push(limitVal);
+      const queryStr = `SELECT * FROM orders ${whereClause} ORDER BY created_at DESC LIMIT $${paramIndex}`;
+
+      res = await query(queryStr, params);
     }
     
     const mapped = res.rows.map(row => ({
