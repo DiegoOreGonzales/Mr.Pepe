@@ -1,5 +1,6 @@
 import { Order } from "../firebase/hooks";
 import { SUNAT_CONFIG } from "./config";
+import { LOGO_BASE64 } from "./logo-base64";
 
 function numberToWords(amount: number): string {
   const units = ["", "UN", "DOS", "TRES", "CUATRO", "CINCO", "SEIS", "SIETE", "OCHO", "NUEVE"];
@@ -105,8 +106,11 @@ export function printTicket80mm(order: Order) {
       </head>
       <body>
         <div class="text-center" style="margin-bottom: 16px;">
+          <div style="display: flex; justify-content: center; margin-bottom: 10px;">
+            <img src="${LOGO_BASE64}" style="width: 75px; height: 75px; object-fit: contain;" alt="Logo Mr. Pepe" />
+          </div>
           <h2 class="font-black" style="font-size: 20px; margin: 0;">${SUNAT_CONFIG.nombreComercial}</h2>
-          <p class="font-bold" style="font-size: 10px; margin: 0 0 6px 0;">BROASTER Y BRASAS</p>
+          <p class="font-bold uppercase" style="font-size: 10px; margin: 0 0 6px 0;">BROASTER Y BRASAS</p>
           <div style="font-size: 10px; line-height: 1.3;">
             <p style="margin: 0;" class="font-bold">${SUNAT_CONFIG.razonSocial}</p>
             <p style="margin: 0;" class="font-bold">RUC: ${SUNAT_CONFIG.ruc}</p>
@@ -207,6 +211,9 @@ export function printTicket58mm(order: Order) {
       </head>
       <body>
         <div class="text-center">
+          <div style="display: flex; justify-content: center; margin-bottom: 6px;">
+            <img src="${LOGO_BASE64}" style="width: 50px; height: 50px; object-fit: contain;" alt="Logo Mr. Pepe" />
+          </div>
           <strong style="font-size: 13px;">${SUNAT_CONFIG.nombreComercial}</strong>
           <div style="font-size: 8px;">RUC: ${SUNAT_CONFIG.ruc}</div>
           <div style="font-size: 8px;">${SUNAT_CONFIG.razonSocial}</div>
@@ -293,14 +300,19 @@ export function printInvoiceA4(order: Order) {
       <body>
         <!-- Header -->
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px;">
-          <div style="flex: 1; padding-right: 24px;">
-            <h1 style="font-size: 26px; font-weight: 900; margin: 0 0 4px 0; color: #0D0D0D;">${SUNAT_CONFIG.nombreComercial}</h1>
-            <p style="font-size: 12px; font-weight: 700; color: #BF391B; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 1px;">BROASTER Y BRASAS</p>
-            <p style="font-size: 11px; font-weight: 700; margin: 0 0 2px 0;">${SUNAT_CONFIG.razonSocial}</p>
-            <p style="font-size: 11px; color: #4b5563; margin: 0 0 2px 0;">${SUNAT_CONFIG.direccion}</p>
-            <p style="font-size: 11px; color: #4b5563; margin: 0;">Teléfono: 984335339 | Junín - Huancayo - Perú</p>
+          <div style="display: flex; gap: 20px; align-items: center; flex: 1; padding-right: 24px;">
+            <div style="width: 90px; height: 90px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+              <img src="${LOGO_BASE64}" style="max-width: 100%; max-height: 100%; object-fit: contain;" alt="Logo Mr. Pepe" />
+            </div>
+            <div>
+              <h1 style="font-size: 26px; font-weight: 900; margin: 0 0 4px 0; color: #0D0D0D;">${SUNAT_CONFIG.nombreComercial}</h1>
+              <p style="font-size: 12px; font-weight: 700; color: #BF391B; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 1px;">BROASTER Y BRASAS</p>
+              <p style="font-size: 11px; font-weight: 700; margin: 0 0 2px 0;">${SUNAT_CONFIG.razonSocial}</p>
+              <p style="font-size: 11px; color: #4b5563; margin: 0 0 2px 0;">${SUNAT_CONFIG.direccion}</p>
+              <p style="font-size: 11px; color: #4b5563; margin: 0;">Teléfono: 984335339 | Junín - Huancayo - Perú</p>
+            </div>
           </div>
-          <div class="border-box" style="width: 260px; text-align: center; padding: 14px 10px; background: #fafafa;">
+          <div class="border-box" style="width: 260px; text-align: center; padding: 14px 10px; background: #fafafa; flex-shrink: 0;">
             <div style="font-size: 14px; font-weight: 900; margin-bottom: 6px;">R.U.C. N° ${SUNAT_CONFIG.ruc}</div>
             <div style="font-size: 15px; font-weight: 900; background: #0D0D0D; color: #fff; padding: 6px 4px; border-radius: 4px; margin-bottom: 6px; text-transform: uppercase;">
               ${order.tipoDocumento === 'factura' ? 'FACTURA ELECTRÓNICA' : 'BOLETA DE VENTA ELECTRÓNICA'}
