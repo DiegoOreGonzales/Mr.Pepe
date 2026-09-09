@@ -2,6 +2,7 @@
 import { useState, useRef, useCallback } from "react";
 import { useBillingOrders, Order } from "@/lib/firebase/hooks";
 import { numberToWords } from "@/lib/numberToWords";
+import { printTicket80mm, printTicket58mm, printInvoiceA4, downloadInvoiceXml, downloadCdrXml } from "@/lib/sunat/print-formats";
 
 // ── API RENIEC - Consulta DNI (via /api/reniec proxy) ─────────────────────────
 
@@ -435,6 +436,8 @@ export default function FacturacionPage() {
   const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [syncingSunat, setSyncingSunat] = useState(false);
+  const [printModalOrder, setPrintModalOrder] = useState<Order | null>(null);
+  const [cdrModalOrder, setCdrModalOrder] = useState<Order | null>(null);
 
   const showToast = useCallback((type: "success" | "error", message: string) => {
     setToast({ type, message });
@@ -660,18 +663,25 @@ export default function FacturacionPage() {
                   <p className="text-[10px] text-[#9AA0A6]">{o.clienteDocumento || "Sin DNI"}</p>
                 </td>
                 <td className="px-6 py-4">
-                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                    o.sunatStatus === 'ACEPTADO' 
-                      ? 'bg-green-100 text-green-700 border border-green-200' 
-                      : o.sunatStatus === 'RECHAZADO'
-                      ? 'bg-red-100 text-red-700 border border-red-200'
-                      : 'bg-amber-100 text-amber-700 border border-amber-200'
-                  }`}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${
-                      o.sunatStatus === 'ACEPTADO' ? 'bg-green-600' : o.sunatStatus === 'RECHAZADO' ? 'bg-red-600' : 'bg-amber-500'
-                    }`} />
-                    {o.sunatStatus || 'PENDIENTE'}
-                  </span>
+                  <button
+                    onClick={() => setCdrModalOrder(o)}
+                    className="group/badge inline-flex items-center gap-1.5 transition-transform hover:scale-105"
+                    title="Ver Constancia CDR y Detalles SUNAT"
+                  >
+                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                      o.sunatStatus === 'ACEPTADO' 
+                        ? 'bg-green-100 text-green-700 border border-green-200' 
+                        : o.sunatStatus === 'RECHAZADO'
+                        ? 'bg-red-100 text-red-700 border border-red-200'
+                        : 'bg-amber-100 text-amber-700 border border-amber-200'
+                    }`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${
+                        o.sunatStatus === 'ACEPTADO' ? 'bg-green-600' : o.sunatStatus === 'RECHAZADO' ? 'bg-red-600' : 'bg-amber-500'
+                      }`} />
+                      {o.sunatStatus || 'PENDIENTE'}
+                      <span className="material-symbols-outlined text-[13px] opacity-60 group-hover/badge:opacity-100">info</span>
+                    </span>
+                  </button>
                 </td>
                 <td className="px-6 py-4 text-xs text-stone-500">
                   {o.createdAt.toLocaleString()}
@@ -691,9 +701,16 @@ export default function FacturacionPage() {
                     </button>
                   )}
                   <button 
-                    onClick={() => handlePrint(o)}
+                    onClick={() => setCdrModalOrder(o)}
+                    className="p-2 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white transition-all"
+                    title="Ver Constancia CDR y Descargar XML"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">verified</span>
+                  </button>
+                  <button 
+                    onClick={() => setPrintModalOrder(o)}
                     className="p-2 rounded-lg bg-[#BF391B]/5 text-[#BF391B] hover:bg-[#BF391B] hover:text-white transition-all"
-                    title="Imprimir Comprobante"
+                    title="Elegir Formato de Impresión (80mm, 58mm, A4)"
                   >
                     <span className="material-symbols-outlined text-[18px]">print</span>
                   </button>
@@ -809,6 +826,207 @@ export default function FacturacionPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Selección de Formato de Impresión SUNAT */}
+      {printModalOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl animate-in fade-in duration-200">
+            <div className="flex items-center justify-between pb-3 border-b border-stone-100 mb-4">
+              <div>
+                <h3 className="text-base font-extrabold text-[#0D0D0D]">Formatos de Impresión SUNAT</h3>
+                <p className="text-xs text-stone-500 font-mono mt-0.5">{printModalOrder.voucherNumber || 'S/N'} • S/ {printModalOrder.total.toFixed(2)}</p>
+              </div>
+              <button 
+                onClick={() => setPrintModalOrder(null)} 
+                className="text-stone-400 hover:text-stone-600 material-symbols-outlined"
+              >
+                close
+              </button>
+            </div>
+
+            <p className="text-xs text-stone-600 mb-4">Seleccione la medida o formato de salida para imprimir el comprobante:</p>
+
+            <div className="space-y-3">
+              {/* Opción 80mm */}
+              <button
+                onClick={() => {
+                  printTicket80mm(printModalOrder);
+                  setPrintModalOrder(null);
+                }}
+                className="w-full flex items-center gap-4 p-4 rounded-xl border border-stone-200 hover:border-[#BF391B] hover:bg-[#BF391B]/5 transition-all text-left group"
+              >
+                <div className="w-10 h-10 rounded-lg bg-stone-100 group-hover:bg-[#BF391B]/10 flex items-center justify-center text-stone-700 group-hover:text-[#BF391B]">
+                  <span className="material-symbols-outlined text-[24px]">receipt_long</span>
+                </div>
+                <div className="flex-1">
+                  <div className="text-sm font-bold text-[#0D0D0D] flex items-center gap-2">
+                    Ticket Térmico 80mm
+                    <span className="text-[10px] px-2 py-0.5 rounded bg-green-100 text-green-700 font-bold">Estándar</span>
+                  </div>
+                  <p className="text-xs text-stone-500 mt-0.5">Ideal para impresoras de caja (Epson, Xprinter, Bixolon).</p>
+                </div>
+                <span className="material-symbols-outlined text-stone-400 group-hover:text-[#BF391B]">chevron_right</span>
+              </button>
+
+              {/* Opción 58mm */}
+              <button
+                onClick={() => {
+                  printTicket58mm(printModalOrder);
+                  setPrintModalOrder(null);
+                }}
+                className="w-full flex items-center gap-4 p-4 rounded-xl border border-stone-200 hover:border-[#BF391B] hover:bg-[#BF391B]/5 transition-all text-left group"
+              >
+                <div className="w-10 h-10 rounded-lg bg-stone-100 group-hover:bg-[#BF391B]/10 flex items-center justify-center text-stone-700 group-hover:text-[#BF391B]">
+                  <span className="material-symbols-outlined text-[24px]">receipt</span>
+                </div>
+                <div className="flex-1">
+                  <div className="text-sm font-bold text-[#0D0D0D]">Ticket Compacto 58mm</div>
+                  <p className="text-xs text-stone-500 mt-0.5">Para mini-impresoras térmicas portátiles o Bluetooth de mozo.</p>
+                </div>
+                <span className="material-symbols-outlined text-stone-400 group-hover:text-[#BF391B]">chevron_right</span>
+              </button>
+
+              {/* Opción A4 */}
+              <button
+                onClick={() => {
+                  printInvoiceA4(printModalOrder);
+                  setPrintModalOrder(null);
+                }}
+                className="w-full flex items-center gap-4 p-4 rounded-xl border border-stone-200 hover:border-[#BF391B] hover:bg-[#BF391B]/5 transition-all text-left group"
+              >
+                <div className="w-10 h-10 rounded-lg bg-stone-100 group-hover:bg-[#BF391B]/10 flex items-center justify-center text-stone-700 group-hover:text-[#BF391B]">
+                  <span className="material-symbols-outlined text-[24px]">description</span>
+                </div>
+                <div className="flex-1">
+                  <div className="text-sm font-bold text-[#0D0D0D] flex items-center gap-2">
+                    Formato A4 (Hoja Completa)
+                    <span className="text-[10px] px-2 py-0.5 rounded bg-blue-100 text-blue-700 font-bold">Corporativo</span>
+                  </div>
+                  <p className="text-xs text-stone-500 mt-0.5">Diseño formal para facturas con RUC solicitadas por empresas.</p>
+                </div>
+                <span className="material-symbols-outlined text-stone-400 group-hover:text-[#BF391B]">chevron_right</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal / CRUD de Constancia de Recepción (CDR) y Descargas SUNAT */}
+      {cdrModalOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl w-full max-w-lg p-6 shadow-2xl animate-in fade-in duration-200 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-stone-100 mb-4">
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                  cdrModalOrder.sunatStatus === 'ACEPTADO' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
+                }`}>
+                  <span className="material-symbols-outlined text-[22px]">verified</span>
+                </div>
+                <div>
+                  <h3 className="text-base font-extrabold text-[#0D0D0D]">Constancia de Recepción (CDR)</h3>
+                  <p className="text-xs text-stone-500 font-mono">{cdrModalOrder.voucherNumber || 'S/N'}</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setCdrModalOrder(null)} 
+                className="text-stone-400 hover:text-stone-600 material-symbols-outlined"
+              >
+                close
+              </button>
+            </div>
+
+            {/* Resumen de Estado */}
+            <div className={`p-4 rounded-xl mb-4 border ${
+              cdrModalOrder.sunatStatus === 'ACEPTADO'
+                ? 'bg-green-50/70 border-green-200 text-green-900'
+                : 'bg-amber-50/70 border-amber-200 text-amber-900'
+            }`}>
+              <div className="flex items-center justify-between font-bold text-xs mb-1">
+                <span>ESTADO DEL COMPROBANTE:</span>
+                <span className="uppercase px-2 py-0.5 rounded bg-white/80 border text-[11px]">
+                  {cdrModalOrder.sunatStatus || 'PENDIENTE'}
+                </span>
+              </div>
+              <p className="text-xs leading-relaxed mt-1">
+                {cdrModalOrder.sunatCdrDesc || 'Comprobante generado localmente con QR y Hash. Listo para transmisión a SUNAT.'}
+              </p>
+            </div>
+
+            {/* Datos Técnicos */}
+            <div className="space-y-3 mb-6 text-xs">
+              <div className="p-3 bg-stone-50 rounded-xl space-y-2 font-mono">
+                <div className="flex justify-between">
+                  <span className="text-stone-500">Tipo CPE:</span>
+                  <span className="font-bold text-stone-800">
+                    {cdrModalOrder.tipoDocumento === 'factura' ? '01 - Factura Electrónica' : '03 - Boleta Electrónica'}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-stone-500">Emisor:</span>
+                  <span className="font-bold text-stone-800">10418236103 (MISTER PEPE II)</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-stone-500">Receptor:</span>
+                  <span className="font-bold text-stone-800">{cdrModalOrder.clienteDocumento || '00000000'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-stone-500">Importe Total:</span>
+                  <span className="font-bold text-stone-800">S/ {cdrModalOrder.total.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-stone-500">Código CDR:</span>
+                  <span className="font-bold text-stone-800">{cdrModalOrder.sunatCdrCode || '0 (Conforme)'}</span>
+                </div>
+              </div>
+
+              {/* Hash Digital */}
+              {cdrModalOrder.sunatHash && (
+                <div>
+                  <label className="block text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-1">
+                    Código Hash Digital (DigestValue)
+                  </label>
+                  <div className="p-2.5 bg-stone-100 rounded-lg font-mono text-[11px] text-stone-700 break-all select-all">
+                    {cdrModalOrder.sunatHash}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Acciones de Descarga */}
+            <div className="space-y-2.5 pt-2 border-t border-stone-100">
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => downloadInvoiceXml(cdrModalOrder)}
+                  className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-stone-200 hover:bg-stone-50 text-xs font-bold text-stone-700 transition-all shadow-sm"
+                >
+                  <span className="material-symbols-outlined text-[18px] text-blue-600">code</span>
+                  Descargar XML UBL
+                </button>
+                <button
+                  onClick={() => downloadCdrXml(cdrModalOrder)}
+                  className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-stone-200 hover:bg-stone-50 text-xs font-bold text-stone-700 transition-all shadow-sm"
+                >
+                  <span className="material-symbols-outlined text-[18px] text-green-600">verified</span>
+                  Descargar CDR (XML)
+                </button>
+              </div>
+
+              {cdrModalOrder.sunatStatus !== 'ACEPTADO' && (
+                <button
+                  onClick={async () => {
+                    await handleSyncSunat(cdrModalOrder.id);
+                    setCdrModalOrder(null);
+                  }}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition-all shadow-sm"
+                >
+                  <span className="material-symbols-outlined text-[18px]">cloud_upload</span>
+                  Reintentar Envío a SUNAT
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}
