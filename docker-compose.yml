@@ -39,10 +39,14 @@ services:
     restart: always
     ports:
       - "3000:3000"
+    env_file:
+      - ./web-admin/.env.local
     environment:
       DATABASE_URL: postgresql://postgres:mrpepepassword@db:5432/mrpepe
       NODE_ENV: production
       PORT: 3000
+    volumes:
+      - ./web-admin/certs:/app/certs:ro
     depends_on:
       - db
     networks:

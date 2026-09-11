@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -259,30 +259,30 @@ export function useBillingOrders() {
   const [orders, setOrders]   = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function fetchBilling() {
-      try {
-        const res = await fetch("/api/orders?status=billing");
-        const json = await res.json();
-        if (json.success && json.data) {
-          setOrders(
-            json.data.map((o: any) => ({
-              ...o,
-              createdAt: parseDate(o.createdAt),
-            }))
-          );
-        }
-      } catch (e) {
-        console.error("Error in useBillingOrders:", e);
-      } finally {
-        setLoading(false);
+  const fetchBilling = useCallback(async () => {
+    try {
+      const res = await fetch("/api/orders?status=billing");
+      const json = await res.json();
+      if (json.success && json.data) {
+        setOrders(
+          json.data.map((o: any) => ({
+            ...o,
+            createdAt: parseDate(o.createdAt),
+          }))
+        );
       }
+    } catch (e) {
+      console.error("Error in useBillingOrders:", e);
+    } finally {
+      setLoading(false);
     }
+  }, []);
 
+  useEffect(() => {
     fetchBilling();
     const interval = setInterval(fetchBilling, 3000);
     return () => clearInterval(interval);
-  }, []);
+  }, [fetchBilling]);
 
-  return { orders, loading };
+  return { orders, loading, refresh: fetchBilling };
 }

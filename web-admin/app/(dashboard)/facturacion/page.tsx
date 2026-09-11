@@ -421,7 +421,7 @@ function PrintTicket({ order }: { order: Order | null }) {
 }
 
 export default function FacturacionPage() {
-  const { orders, loading } = useBillingOrders();
+  const { orders, loading, refresh: refreshBilling } = useBillingOrders();
   const [search, setSearch] = useState("");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
@@ -456,6 +456,7 @@ export default function FacturacionPage() {
       const data = await res.json();
       if (data.success) {
         showToast("success", data.message || "Sincronización con SUNAT completada");
+        await refreshBilling();
       } else {
         showToast("error", data.error || "Error al sincronizar con SUNAT");
       }
