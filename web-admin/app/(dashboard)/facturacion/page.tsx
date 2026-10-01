@@ -425,6 +425,13 @@ export default function FacturacionPage() {
   const [search, setSearch] = useState("");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
+  // Filtros de Estado y Monto
+  const [statusFilter, setStatusFilter] = useState<"todos" | "PENDIENTE" | "ACEPTADO" | "HISTORICO">("todos");
+  const [amountFilter, setAmountFilter] = useState<"all" | "min10" | "min20" | "min50" | "small15">("all");
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [showSyncConfirmModal, setShowSyncConfirmModal] = useState(false);
+  const [processingStatus, setProcessingStatus] = useState(false);
+
   // Edit / Delete State
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
   const [editNombre, setEditNombre] = useState("");
@@ -432,6 +439,7 @@ export default function FacturacionPage() {
   const [editTipo, setEditTipo] = useState<"boleta" | "factura">("boleta");
   const [editVoucher, setEditVoucher] = useState("");
   const [editTotal, setEditTotal] = useState("");
+  const [editSunatStatus, setEditSunatStatus] = useState<"PENDIENTE" | "ACEPTADO" | "HISTORICO">("PENDIENTE");
 
   const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -445,17 +453,20 @@ export default function FacturacionPage() {
     timeoutRef.current = setTimeout(() => setToast(null), 3000);
   }, []);
 
-  const handleSyncSunat = async (orderId?: string) => {
+  // Transmisión manual con SUNAT (individual, por IDs seleccionados o masivo)
+  const handleSyncSunat = async (orderId?: string, orderIds?: string[]) => {
     setSyncingSunat(true);
     try {
       const res = await fetch("/api/sunat/sync", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderId }),
+        body: JSON.stringify({ orderId, orderIds }),
       });
       const data = await res.json();
       if (data.success) {
         showToast("success", data.message || "Sincronización con SUNAT completada");
+        setSelectedIds([]);
+        setShowSyncConfirmModal(false);
         await refreshBilling();
       } else {
         showToast("error", data.error || "Error al sincronizar con SUNAT");
@@ -464,6 +475,33 @@ export default function FacturacionPage() {
       showToast("error", "Error de conexión al sincronizar con SUNAT");
     } finally {
       setSyncingSunat(false);
+    }
+  };
+
+  // Cambio manual de estado SUNAT (para excluir compras pequeñas o restaurar a pendiente)
+  const handleUpdateStatus = async (orderIdOrIds: string | string[], newStatus: "PENDIENTE" | "HISTORICO" | "EXCLUIDO") => {
+    setProcessingStatus(true);
+    try {
+      const isArray = Array.isArray(orderIdOrIds);
+      const res = await fetch("/api/sunat/status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(
+          isArray ? { orderIds: orderIdOrIds, status: newStatus } : { orderId: orderIdOrIds, status: newStatus }
+        ),
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast("success", data.message || `Estado actualizado a ${newStatus}`);
+        if (isArray) setSelectedIds([]);
+        await refreshBilling();
+      } else {
+        showToast("error", data.error || "Error al actualizar estado");
+      }
+    } catch (e) {
+      showToast("error", "Error de conexión al actualizar estado");
+    } finally {
+      setProcessingStatus(false);
     }
   };
 
@@ -478,6 +516,7 @@ export default function FacturacionPage() {
     setEditTipo(o.tipoDocumento || "boleta");
     setEditVoucher(o.voucherNumber || "");
     setEditTotal(String(o.total));
+    setEditSunatStatus((o.sunatStatus as any) || "PENDIENTE");
   };
 
   const handleEditSubmit = async (e: React.FormEvent) => {
@@ -495,13 +534,15 @@ export default function FacturacionPage() {
           clienteDocumento: editDoc,
           tipoDocumento: editTipo,
           voucherNumber: editVoucher,
-          total: parseFloat(editTotal)
+          total: parseFloat(editTotal),
+          sunatStatus: editSunatStatus
         })
       });
       const json = await res.json();
       if (json.success) {
         setEditingOrder(null);
         showToast("success", "Comprobante editado correctamente");
+        await refreshBilling();
       } else {
         showToast("error", "Error al editar: " + json.error);
       }
@@ -521,6 +562,7 @@ export default function FacturacionPage() {
       const json = await res.json();
       if (json.success) {
         showToast("success", "Comprobante eliminado con éxito");
+        await refreshBilling();
       } else {
         showToast("error", "Error al eliminar: " + json.error);
       }
@@ -530,15 +572,84 @@ export default function FacturacionPage() {
     }
   };
 
-  const filtered = orders.filter(o => 
-    search === "" || 
-    o.clienteNombre?.toLowerCase().includes(search.toLowerCase()) ||
-    o.clienteDocumento?.includes(search) ||
-    o.voucherNumber?.includes(search)
-  );
+  // Métricas para pestañas de estado
+  const stats = {
+    todos: {
+      count: orders.length,
+      total: orders.reduce((sum, o) => sum + o.total, 0),
+    },
+    pendiente: {
+      count: orders.filter((o) => (o.sunatStatus || "PENDIENTE") === "PENDIENTE").length,
+      total: orders
+        .filter((o) => (o.sunatStatus || "PENDIENTE") === "PENDIENTE")
+        .reduce((sum, o) => sum + o.total, 0),
+    },
+    aceptado: {
+      count: orders.filter((o) => o.sunatStatus === "ACEPTADO").length,
+      total: orders.filter((o) => o.sunatStatus === "ACEPTADO").reduce((sum, o) => sum + o.total, 0),
+    },
+    historico: {
+      count: orders.filter((o) => o.sunatStatus === "HISTORICO" || o.sunatStatus === "EXCLUIDO").length,
+      total: orders
+        .filter((o) => o.sunatStatus === "HISTORICO" || o.sunatStatus === "EXCLUIDO")
+        .reduce((sum, o) => sum + o.total, 0),
+    },
+  };
+
+  // Filtrado compuesto
+  const filtered = orders.filter((o) => {
+    // 1. Búsqueda por texto
+    const matchesSearch =
+      search === "" ||
+      o.clienteNombre?.toLowerCase().includes(search.toLowerCase()) ||
+      o.clienteDocumento?.includes(search) ||
+      o.voucherNumber?.toLowerCase().includes(search.toLowerCase());
+
+    // 2. Filtro por Estado
+    const st = o.sunatStatus || "PENDIENTE";
+    let matchesStatus = true;
+    if (statusFilter === "PENDIENTE") {
+      matchesStatus = st === "PENDIENTE";
+    } else if (statusFilter === "ACEPTADO") {
+      matchesStatus = st === "ACEPTADO";
+    } else if (statusFilter === "HISTORICO") {
+      matchesStatus = st === "HISTORICO" || st === "EXCLUIDO";
+    }
+
+    // 3. Filtro por Monto (Compras pequeñas)
+    let matchesAmount = true;
+    if (amountFilter === "min10") matchesAmount = o.total >= 10;
+    else if (amountFilter === "min20") matchesAmount = o.total >= 20;
+    else if (amountFilter === "min50") matchesAmount = o.total >= 50;
+    else if (amountFilter === "small15") matchesAmount = o.total <= 15;
+
+    return matchesSearch && matchesStatus && matchesAmount;
+  });
+
+  // Manejo de Selección Múltiple
+  const isAllSelected = filtered.length > 0 && filtered.every((o) => selectedIds.includes(o.id));
+  const toggleSelectAll = () => {
+    if (isAllSelected) {
+      const visibleIds = new Set(filtered.map((o) => o.id));
+      setSelectedIds((prev) => prev.filter((id) => !visibleIds.has(id)));
+    } else {
+      const newIds = new Set([...selectedIds, ...filtered.map((o) => o.id)]);
+      setSelectedIds(Array.from(newIds));
+    }
+  };
+
+  const toggleSelectOne = (id: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  const selectedOrders = orders.filter((o) => selectedIds.includes(o.id));
+  const selectedTotal = selectedOrders.reduce((sum, o) => sum + o.total, 0);
+  const selectedPendientes = selectedOrders.filter((o) => (o.sunatStatus || "PENDIENTE") === "PENDIENTE");
 
   const handleExportCSV = () => {
-    const headers = ["N° Comprobante", "Tipo Doc", "Cliente", "DNI / RUC", "Mesa", "Total (S/)", "Fecha y Hora"];
+    const headers = ["N° Comprobante", "Tipo Doc", "Cliente", "DNI / RUC", "Mesa", "Total (S/)", "Estado SUNAT", "Fecha y Hora"];
     const rows = filtered.map((o) => [
       o.voucherNumber || "S/N",
       (o.tipoDocumento || "boleta").toUpperCase(),
@@ -546,13 +657,14 @@ export default function FacturacionPage() {
       o.clienteDocumento ? `="${o.clienteDocumento}"` : "00000000",
       `Mesa ${o.mesaNumero}`,
       o.total.toFixed(2),
+      o.sunatStatus || "PENDIENTE",
       o.createdAt.toLocaleString("es-PE")
     ]);
 
     const csvContent = [
-      ["sep=;"], // Forzar punto y coma en Excel
+      ["sep=;"],
       ["MR. PEPE - FACTURACION Y BOLETAS"],
-      ["REPORTE DE COMPROBANTES EMITIDOS"],
+      ["REPORTE DE COMPROBANTES EMITIDOS CON GESTION DE ESTADO SUNAT"],
       [`Fecha de exportacion: ${new Date().toLocaleString("es-PE")}`],
       [], 
       headers,
@@ -571,7 +683,7 @@ export default function FacturacionPage() {
   };
 
   return (
-    <div className="space-y-6 relative">
+    <div className="space-y-6 relative pb-16">
       {/* Toast Notification */}
       {toast && (
         <div
@@ -585,39 +697,147 @@ export default function FacturacionPage() {
           {toast.message}
         </div>
       )}
+
       {/* Consulta DNI - RENIEC */}
       <div className="no-print">
         <DniLookup />
       </div>
 
-      {/* Buscador */}
-      <div className="flex items-center gap-4 no-print flex-wrap">
-        <div className="relative flex-1 min-w-[280px] max-w-md">
-          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#9AA0A6] text-[20px]">search</span>
-          <input
-            type="text"
-            placeholder="Buscar por DNI, Nombre o N° Boleta..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 rounded-xl border border-stone-100 outline-none focus:border-[#BF391B] transition-all bg-white card-shadow text-sm"
-          />
-        </div>
-        <div className="flex items-center gap-2 px-4 py-2.5 bg-white rounded-lg border border-stone-100 text-xs font-bold text-stone-500 card-shadow">
-          <span className="w-2 h-2 rounded-full bg-[#1A8952] animate-pulse" />
-          {filtered.length} COMPROBANTES
+      {/* Pestañas de Gestión de Estado SUNAT */}
+      <div className="no-print grid grid-cols-2 md:grid-cols-4 gap-3">
+        <button
+          onClick={() => setStatusFilter("todos")}
+          className={`p-4 rounded-xl border text-left transition-all ${
+            statusFilter === "todos"
+              ? "bg-stone-900 border-stone-900 text-white shadow-lg"
+              : "bg-white border-stone-200 hover:border-stone-300 text-stone-700"
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider opacity-80">Todos</span>
+            <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
+              statusFilter === "todos" ? "bg-white/20 text-white" : "bg-stone-100 text-stone-600"
+            }`}>
+              {stats.todos.count}
+            </span>
+          </div>
+          <div className="text-lg font-black mt-1">S/ {stats.todos.total.toFixed(2)}</div>
+          <div className="text-[10px] opacity-75 mt-0.5">Historial total emitido</div>
+        </button>
+
+        <button
+          onClick={() => setStatusFilter("PENDIENTE")}
+          className={`p-4 rounded-xl border text-left transition-all ${
+            statusFilter === "PENDIENTE"
+              ? "bg-amber-600 border-amber-600 text-white shadow-lg shadow-amber-600/20"
+              : "bg-amber-50/50 border-amber-200 hover:border-amber-300 text-amber-900"
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
+              <span className={`w-2 h-2 rounded-full ${statusFilter === "PENDIENTE" ? "bg-white" : "bg-amber-500 animate-pulse"}`} />
+              Pendientes
+            </span>
+            <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
+              statusFilter === "PENDIENTE" ? "bg-white/20 text-white" : "bg-amber-100 text-amber-800"
+            }`}>
+              {stats.pendiente.count}
+            </span>
+          </div>
+          <div className="text-lg font-black mt-1">S/ {stats.pendiente.total.toFixed(2)}</div>
+          <div className="text-[10px] opacity-80 mt-0.5">Pendiente de envío manual</div>
+        </button>
+
+        <button
+          onClick={() => setStatusFilter("ACEPTADO")}
+          className={`p-4 rounded-xl border text-left transition-all ${
+            statusFilter === "ACEPTADO"
+              ? "bg-green-700 border-green-700 text-white shadow-lg shadow-green-700/20"
+              : "bg-green-50/50 border-green-200 hover:border-green-300 text-green-900"
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-[14px]">verified</span>
+              Aceptados
+            </span>
+            <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
+              statusFilter === "ACEPTADO" ? "bg-white/20 text-white" : "bg-green-100 text-green-800"
+            }`}>
+              {stats.aceptado.count}
+            </span>
+          </div>
+          <div className="text-lg font-black mt-1">S/ {stats.aceptado.total.toFixed(2)}</div>
+          <div className="text-[10px] opacity-80 mt-0.5">Declarados con éxito</div>
+        </button>
+
+        <button
+          onClick={() => setStatusFilter("HISTORICO")}
+          className={`p-4 rounded-xl border text-left transition-all ${
+            statusFilter === "HISTORICO"
+              ? "bg-stone-700 border-stone-700 text-white shadow-lg"
+              : "bg-stone-100/70 border-stone-200 hover:border-stone-300 text-stone-700"
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-[14px]">block</span>
+              Excluidos / Histórico
+            </span>
+            <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
+              statusFilter === "HISTORICO" ? "bg-white/20 text-white" : "bg-stone-200 text-stone-700"
+            }`}>
+              {stats.historico.count}
+            </span>
+          </div>
+          <div className="text-lg font-black mt-1">S/ {stats.historico.total.toFixed(2)}</div>
+          <div className="text-[10px] opacity-80 mt-0.5">No se envían a SUNAT</div>
+        </button>
+      </div>
+
+      {/* Buscador y Controles de Filtro */}
+      <div className="flex items-center gap-3 no-print flex-wrap justify-between">
+        <div className="flex items-center gap-3 flex-1 min-w-[320px] max-w-2xl">
+          {/* Input Buscador */}
+          <div className="relative flex-1">
+            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#9AA0A6] text-[20px]">search</span>
+            <input
+              type="text"
+              placeholder="Buscar por DNI/RUC, Nombre o N° Comprobante..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-stone-200 outline-none focus:border-[#BF391B] transition-all bg-white card-shadow text-sm"
+            />
+          </div>
+
+          {/* Filtro de Compras Pequeñas (Evitar sobregiros) */}
+          <div className="relative">
+            <select
+              value={amountFilter}
+              onChange={(e) => setAmountFilter(e.target.value as any)}
+              className="py-2.5 px-3 rounded-xl border border-stone-200 bg-white text-xs font-bold text-stone-700 outline-none focus:border-[#BF391B] card-shadow cursor-pointer"
+              title="Filtro de montos para evitar sobregiro por compras pequeñas"
+            >
+              <option value="all">💰 Todos los montos</option>
+              <option value="min10">💰 Monto ≥ S/ 10.00</option>
+              <option value="min20">💰 Monto ≥ S/ 20.00</option>
+              <option value="min50">💰 Monto ≥ S/ 50.00</option>
+              <option value="small15">⚠️ Compras pequeñas (≤ S/ 15.00)</option>
+            </select>
+          </div>
         </div>
         
-        {/* Botones de Acción */}
+        {/* Botones de Acción Global */}
         <div className="flex items-center gap-2">
-          {/* Sync SUNAT Button */}
+          {/* Botón Sincronizar SUNAT Manual */}
           <button
-            onClick={() => handleSyncSunat()}
-            disabled={syncingSunat}
-            className="flex items-center gap-1.5 px-4 py-2.5 bg-stone-800 hover:bg-stone-900 text-white font-bold text-xs rounded-xl transition-all shadow-md disabled:opacity-50"
-            title="Enviar comprobantes pendientes a SUNAT"
+            onClick={() => setShowSyncConfirmModal(true)}
+            disabled={syncingSunat || stats.pendiente.count === 0}
+            className="flex items-center gap-1.5 px-4 py-2.5 bg-stone-900 hover:bg-black text-white font-bold text-xs rounded-xl transition-all shadow-md disabled:opacity-40"
+            title="Enviar comprobantes pendientes a SUNAT manualmente"
           >
-            <span className={`material-symbols-outlined text-[16px] ${syncingSunat ? 'animate-spin' : ''}`}>sync</span>
-            {syncingSunat ? "Sincronizando..." : "Sincronizar SUNAT"}
+            <span className={`material-symbols-outlined text-[16px] ${syncingSunat ? 'animate-spin' : ''}`}>cloud_upload</span>
+            {syncingSunat ? "Enviando..." : `Enviar Pendientes a SUNAT (${stats.pendiente.count})`}
           </button>
 
           {/* Export CSV Button */}
@@ -631,113 +851,339 @@ export default function FacturacionPage() {
         </div>
       </div>
 
-      {/* Tabla */}
+      {/* Barra de Acciones en Lote (cuando hay ítems seleccionados) */}
+      {selectedIds.length > 0 && (
+        <div className="sticky top-4 z-40 bg-stone-900 text-white p-3.5 rounded-2xl shadow-2xl flex items-center justify-between gap-4 animate-in fade-in slide-in-from-top-2 no-print border border-stone-800">
+          <div className="flex items-center gap-3">
+            <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-white/10 text-white font-mono text-xs font-bold">
+              {selectedIds.length}
+            </span>
+            <div>
+              <p className="text-xs font-bold leading-tight">
+                {selectedIds.length} comprobante(s) seleccionado(s)
+              </p>
+              <p className="text-[11px] text-stone-400 font-mono">
+                Total acumulado: <strong className="text-white">S/ {selectedTotal.toFixed(2)}</strong> • ({selectedPendientes.length} pendientes)
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {/* Enviar seleccionadas a SUNAT */}
+            {selectedPendientes.length > 0 && (
+              <button
+                onClick={() => handleSyncSunat(undefined, selectedPendientes.map(o => o.id))}
+                disabled={syncingSunat}
+                className="flex items-center gap-1.5 px-3.5 py-2 bg-amber-500 hover:bg-amber-600 text-black font-bold text-xs rounded-xl transition-all shadow disabled:opacity-50"
+              >
+                <span className="material-symbols-outlined text-[16px]">cloud_upload</span>
+                Enviar {selectedPendientes.length} a SUNAT
+              </button>
+            )}
+
+            {/* Excluir seleccionadas (Para compras pequeñas que no se quieren declarar) */}
+            <button
+              onClick={() => handleUpdateStatus(selectedIds, "HISTORICO")}
+              disabled={processingStatus}
+              className="flex items-center gap-1.5 px-3.5 py-2 bg-stone-800 hover:bg-stone-700 text-stone-200 font-bold text-xs rounded-xl transition-all border border-stone-700 disabled:opacity-50"
+              title="Marcar como Histórico/Excluido para no enviar a SUNAT"
+            >
+              <span className="material-symbols-outlined text-[16px]">block</span>
+              Excluir de SUNAT ({selectedIds.length})
+            </button>
+
+            {/* Reactivar seleccionadas a PENDIENTE */}
+            <button
+              onClick={() => handleUpdateStatus(selectedIds, "PENDIENTE")}
+              disabled={processingStatus}
+              className="flex items-center gap-1.5 px-3 py-2 bg-stone-800 hover:bg-stone-700 text-stone-300 font-bold text-xs rounded-xl transition-all border border-stone-700 disabled:opacity-50"
+              title="Restaurar estado a Pendiente para permitir envío"
+            >
+              <span className="material-symbols-outlined text-[16px]">restore</span>
+              Poner en Pendiente
+            </button>
+
+            {/* Limpiar selección */}
+            <button
+              onClick={() => setSelectedIds([])}
+              className="p-2 text-stone-400 hover:text-white transition-colors"
+              title="Cancelar selección"
+            >
+              <span className="material-symbols-outlined text-[18px]">close</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Tabla con Checkboxes y Gestión de Estado */}
       <div className="bg-white rounded-[14px] border border-stone-100/60 card-shadow overflow-hidden no-print">
         <table className="w-full text-left">
           <thead className="bg-stone-50">
             <tr className="text-[10px] font-bold text-[#9AA0A6] uppercase tracking-widest">
-              <th className="px-6 py-4">N° Comprobante</th>
-              <th className="px-6 py-4">Cliente</th>
-              <th className="px-6 py-4">Estado SUNAT</th>
-              <th className="px-6 py-4">Fecha</th>
-              <th className="px-6 py-4">Total</th>
-              <th className="px-6 py-4 text-right">Acción</th>
+              <th className="px-4 py-4 w-10 text-center">
+                <input
+                  type="checkbox"
+                  checked={isAllSelected}
+                  onChange={toggleSelectAll}
+                  className="rounded border-stone-300 text-[#BF391B] focus:ring-[#BF391B] w-4 h-4 cursor-pointer"
+                  title="Seleccionar todas las visibles"
+                />
+              </th>
+              <th className="px-5 py-4">N° Comprobante</th>
+              <th className="px-5 py-4">Cliente</th>
+              <th className="px-5 py-4">Estado SUNAT</th>
+              <th className="px-5 py-4">Fecha</th>
+              <th className="px-5 py-4">Total</th>
+              <th className="px-5 py-4 text-right">Acción</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-stone-50">
             {loading ? (
               Array.from({ length: 6 }).map((_, i) => (
-                <tr key={i}><td colSpan={6} className="px-6 py-4 animate-pulse bg-stone-50/50 h-16"></td></tr>
+                <tr key={i}><td colSpan={7} className="px-6 py-4 animate-pulse bg-stone-50/50 h-16"></td></tr>
               ))
-            ) : filtered.map((o) => (
-              <tr key={o.id} className="hover:bg-stone-50 transition-colors group">
-                <td className="px-6 py-4">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono font-bold text-[#BF391B]">{o.voucherNumber || "S/N"}</span>
-                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-stone-100 font-bold uppercase text-stone-600">
-                      {o.tipoDocumento === 'factura' ? 'FAC' : 'BOL'}
-                    </span>
-                  </div>
-                </td>
-                <td className="px-6 py-4">
-                  <p className="text-sm font-bold text-[#0D0D0D] uppercase">{o.clienteNombre || "Consumidor Final"}</p>
-                  <p className="text-[10px] text-[#9AA0A6]">{o.clienteDocumento || "Sin DNI"}</p>
-                </td>
-                <td className="px-6 py-4">
-                  <button
-                    onClick={() => setCdrModalOrder(o)}
-                    className="group/badge inline-flex items-center gap-1.5 transition-transform hover:scale-105"
-                    title="Ver Constancia CDR y Detalles SUNAT"
-                  >
-                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                      o.sunatStatus === 'ACEPTADO' 
-                        ? 'bg-green-100 text-green-700 border border-green-200' 
-                        : o.sunatStatus === 'RECHAZADO'
-                        ? 'bg-red-100 text-red-700 border border-red-200'
-                        : 'bg-amber-100 text-amber-700 border border-amber-200'
-                    }`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${
-                        o.sunatStatus === 'ACEPTADO' ? 'bg-green-600' : o.sunatStatus === 'RECHAZADO' ? 'bg-red-600' : 'bg-amber-500'
-                      }`} />
-                      {o.sunatStatus || 'PENDIENTE'}
-                      <span className="material-symbols-outlined text-[13px] opacity-60 group-hover/badge:opacity-100">info</span>
-                    </span>
-                  </button>
-                </td>
-                <td className="px-6 py-4 text-xs text-stone-500">
-                  {o.createdAt.toLocaleString()}
-                </td>
-                <td className="px-6 py-4 font-extrabold text-sm text-[#0D0D0D]">
-                  S/ {o.total.toFixed(2)}
-                </td>
-                <td className="px-6 py-4 text-right flex justify-end gap-1.5">
-                  {o.sunatStatus !== 'ACEPTADO' && (
-                    <button 
-                      onClick={() => handleSyncSunat(o.id)}
-                      disabled={syncingSunat}
-                      className="p-2 rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 transition-all disabled:opacity-50"
-                      title="Enviar a SUNAT"
-                    >
-                      <span className="material-symbols-outlined text-[18px]">cloud_upload</span>
-                    </button>
-                  )}
-                  <button 
-                    onClick={() => setCdrModalOrder(o)}
-                    className="p-2 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white transition-all"
-                    title="Ver Constancia CDR y Descargar XML"
-                  >
-                    <span className="material-symbols-outlined text-[18px]">verified</span>
-                  </button>
-                  <button 
-                    onClick={() => setPrintModalOrder(o)}
-                    className="p-2 rounded-lg bg-[#BF391B]/5 text-[#BF391B] hover:bg-[#BF391B] hover:text-white transition-all"
-                    title="Elegir Formato de Impresión (80mm, 58mm, A4)"
-                  >
-                    <span className="material-symbols-outlined text-[18px]">print</span>
-                  </button>
-                  <button 
-                    onClick={() => openEditModal(o)}
-                    className="p-2 rounded-lg bg-[#BF391B]/5 text-[#BF391B] hover:bg-[#BF391B] hover:text-white transition-all"
-                    title="Editar Datos"
-                  >
-                    <span className="material-symbols-outlined text-[18px]">edit</span>
-                  </button>
-                  <button 
-                    onClick={() => handleDelete(o.id)}
-                    className="p-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all"
-                    title="Eliminar Comprobante"
-                  >
-                    <span className="material-symbols-outlined text-[18px]">delete</span>
-                  </button>
+            ) : filtered.length === 0 ? (
+              <tr>
+                <td colSpan={7} className="px-6 py-12 text-center text-stone-400">
+                  <span className="material-symbols-outlined text-[40px] mb-2 opacity-50">search_off</span>
+                  <p className="text-sm font-bold">No se encontraron comprobantes con los filtros seleccionados</p>
+                  <p className="text-xs text-stone-400 mt-1">Prueba cambiando la pestaña de estado o el filtro de monto.</p>
                 </td>
               </tr>
-            ))}
+            ) : filtered.map((o) => {
+              const isSelected = selectedIds.includes(o.id);
+              const orderStatus = o.sunatStatus || "PENDIENTE";
+              const isSmallPurchase = o.total <= 15;
+
+              return (
+                <tr 
+                  key={o.id} 
+                  className={`hover:bg-stone-50 transition-colors group ${isSelected ? 'bg-amber-50/40' : ''}`}
+                >
+                  {/* Checkbox selección */}
+                  <td className="px-4 py-4 text-center">
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => toggleSelectOne(o.id)}
+                      className="rounded border-stone-300 text-[#BF391B] focus:ring-[#BF391B] w-4 h-4 cursor-pointer"
+                    />
+                  </td>
+
+                  {/* N° Comprobante */}
+                  <td className="px-5 py-4">
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono font-bold text-[#BF391B] text-xs">{o.voucherNumber || "S/N"}</span>
+                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-stone-100 font-bold uppercase text-stone-600">
+                        {o.tipoDocumento === 'factura' ? 'FAC' : 'BOL'}
+                      </span>
+                      {isSmallPurchase && (
+                        <span className="text-[9px] px-1 py-0.2 rounded bg-amber-100 text-amber-800 font-bold" title="Compra pequeña">
+                          ≤15
+                        </span>
+                      )}
+                    </div>
+                  </td>
+
+                  {/* Cliente */}
+                  <td className="px-5 py-4">
+                    <p className="text-sm font-bold text-[#0D0D0D] uppercase truncate max-w-[200px]" title={o.clienteNombre || "Consumidor Final"}>
+                      {o.clienteNombre || "Consumidor Final"}
+                    </p>
+                    <p className="text-[10px] text-[#9AA0A6]">{o.clienteDocumento || "Sin DNI"}</p>
+                  </td>
+
+                  {/* Estado SUNAT Badge */}
+                  <td className="px-5 py-4">
+                    <button
+                      onClick={() => setCdrModalOrder(o)}
+                      className="group/badge inline-flex items-center gap-1.5 transition-transform hover:scale-105"
+                      title="Ver Detalles y Constancia SUNAT"
+                    >
+                      {orderStatus === 'ACEPTADO' && (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-green-100 text-green-700 border border-green-200">
+                          <span className="w-1.5 h-1.5 rounded-full bg-green-600" />
+                          Aceptado
+                          <span className="material-symbols-outlined text-[13px] opacity-60">verified</span>
+                        </span>
+                      )}
+
+                      {orderStatus === 'PENDIENTE' && (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-300">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                          Pendiente Envío
+                          <span className="material-symbols-outlined text-[13px] opacity-60">schedule</span>
+                        </span>
+                      )}
+
+                      {(orderStatus === 'HISTORICO' || orderStatus === 'EXCLUIDO') && (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-stone-100 text-stone-600 border border-stone-300">
+                          <span className="w-1.5 h-1.5 rounded-full bg-stone-400" />
+                          Excluido / Histórico
+                          <span className="material-symbols-outlined text-[13px] opacity-60">block</span>
+                        </span>
+                      )}
+
+                      {orderStatus === 'RECHAZADO' && (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-red-100 text-red-700 border border-red-200">
+                          <span className="w-1.5 h-1.5 rounded-full bg-red-600" />
+                          Rechazado
+                        </span>
+                      )}
+                    </button>
+                  </td>
+
+                  {/* Fecha */}
+                  <td className="px-5 py-4 text-xs text-stone-500 whitespace-nowrap">
+                    {o.createdAt.toLocaleString("es-PE", { dateStyle: "short", timeStyle: "short" })}
+                  </td>
+
+                  {/* Total */}
+                  <td className="px-5 py-4 font-extrabold text-sm text-[#0D0D0D] whitespace-nowrap">
+                    S/ {o.total.toFixed(2)}
+                  </td>
+
+                  {/* Acciones */}
+                  <td className="px-5 py-4 text-right flex justify-end gap-1.5 whitespace-nowrap">
+                    {/* Botón Enviar individual a SUNAT (Solo si está pendiente) */}
+                    {orderStatus === 'PENDIENTE' && (
+                      <button 
+                        onClick={() => handleSyncSunat(o.id)}
+                        disabled={syncingSunat}
+                        className="p-2 rounded-lg bg-amber-100 text-amber-800 hover:bg-amber-200 transition-all disabled:opacity-50"
+                        title="Enviar a SUNAT manualmente ahora"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">cloud_upload</span>
+                      </button>
+                    )}
+
+                    {/* Botón Excluir de SUNAT (Para compras pequeñas o ventas internas) */}
+                    {orderStatus === 'PENDIENTE' && (
+                      <button 
+                        onClick={() => handleUpdateStatus(o.id, "HISTORICO")}
+                        disabled={processingStatus}
+                        className="p-2 rounded-lg bg-stone-100 text-stone-600 hover:bg-stone-200 transition-all disabled:opacity-50"
+                        title="Excluir de SUNAT (Marcar como compra pequeña / histórico para no enviar)"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">block</span>
+                      </button>
+                    )}
+
+                    {/* Botón Reactivar a Pendiente (Si fue excluida previamente) */}
+                    {(orderStatus === 'HISTORICO' || orderStatus === 'EXCLUIDO') && (
+                      <button 
+                        onClick={() => handleUpdateStatus(o.id, "PENDIENTE")}
+                        disabled={processingStatus}
+                        className="p-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-all disabled:opacity-50"
+                        title="Reactivar a estado Pendiente para permitir envío a SUNAT"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">restore</span>
+                      </button>
+                    )}
+
+                    {/* Botón Ver CDR */}
+                    <button 
+                      onClick={() => setCdrModalOrder(o)}
+                      className="p-2 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white transition-all"
+                      title="Ver Constancia CDR y Detalles"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">verified</span>
+                    </button>
+
+                    {/* Botón Imprimir Ticket */}
+                    <button 
+                      onClick={() => setPrintModalOrder(o)}
+                      className="p-2 rounded-lg bg-[#BF391B]/5 text-[#BF391B] hover:bg-[#BF391B] hover:text-white transition-all"
+                      title="Elegir Formato de Impresión (80mm, 58mm, A4)"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">print</span>
+                    </button>
+
+                    {/* Botón Editar */}
+                    <button 
+                      onClick={() => openEditModal(o)}
+                      className="p-2 rounded-lg bg-[#BF391B]/5 text-[#BF391B] hover:bg-[#BF391B] hover:text-white transition-all"
+                      title="Editar Datos"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">edit</span>
+                    </button>
+
+                    {/* Botón Eliminar */}
+                    <button 
+                      onClick={() => handleDelete(o.id)}
+                      className="p-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all"
+                      title="Eliminar Comprobante"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">delete</span>
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
 
       {/* Ticket Invisible */}
       <PrintTicket order={selectedOrder} />
+
+      {/* Modal de Confirmación de Sincronización Manual con SUNAT */}
+      {showSyncConfirmModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl animate-in fade-in duration-200">
+            <div className="flex items-center gap-3 pb-3 border-b border-stone-100 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center">
+                <span className="material-symbols-outlined text-[24px]">cloud_upload</span>
+              </div>
+              <div>
+                <h3 className="text-base font-extrabold text-[#0D0D0D]">Enviar a SUNAT Manualmente</h3>
+                <p className="text-xs text-stone-500">Confirmación antes de transmitir</p>
+              </div>
+            </div>
+
+            <div className="p-4 bg-amber-50/70 border border-amber-200 rounded-xl mb-4 text-xs text-amber-900 space-y-2">
+              <p className="font-bold text-sm">
+                Se enviarán {stats.pendiente.count} comprobante(s) en estado PENDIENTE.
+              </p>
+              <div className="flex justify-between items-center py-1.5 border-t border-amber-200/60 font-mono">
+                <span>Monto Total a Declarar:</span>
+                <span className="font-extrabold text-sm text-[#0D0D0D]">S/ {stats.pendiente.total.toFixed(2)}</span>
+              </div>
+              <p className="text-[11px] text-amber-800 leading-relaxed">
+                🛡️ <strong>Protección contra sobregiros:</strong> Los <strong>{stats.historico.count}</strong> comprobantes marcados como <strong>Excluido / Histórico</strong> (compras pequeñas) están protegidos y NO viajarán a SUNAT.
+              </p>
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowSyncConfirmModal(false)}
+                className="flex-1 py-2.5 border border-stone-200 text-stone-600 font-bold rounded-xl hover:bg-stone-50 transition-all text-xs"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSyncSunat()}
+                disabled={syncingSunat}
+                className="flex-1 py-2.5 bg-stone-900 hover:bg-black text-white font-bold rounded-xl transition-all text-xs flex items-center justify-center gap-1.5 shadow-md"
+              >
+                {syncingSunat ? (
+                  <>
+                    <span className="material-symbols-outlined text-[16px] animate-spin">sync</span>
+                    Transmitiendo...
+                  </>
+                ) : (
+                  <>
+                    <span className="material-symbols-outlined text-[16px]">cloud_upload</span>
+                    Confirmar Envío
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal Editar Boleta */}
       {editingOrder && (
@@ -764,6 +1210,20 @@ export default function FacturacionPage() {
                   <option value="boleta">Boleta (DNI)</option>
                   <option value="factura">Factura (RUC)</option>
                 </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-stone-600 uppercase mb-1">Estado SUNAT</label>
+                <select
+                  value={editSunatStatus}
+                  onChange={(e) => setEditSunatStatus(e.target.value as any)}
+                  className="w-full p-2.5 rounded-lg border border-stone-200 text-sm focus:outline-none focus:border-[#BF391B]"
+                >
+                  <option value="PENDIENTE">⏳ PENDIENTE (Pendiente de envío manual)</option>
+                  <option value="HISTORICO">🚫 EXCLUIDO / HISTÓRICO (No enviar a SUNAT)</option>
+                  <option value="ACEPTADO">✅ ACEPTADO (Declarado en SUNAT)</option>
+                </select>
+                <p className="text-[10px] text-stone-400 mt-1">Usa &quot;EXCLUIDO / HISTÓRICO&quot; para compras pequeñas o ventas internas que no deben viajar a SUNAT.</p>
               </div>
 
               <div>
@@ -943,6 +1403,8 @@ export default function FacturacionPage() {
             <div className={`p-4 rounded-xl mb-4 border ${
               cdrModalOrder.sunatStatus === 'ACEPTADO'
                 ? 'bg-green-50/70 border-green-200 text-green-900'
+                : (cdrModalOrder.sunatStatus === 'HISTORICO' || cdrModalOrder.sunatStatus === 'EXCLUIDO')
+                ? 'bg-stone-100 border-stone-200 text-stone-800'
                 : 'bg-amber-50/70 border-amber-200 text-amber-900'
             }`}>
               <div className="flex items-center justify-between font-bold text-xs mb-1">
@@ -952,7 +1414,9 @@ export default function FacturacionPage() {
                 </span>
               </div>
               <p className="text-xs leading-relaxed mt-1">
-                {cdrModalOrder.sunatCdrDesc || 'Comprobante generado localmente con QR y Hash. Listo para transmisión a SUNAT.'}
+                {(cdrModalOrder.sunatStatus === 'HISTORICO' || cdrModalOrder.sunatStatus === 'EXCLUIDO')
+                  ? 'Comprobante marcado como Excluido / Histórico. No será transmitido a SUNAT para evitar sobregiros por compras pequeñas.'
+                  : cdrModalOrder.sunatCdrDesc || 'Comprobante emitido localmente con QR y Hash. Pendiente de envío manual a SUNAT.'}
               </p>
             </div>
 
@@ -1015,7 +1479,7 @@ export default function FacturacionPage() {
                 </button>
               </div>
 
-              {cdrModalOrder.sunatStatus !== 'ACEPTADO' && (
+              {cdrModalOrder.sunatStatus === 'PENDIENTE' && (
                 <button
                   onClick={async () => {
                     await handleSyncSunat(cdrModalOrder.id);
@@ -1024,7 +1488,20 @@ export default function FacturacionPage() {
                   className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition-all shadow-sm"
                 >
                   <span className="material-symbols-outlined text-[18px]">cloud_upload</span>
-                  Reintentar Envío a SUNAT
+                  Enviar a SUNAT Manualmente
+                </button>
+              )}
+
+              {(cdrModalOrder.sunatStatus === 'HISTORICO' || cdrModalOrder.sunatStatus === 'EXCLUIDO') && (
+                <button
+                  onClick={async () => {
+                    await handleUpdateStatus(cdrModalOrder.id, 'PENDIENTE');
+                    setCdrModalOrder(null);
+                  }}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all shadow-sm"
+                >
+                  <span className="material-symbols-outlined text-[18px]">restore</span>
+                  Reactivar a Pendiente (Habilitar para envío a SUNAT)
                 </button>
               )}
             </div>

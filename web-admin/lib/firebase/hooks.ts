@@ -22,7 +22,7 @@ export interface Order {
   createdAt: Date;
   printed?: boolean;
   voucherNumber?: string;
-  sunatStatus?: "PENDIENTE" | "ACEPTADO" | "RECHAZADO";
+  sunatStatus?: "PENDIENTE" | "ACEPTADO" | "RECHAZADO" | "HISTORICO" | "EXCLUIDO";
   sunatHash?: string;
   sunatQr?: string;
   sunatCdrCode?: string;

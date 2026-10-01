@@ -1,5 +1,8 @@
 import crypto from "crypto";
 import { SUNAT_CONFIG } from "./config";
+import { buildUbl21InvoiceXml } from "./ubl-builder";
+import { signUblXml } from "./xml-signer";
+import { sendInvoiceToSunat } from "./soap-client";
 
 export interface SunatTaxBreakdown {
   gravada: number;
@@ -59,7 +62,8 @@ export function generateSunatQRString(
 ): string {
   const tipoCpe = payload.tipoDocumento === "factura" ? "01" : "03";
   const [serie, correlativo] = payload.voucherNumber.split("-");
-  const fechaStr = (payload.fecha || new Date()).toISOString().slice(0, 10);
+  const f = payload.fecha ? new Date(payload.fecha) : new Date();
+  const fechaStr = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Lima" }).format(f);
   
   // Tipo documento de identidad según Catálogo 06 de SUNAT:
   // '1' = DNI, '6' = RUC, '0' = Doc. Trib. No Domic. Sin RUC / Consumidor final
@@ -166,29 +170,59 @@ export async function processElectronicInvoice(
     }
   }
 
-  // Modo DIRECTO (Conexión SUNAT / Ambiente Ensayo Beta o Producción)
+  // Modo DIRECTO: Construir XML UBL 2.1, firmar con CDT (.pem / .p12) y transmitir a SUNAT mediante SOAP
   if (SUNAT_CONFIG.modo === "DIRECTO") {
-    if (SUNAT_CONFIG.ambiente === "beta") {
-      // Ensayo de validación y homologación con firma CDT
+    try {
+      const ublXml = buildUbl21InvoiceXml({
+        voucherNumber: payload.voucherNumber,
+        tipoDocumento: payload.tipoDocumento,
+        clienteNombre: payload.clienteNombre,
+        clienteDocumento: payload.clienteDocumento,
+        items: payload.items,
+        total: payload.total,
+        fecha: payload.fecha,
+      });
+
+      const { signedXml, hash: realHash } = signUblXml(ublXml);
+      const invoiceHash = realHash || hash;
+      const officialQrString = generateSunatQRString(payload, invoiceHash, tax);
+
+      const soapResult = await sendInvoiceToSunat(
+        signedXml,
+        payload.voucherNumber,
+        payload.tipoDocumento
+      );
+
+      if (soapResult.success) {
+        return {
+          voucherNumber: payload.voucherNumber,
+          hash: invoiceHash,
+          qrString: officialQrString,
+          status: "ACEPTADO",
+          cdrCode: soapResult.cdrCode || "0",
+          cdrDesc: soapResult.cdrDesc || "Comprobante aceptado conforme por SUNAT",
+        };
+      } else {
+        return {
+          voucherNumber: payload.voucherNumber,
+          hash: invoiceHash,
+          qrString: officialQrString,
+          status: "RECHAZADO",
+          cdrCode: soapResult.cdrCode || "ERROR",
+          cdrDesc: soapResult.cdrDesc || "Rechazado o error de transmisión con SUNAT",
+        };
+      }
+    } catch (directErr: any) {
+      console.error("Error al procesar emisión directa con SUNAT:", directErr);
       return {
         voucherNumber: payload.voucherNumber,
         hash,
         qrString,
-        status: "ACEPTADO",
-        cdrCode: "0",
-        cdrDesc: `El comprobante ${payload.voucherNumber} ha sido aceptado conforme por SUNAT (Ambiente de Ensayo / Beta).`,
+        status: "PENDIENTE",
+        cdrCode: undefined,
+        cdrDesc: `Error al firmar/transmitir a SUNAT: ${directErr.message}`,
       };
     }
-
-    // En producción oficial con transmisión directa
-    return {
-      voucherNumber: payload.voucherNumber,
-      hash,
-      qrString,
-      status: "ACEPTADO",
-      cdrCode: "0",
-      cdrDesc: `La ${payload.tipoDocumento === "factura" ? "Factura" : "Boleta"} número ${payload.voucherNumber}, ha sido aceptada por SUNAT.`,
-    };
   }
 
   // Modo predeterminado / SIMULADO / Contingencia:

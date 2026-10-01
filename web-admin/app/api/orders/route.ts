@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import { getNextCorrelative } from '@/lib/sunat/correlatives';
-import { processElectronicInvoice } from '@/lib/sunat/sunat-engine';
+import { processElectronicInvoice, calculateTaxes, generateDigitalHash, generateSunatQRString } from '@/lib/sunat/sunat-engine';
 
 export async function GET(request: Request) {
   try {
@@ -127,10 +127,19 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
   try {
-    const { id, status, items, total, clienteNombre, clienteDocumento, tipoDocumento, voucherNumber } = await request.json();
+    const { id, status, items, total, clienteNombre, clienteDocumento, tipoDocumento, voucherNumber, sunatStatus } = await request.json();
     
     if (!id) {
       return NextResponse.json({ success: false, error: 'ID de orden requerido' }, { status: 400 });
+    }
+
+    // Actualización directa de estado SUNAT (por ejemplo para marcar como HISTORICO / EXCLUIDO o PENDIENTE)
+    if (sunatStatus !== undefined && !status) {
+      await query(
+        `UPDATE orders SET sunat_status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2`,
+        [sunatStatus, id]
+      );
+      return NextResponse.json({ success: true, message: `Estado SUNAT actualizado a ${sunatStatus}` });
     }
     
     // Si viene items o total, actualizamos los detalles de la orden
@@ -159,13 +168,14 @@ export async function PUT(request: Request) {
             finalVoucher = await getNextCorrelative(currentType);
           }
 
-          // Desglose tributario y generación de QR y Hash oficial de SUNAT
+          // Desglose tributario y generación de QR y Hash oficial de SUNAT para impresión de tickets
           const orderItems = items !== undefined 
             ? items 
             : (Array.isArray(currentOrder.items) ? currentOrder.items : JSON.parse(currentOrder.items || '[]'));
           const orderTotal = total !== undefined ? Number(total) : parseFloat(currentOrder.total);
 
-          const sunatResult = await processElectronicInvoice({
+          const tax = calculateTaxes(orderTotal);
+          const digitalHash = generateDigitalHash({
             voucherNumber: finalVoucher,
             tipoDocumento: currentType,
             clienteNombre: clienteNombre || 'Consumidor Final',
@@ -173,8 +183,23 @@ export async function PUT(request: Request) {
             items: orderItems,
             total: orderTotal,
           });
+          const qrString = generateSunatQRString({
+            voucherNumber: finalVoucher,
+            tipoDocumento: currentType,
+            clienteNombre: clienteNombre || 'Consumidor Final',
+            clienteDocumento: clienteDocumento || '00000000',
+            items: orderItems,
+            total: orderTotal,
+          }, digitalHash, tax);
+
+          // IMPORTANTE (Evitar sobregiros por compras pequeñas):
+          // El comprobante se genera con numeración, Hash y QR válidos para entrega al cliente,
+          // pero NO se transmite automáticamente a SUNAT. Queda registrado como 'PENDIENTE'
+          // para que la dueña gestione su estado y decida enviarlo manualmente.
+          const initialSunatStatus = sunatStatus || 'PENDIENTE';
+          const initialCdrDesc = 'Emitido localmente. Pendiente de envío manual a SUNAT.';
           
-          // 2. Actualizar orden a pagado con comprobante y datos SUNAT
+          // 2. Actualizar orden a pagado con comprobante y datos SUNAT en estado PENDIENTE
           await query(
             `UPDATE orders 
              SET status = $1, cliente_nombre = $2, cliente_documento = $3, tipo_documento = $4, voucher_number = $5,
@@ -187,11 +212,11 @@ export async function PUT(request: Request) {
               clienteDocumento || null, 
               currentType, 
               finalVoucher,
-              sunatResult.status,
-              sunatResult.hash,
-              sunatResult.qrString,
-              sunatResult.cdrCode || null,
-              sunatResult.cdrDesc || null,
+              initialSunatStatus,
+              digitalHash,
+              qrString,
+              null,
+              initialCdrDesc,
               id
             ]
           );
@@ -205,9 +230,15 @@ export async function PUT(request: Request) {
 
           return NextResponse.json({ 
             success: true, 
-            message: 'Cobro procesado y comprobante generado con éxito',
+            message: 'Cobro procesado y comprobante generado con éxito (Listo para envío manual)',
             voucherNumber: finalVoucher,
-            sunat: sunatResult
+            sunat: {
+              voucherNumber: finalVoucher,
+              hash: digitalHash,
+              qrString,
+              status: initialSunatStatus,
+              cdrDesc: initialCdrDesc
+            }
           });
         } else {
           return NextResponse.json({ success: false, error: 'Orden no encontrada' }, { status: 404 });
