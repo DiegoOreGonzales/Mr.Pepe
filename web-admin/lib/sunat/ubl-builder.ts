@@ -111,7 +111,7 @@ export function buildUbl21InvoiceXml(data: UblInvoiceData): string {
   <cbc:ID>${data.voucherNumber}</cbc:ID>
   <cbc:IssueDate>${fechaStr}</cbc:IssueDate>
   <cbc:IssueTime>${horaStr}</cbc:IssueTime>
-  <cbc:InvoiceTypeCode listID="0101">${tipoCpe}</cbc:InvoiceTypeCode>
+  <cbc:InvoiceTypeCode listAgencyName="PE:SUNAT" listName="Tipo de Documento" listURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo01" listID="0101" name="Tipo de Operacion">${tipoCpe}</cbc:InvoiceTypeCode>
   <cbc:Note languageLocaleID="1000">${montoLetras}</cbc:Note>
   <cbc:DocumentCurrencyCode>PEN</cbc:DocumentCurrencyCode>
   <cac:Signature>
@@ -163,6 +163,10 @@ export function buildUbl21InvoiceXml(data: UblInvoiceData): string {
       </cac:PartyLegalEntity>
     </cac:Party>
   </cac:AccountingCustomerParty>
+  <cac:PaymentTerms>
+    <cbc:ID>FormaPago</cbc:ID>
+    <cbc:PaymentPaymentMeansID>Contado</cbc:PaymentPaymentMeansID>
+  </cac:PaymentTerms>
   <cac:TaxTotal>
     <cbc:TaxAmount currencyID="PEN">${igv.toFixed(2)}</cbc:TaxAmount>
     <cac:TaxSubtotal>
