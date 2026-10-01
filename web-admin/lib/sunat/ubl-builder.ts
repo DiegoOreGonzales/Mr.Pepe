@@ -165,7 +165,7 @@ export function buildUbl21InvoiceXml(data: UblInvoiceData): string {
   </cac:AccountingCustomerParty>
   <cac:PaymentTerms>
     <cbc:ID>FormaPago</cbc:ID>
-    <cbc:PaymentPaymentMeansID>Contado</cbc:PaymentPaymentMeansID>
+    <cbc:PaymentMeansID>Contado</cbc:PaymentMeansID>
   </cac:PaymentTerms>
   <cac:TaxTotal>
     <cbc:TaxAmount currencyID="PEN">${igv.toFixed(2)}</cbc:TaxAmount>
