@@ -31,14 +31,16 @@ export function buildUbl21InvoiceXml(data: UblInvoiceData): string {
 
   const doc = (data.clienteDocumento || "").trim();
   let tipoDocIdentidad = "0"; // Consumidor final sin documento
-  if (doc.length === 8) {
+  if (!doc || doc === "00000000" || doc === "0") {
+    tipoDocIdentidad = "0";
+  } else if (doc.length === 8) {
     tipoDocIdentidad = "1"; // DNI
   } else if (doc.length === 11) {
     tipoDocIdentidad = "6"; // RUC
   }
 
-  const clienteNombre = (data.clienteNombre || "Consumidor Final").trim();
-  const clienteDocumento = doc || (tipoDocIdentidad === "0" ? "00000000" : doc);
+  const clienteNombre = (data.clienteNombre || "Clientes Varios").trim();
+  const clienteDocumento = tipoDocIdentidad === "0" ? "00000000" : doc;
 
   const total = Number(data.total.toFixed(2));
   const gravada = Number((total / 1.18).toFixed(2));

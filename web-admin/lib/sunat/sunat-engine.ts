@@ -69,7 +69,9 @@ export function generateSunatQRString(
   // '1' = DNI, '6' = RUC, '0' = Doc. Trib. No Domic. Sin RUC / Consumidor final
   let tipoDocIdentidad = "0";
   const doc = (payload.clienteDocumento || "").trim();
-  if (doc.length === 8) {
+  if (!doc || doc === "00000000" || doc === "0") {
+    tipoDocIdentidad = "0";
+  } else if (doc.length === 8) {
     tipoDocIdentidad = "1"; // DNI
   } else if (doc.length === 11) {
     tipoDocIdentidad = "6"; // RUC
