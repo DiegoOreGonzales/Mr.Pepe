@@ -118,11 +118,14 @@ export async function sendInvoiceToSunat(
       const faultCode = faultCodeMatch ? faultCodeMatch[1].trim() : "Error";
       const faultString = faultStringMatch ? faultStringMatch[1].trim() : "Error en servidor SUNAT";
 
+      const numericCodeMatch = faultString.match(/\b(\d{4})\b/);
+      const cleanCode = numericCodeMatch ? numericCodeMatch[1] : faultCode.substring(0, 10);
+
       return {
         success: false,
         faultCode,
         faultString,
-        cdrCode: faultCode,
+        cdrCode: cleanCode,
         cdrDesc: faultString,
       };
     }

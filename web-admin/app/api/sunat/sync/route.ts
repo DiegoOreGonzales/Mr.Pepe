@@ -67,7 +67,7 @@ export async function POST(request: Request) {
           sunatRes.status,
           sunatRes.hash,
           sunatRes.qrString,
-          sunatRes.cdrCode || null,
+          sunatRes.cdrCode ? String(sunatRes.cdrCode).substring(0, 10) : null,
           sunatRes.cdrDesc || null,
           ord.id,
           diffDays > 3,
