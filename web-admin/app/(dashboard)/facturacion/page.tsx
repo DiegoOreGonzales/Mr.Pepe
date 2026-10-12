@@ -426,7 +426,7 @@ export default function FacturacionPage() {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
   // Filtros de Estado y Monto
-  const [statusFilter, setStatusFilter] = useState<"todos" | "PENDIENTE" | "ACEPTADO" | "HISTORICO">("todos");
+  const [statusFilter, setStatusFilter] = useState<"todos" | "PENDIENTE" | "ACEPTADO" | "HISTORICO" | "RECHAZADO">("todos");
   const [amountFilter, setAmountFilter] = useState<"all" | "min10" | "min20" | "min50" | "small15">("all");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [showSyncConfirmModal, setShowSyncConfirmModal] = useState(false);
@@ -439,7 +439,7 @@ export default function FacturacionPage() {
   const [editTipo, setEditTipo] = useState<"boleta" | "factura">("boleta");
   const [editVoucher, setEditVoucher] = useState("");
   const [editTotal, setEditTotal] = useState("");
-  const [editSunatStatus, setEditSunatStatus] = useState<"PENDIENTE" | "ACEPTADO" | "HISTORICO">("PENDIENTE");
+  const [editSunatStatus, setEditSunatStatus] = useState<"PENDIENTE" | "ACEPTADO" | "HISTORICO" | "RECHAZADO">("PENDIENTE");
 
   const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -479,7 +479,7 @@ export default function FacturacionPage() {
   };
 
   // Cambio manual de estado SUNAT (para excluir compras pequeñas o restaurar a pendiente)
-  const handleUpdateStatus = async (orderIdOrIds: string | string[], newStatus: "PENDIENTE" | "HISTORICO" | "EXCLUIDO") => {
+  const handleUpdateStatus = async (orderIdOrIds: string | string[], newStatus: "PENDIENTE" | "HISTORICO" | "EXCLUIDO" | "RECHAZADO") => {
     setProcessingStatus(true);
     try {
       const isArray = Array.isArray(orderIdOrIds);
@@ -588,6 +588,10 @@ export default function FacturacionPage() {
       count: orders.filter((o) => o.sunatStatus === "ACEPTADO").length,
       total: orders.filter((o) => o.sunatStatus === "ACEPTADO").reduce((sum, o) => sum + o.total, 0),
     },
+    rechazado: {
+      count: orders.filter((o) => o.sunatStatus === "RECHAZADO").length,
+      total: orders.filter((o) => o.sunatStatus === "RECHAZADO").reduce((sum, o) => sum + o.total, 0),
+    },
     historico: {
       count: orders.filter((o) => o.sunatStatus === "HISTORICO" || o.sunatStatus === "EXCLUIDO").length,
       total: orders
@@ -612,6 +616,8 @@ export default function FacturacionPage() {
       matchesStatus = st === "PENDIENTE";
     } else if (statusFilter === "ACEPTADO") {
       matchesStatus = st === "ACEPTADO";
+    } else if (statusFilter === "RECHAZADO") {
+      matchesStatus = st === "RECHAZADO";
     } else if (statusFilter === "HISTORICO") {
       matchesStatus = st === "HISTORICO" || st === "EXCLUIDO";
     }
@@ -647,6 +653,7 @@ export default function FacturacionPage() {
   const selectedOrders = orders.filter((o) => selectedIds.includes(o.id));
   const selectedTotal = selectedOrders.reduce((sum, o) => sum + o.total, 0);
   const selectedPendientes = selectedOrders.filter((o) => (o.sunatStatus || "PENDIENTE") === "PENDIENTE");
+  const selectedRechazados = selectedOrders.filter((o) => o.sunatStatus === "RECHAZADO");
 
   const handleExportCSV = () => {
     const headers = ["N° Comprobante", "Tipo Doc", "Cliente", "DNI / RUC", "Mesa", "Total (S/)", "Estado SUNAT", "Fecha y Hora"];
@@ -704,7 +711,7 @@ export default function FacturacionPage() {
       </div>
 
       {/* Pestañas de Gestión de Estado SUNAT */}
-      <div className="no-print grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="no-print grid grid-cols-2 md:grid-cols-5 gap-3">
         <button
           onClick={() => setStatusFilter("todos")}
           className={`p-4 rounded-xl border text-left transition-all ${
@@ -746,6 +753,29 @@ export default function FacturacionPage() {
           </div>
           <div className="text-lg font-black mt-1">S/ {stats.pendiente.total.toFixed(2)}</div>
           <div className="text-[10px] opacity-80 mt-0.5">Pendiente de envío manual</div>
+        </button>
+
+        <button
+          onClick={() => setStatusFilter("RECHAZADO")}
+          className={`p-4 rounded-xl border text-left transition-all ${
+            statusFilter === "RECHAZADO"
+              ? "bg-red-600 border-red-600 text-white shadow-lg shadow-red-600/20"
+              : "bg-red-50/60 border-red-200 hover:border-red-300 text-red-900"
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-[14px]">error</span>
+              Rechazados
+            </span>
+            <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
+              statusFilter === "RECHAZADO" ? "bg-white/20 text-white" : "bg-red-100 text-red-800"
+            }`}>
+              {stats.rechazado.count}
+            </span>
+          </div>
+          <div className="text-lg font-black mt-1">S/ {stats.rechazado.total.toFixed(2)}</div>
+          <div className="text-[10px] opacity-80 mt-0.5">Observados por SUNAT</div>
         </button>
 
         <button
@@ -863,12 +893,27 @@ export default function FacturacionPage() {
                 {selectedIds.length} comprobante(s) seleccionado(s)
               </p>
               <p className="text-[11px] text-stone-400 font-mono">
-                Total acumulado: <strong className="text-white">S/ {selectedTotal.toFixed(2)}</strong> • ({selectedPendientes.length} pendientes)
+                Total acumulado: <strong className="text-white">S/ {selectedTotal.toFixed(2)}</strong>
+                {selectedPendientes.length > 0 && <span> • ({selectedPendientes.length} pendientes)</span>}
+                {selectedRechazados.length > 0 && <span className="text-red-400 font-bold"> • ({selectedRechazados.length} rechazados)</span>}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Reintentar seleccionadas rechazadas */}
+            {selectedRechazados.length > 0 && (
+              <button
+                onClick={() => handleSyncSunat(undefined, selectedRechazados.map(o => o.id))}
+                disabled={syncingSunat}
+                className="flex items-center gap-1.5 px-3.5 py-2 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl transition-all shadow disabled:opacity-50"
+                title="Reintentar transmisión inmediata a SUNAT de los comprobantes rechazados"
+              >
+                <span className="material-symbols-outlined text-[16px]">replay</span>
+                Reintentar {selectedRechazados.length} Rechazados
+              </button>
+            )}
+
             {/* Enviar seleccionadas a SUNAT */}
             {selectedPendientes.length > 0 && (
               <button
@@ -1025,9 +1070,13 @@ export default function FacturacionPage() {
                       )}
 
                       {orderStatus === 'RECHAZADO' && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-red-100 text-red-700 border border-red-200">
-                          <span className="w-1.5 h-1.5 rounded-full bg-red-600" />
+                        <span 
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-red-100 text-red-700 border border-red-200 hover:bg-red-200 transition-colors"
+                          title={o.sunatCdrDesc ? `Motivo: ${o.sunatCdrDesc} (Click para ver detalles)` : "Comprobante rechazado por SUNAT (Click para ver detalles)"}
+                        >
+                          <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-ping" />
                           Rechazado
+                          <span className="material-symbols-outlined text-[13px] opacity-75">error</span>
                         </span>
                       )}
                     </button>
@@ -1045,6 +1094,42 @@ export default function FacturacionPage() {
 
                   {/* Acciones */}
                   <td className="px-5 py-4 text-right flex justify-end gap-1.5 whitespace-nowrap">
+                    {/* Botón Reintentar envío a SUNAT (Solo si fue rechazado) */}
+                    {orderStatus === 'RECHAZADO' && (
+                      <button 
+                        onClick={() => handleSyncSunat(o.id)}
+                        disabled={syncingSunat}
+                        className="p-2 rounded-lg bg-red-100 text-red-700 hover:bg-red-600 hover:text-white transition-all disabled:opacity-50"
+                        title={o.sunatCdrDesc ? `Reintentar envío a SUNAT ahora. Error previo: ${o.sunatCdrDesc}` : "Reintentar envío a SUNAT ahora (Comprobante Rechazado)"}
+                      >
+                        <span className="material-symbols-outlined text-[18px]">replay</span>
+                      </button>
+                    )}
+
+                    {/* Botón Restaurar a Pendiente si fue rechazado */}
+                    {orderStatus === 'RECHAZADO' && (
+                      <button 
+                        onClick={() => handleUpdateStatus(o.id, "PENDIENTE")}
+                        disabled={processingStatus}
+                        className="p-2 rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 transition-all disabled:opacity-50"
+                        title="Restablecer a Pendiente (Limpia el error para reiniciar flujo)"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">restart_alt</span>
+                      </button>
+                    )}
+
+                    {/* Botón Excluir si fue rechazado */}
+                    {orderStatus === 'RECHAZADO' && (
+                      <button 
+                        onClick={() => handleUpdateStatus(o.id, "HISTORICO")}
+                        disabled={processingStatus}
+                        className="p-2 rounded-lg bg-stone-100 text-stone-600 hover:bg-stone-200 transition-all disabled:opacity-50"
+                        title="Excluir de SUNAT (Marcar como histórico)"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">block</span>
+                      </button>
+                    )}
+
                     {/* Botón Enviar individual a SUNAT (Solo si está pendiente) */}
                     {orderStatus === 'PENDIENTE' && (
                       <button 
@@ -1222,6 +1307,7 @@ export default function FacturacionPage() {
                   <option value="PENDIENTE">⏳ PENDIENTE (Pendiente de envío manual)</option>
                   <option value="HISTORICO">🚫 EXCLUIDO / HISTÓRICO (No enviar a SUNAT)</option>
                   <option value="ACEPTADO">✅ ACEPTADO (Declarado en SUNAT)</option>
+                  <option value="RECHAZADO">❌ RECHAZADO (Observado / Rechazado por SUNAT)</option>
                 </select>
                 <p className="text-[10px] text-stone-400 mt-1">Usa &quot;EXCLUIDO / HISTÓRICO&quot; para compras pequeñas o ventas internas que no deben viajar a SUNAT.</p>
               </div>
@@ -1382,9 +1468,15 @@ export default function FacturacionPage() {
             <div className="flex items-center justify-between pb-3 border-b border-stone-100 mb-4">
               <div className="flex items-center gap-3">
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                  cdrModalOrder.sunatStatus === 'ACEPTADO' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
+                  cdrModalOrder.sunatStatus === 'ACEPTADO' 
+                    ? 'bg-green-100 text-green-700' 
+                    : cdrModalOrder.sunatStatus === 'RECHAZADO'
+                    ? 'bg-red-100 text-red-700'
+                    : 'bg-amber-100 text-amber-700'
                 }`}>
-                  <span className="material-symbols-outlined text-[22px]">verified</span>
+                  <span className="material-symbols-outlined text-[22px]">
+                    {cdrModalOrder.sunatStatus === 'ACEPTADO' ? 'verified' : cdrModalOrder.sunatStatus === 'RECHAZADO' ? 'error' : 'schedule'}
+                  </span>
                 </div>
                 <div>
                   <h3 className="text-base font-extrabold text-[#0D0D0D]">Constancia de Recepción (CDR)</h3>
@@ -1405,17 +1497,27 @@ export default function FacturacionPage() {
                 ? 'bg-green-50/70 border-green-200 text-green-900'
                 : (cdrModalOrder.sunatStatus === 'HISTORICO' || cdrModalOrder.sunatStatus === 'EXCLUIDO')
                 ? 'bg-stone-100 border-stone-200 text-stone-800'
+                : cdrModalOrder.sunatStatus === 'RECHAZADO'
+                ? 'bg-red-50 border-red-200 text-red-900'
                 : 'bg-amber-50/70 border-amber-200 text-amber-900'
             }`}>
               <div className="flex items-center justify-between font-bold text-xs mb-1">
                 <span>ESTADO DEL COMPROBANTE:</span>
-                <span className="uppercase px-2 py-0.5 rounded bg-white/80 border text-[11px]">
+                <span className={`uppercase px-2 py-0.5 rounded border text-[11px] font-bold ${
+                  cdrModalOrder.sunatStatus === 'ACEPTADO'
+                    ? 'bg-green-100 text-green-800 border-green-300'
+                    : cdrModalOrder.sunatStatus === 'RECHAZADO'
+                    ? 'bg-red-100 text-red-800 border-red-300'
+                    : 'bg-amber-100 text-amber-800 border-amber-300'
+                }`}>
                   {cdrModalOrder.sunatStatus || 'PENDIENTE'}
                 </span>
               </div>
-              <p className="text-xs leading-relaxed mt-1">
+              <p className="text-xs leading-relaxed mt-1 font-medium">
                 {(cdrModalOrder.sunatStatus === 'HISTORICO' || cdrModalOrder.sunatStatus === 'EXCLUIDO')
                   ? 'Comprobante marcado como Excluido / Histórico. No será transmitido a SUNAT para evitar sobregiros por compras pequeñas.'
+                  : cdrModalOrder.sunatStatus === 'RECHAZADO'
+                  ? (cdrModalOrder.sunatCdrDesc ? `Motivo del rechazo de SUNAT: ${cdrModalOrder.sunatCdrDesc}` : 'Comprobante rechazado por SUNAT. Puede verificar los datos o reintentar el envío.')
                   : cdrModalOrder.sunatCdrDesc || 'Comprobante emitido localmente con QR y Hash. Pendiente de envío manual a SUNAT.'}
               </p>
             </div>
@@ -1442,8 +1544,10 @@ export default function FacturacionPage() {
                   <span className="font-bold text-stone-800">S/ {cdrModalOrder.total.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-stone-500">Código CDR:</span>
-                  <span className="font-bold text-stone-800">{cdrModalOrder.sunatCdrCode || '0 (Conforme)'}</span>
+                  <span className="text-stone-500">Código CDR / Error:</span>
+                  <span className={`font-bold ${cdrModalOrder.sunatStatus === 'RECHAZADO' ? 'text-red-700' : 'text-stone-800'}`}>
+                    {cdrModalOrder.sunatCdrCode || (cdrModalOrder.sunatStatus === 'ACEPTADO' ? '0 (Conforme)' : '-')}
+                  </span>
                 </div>
               </div>
 
@@ -1460,7 +1564,7 @@ export default function FacturacionPage() {
               )}
             </div>
 
-            {/* Acciones de Descarga */}
+            {/* Acciones de Descarga y Reintento */}
             <div className="space-y-2.5 pt-2 border-t border-stone-100">
               <div className="grid grid-cols-2 gap-3">
                 <button
@@ -1478,6 +1582,47 @@ export default function FacturacionPage() {
                   Descargar CDR (XML)
                 </button>
               </div>
+
+              {/* Acciones si el comprobante fue rechazado */}
+              {cdrModalOrder.sunatStatus === 'RECHAZADO' && (
+                <div className="space-y-2">
+                  <button
+                    onClick={async () => {
+                      await handleSyncSunat(cdrModalOrder.id);
+                      setCdrModalOrder(null);
+                    }}
+                    disabled={syncingSunat}
+                    className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-all shadow-sm disabled:opacity-50"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">replay</span>
+                    Reintentar Envío a SUNAT Ahora
+                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={async () => {
+                        await handleUpdateStatus(cdrModalOrder.id, 'PENDIENTE');
+                        setCdrModalOrder(null);
+                      }}
+                      disabled={processingStatus}
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs font-bold transition-all border border-amber-200"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">restart_alt</span>
+                      Restablecer a Pendiente
+                    </button>
+                    <button
+                      onClick={async () => {
+                        await handleUpdateStatus(cdrModalOrder.id, 'HISTORICO');
+                        setCdrModalOrder(null);
+                      }}
+                      disabled={processingStatus}
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold transition-all border border-stone-200"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">block</span>
+                      Excluir (Histórico)
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {cdrModalOrder.sunatStatus === 'PENDIENTE' && (
                 <button

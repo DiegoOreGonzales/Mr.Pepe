@@ -33,7 +33,7 @@ export async function POST(request: Request) {
     const body = await request.json().catch(() => ({}));
     const { orderId, orderIds, status } = body;
 
-    const allowedStatuses = ["PENDIENTE", "HISTORICO", "EXCLUIDO", "ACEPTADO"];
+    const allowedStatuses = ["PENDIENTE", "HISTORICO", "EXCLUIDO", "ACEPTADO", "RECHAZADO"];
     if (!status || !allowedStatuses.includes(status)) {
       return NextResponse.json(
         { success: false, error: `Estado inválido. Debe ser uno de: ${allowedStatuses.join(", ")}` },
@@ -45,13 +45,23 @@ export async function POST(request: Request) {
 
     if (orderId) {
       const res = await query(
-        "UPDATE orders SET sunat_status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 RETURNING id",
+        `UPDATE orders 
+         SET sunat_status = $1, 
+             sunat_cdr_code = CASE WHEN $1 = 'PENDIENTE' THEN NULL ELSE sunat_cdr_code END,
+             sunat_cdr_desc = CASE WHEN $1 = 'PENDIENTE' THEN NULL ELSE sunat_cdr_desc END,
+             updated_at = CURRENT_TIMESTAMP 
+         WHERE id = $2 RETURNING id`,
         [status, orderId]
       );
       updatedCount = res.rowCount || 0;
     } else if (Array.isArray(orderIds) && orderIds.length > 0) {
       const res = await query(
-        "UPDATE orders SET sunat_status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = ANY($2::uuid[]) RETURNING id",
+        `UPDATE orders 
+         SET sunat_status = $1, 
+             sunat_cdr_code = CASE WHEN $1 = 'PENDIENTE' THEN NULL ELSE sunat_cdr_code END,
+             sunat_cdr_desc = CASE WHEN $1 = 'PENDIENTE' THEN NULL ELSE sunat_cdr_desc END,
+             updated_at = CURRENT_TIMESTAMP 
+         WHERE id = ANY($2::uuid[]) RETURNING id`,
         [status, orderIds]
       );
       updatedCount = res.rowCount || 0;

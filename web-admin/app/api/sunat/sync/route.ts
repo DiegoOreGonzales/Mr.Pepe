@@ -15,9 +15,9 @@ export async function POST(request: Request) {
       const res = await query("SELECT * FROM orders WHERE id = $1 AND sunat_status != 'ACEPTADO'", [orderId]);
       targetOrders = res.rows;
     } else if (Array.isArray(orderIds) && orderIds.length > 0) {
-      // Sincronizar pedidos seleccionados manualmente
+      // Sincronizar pedidos seleccionados manualmente (permite reintentar RECHAZADO o PENDIENTE)
       const res = await query(
-        "SELECT * FROM orders WHERE id = ANY($1::uuid[]) AND sunat_status = 'PENDIENTE' ORDER BY created_at ASC",
+        "SELECT * FROM orders WHERE id = ANY($1::uuid[]) AND sunat_status != 'ACEPTADO' ORDER BY created_at ASC",
         [orderIds]
       );
       targetOrders = res.rows;
