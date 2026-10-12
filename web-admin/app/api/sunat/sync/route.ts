@@ -17,14 +17,14 @@ export async function POST(request: Request) {
     } else if (Array.isArray(orderIds) && orderIds.length > 0) {
       // Sincronizar pedidos seleccionados manualmente (permite reintentar RECHAZADO o PENDIENTE)
       const res = await query(
-        "SELECT * FROM orders WHERE id = ANY($1::uuid[]) AND sunat_status != 'ACEPTADO' ORDER BY created_at ASC",
+        "SELECT * FROM orders WHERE id = ANY($1::uuid[]) AND sunat_status != 'ACEPTADO' ORDER BY created_at ASC, voucher_number ASC",
         [orderIds]
       );
       targetOrders = res.rows;
     } else {
       // Sincronizar comprobantes pendientes de pago (excluye HISTORICO / EXCLUIDO)
       const res = await query(
-        "SELECT * FROM orders WHERE status = 'pagado' AND sunat_status = 'PENDIENTE' ORDER BY created_at ASC LIMIT 50"
+        "SELECT * FROM orders WHERE status = 'pagado' AND sunat_status = 'PENDIENTE' ORDER BY created_at ASC, voucher_number ASC LIMIT 50"
       );
       targetOrders = res.rows;
     }
