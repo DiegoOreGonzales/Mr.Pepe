@@ -205,13 +205,21 @@ export async function processElectronicInvoice(
           cdrDesc: soapResult.cdrDesc || "Comprobante aceptado conforme por SUNAT",
         };
       } else {
+        // Distinguir entre caída temporal del servidor SUNAT (HTTP 502, 503, timeout, red) vs rechazo tributario formal
+        const isTransientError =
+          Boolean(!soapResult.faultCode && (!soapResult.cdrCode || soapResult.cdrCode === "ERROR")) ||
+          Boolean(soapResult.cdrDesc?.includes("HTTP 5")) ||
+          Boolean(soapResult.cdrDesc?.includes("Error de red"));
+
         return {
           voucherNumber: payload.voucherNumber,
           hash: invoiceHash,
           qrString: officialQrString,
-          status: "RECHAZADO",
-          cdrCode: soapResult.cdrCode || "ERROR",
-          cdrDesc: soapResult.cdrDesc || "Rechazado o error de transmisión con SUNAT",
+          status: isTransientError ? "PENDIENTE" : "RECHAZADO",
+          cdrCode: isTransientError ? undefined : (soapResult.cdrCode || "ERROR"),
+          cdrDesc: isTransientError
+            ? `Servidor SUNAT no disponible temporalmente (${soapResult.cdrDesc || "HTTP 502"}). Listo para reintento.`
+            : (soapResult.cdrDesc || "Rechazado por SUNAT"),
         };
       }
     } catch (directErr: any) {
