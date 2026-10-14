@@ -20,7 +20,9 @@ services:
   pgadmin:
     image: dpage/pgadmin4
     container_name: chios_pgadmin
-    restart: always
+    restart: "no"
+    profiles:
+      - dev
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@mrpepe.com
       PGADMIN_DEFAULT_PASSWORD: adminpassword
